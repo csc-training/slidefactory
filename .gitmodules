@@ -1,0 +1,3 @@
+[submodule "markdeep"]
+	path = markdeep
+	url = https://github.com/morgan3d/markdeep.git
