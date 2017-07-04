@@ -1,9 +1,16 @@
 /* Request lanscape from the printer/browser */
 @page {
     size: landscape;
-    margin-bottom: 100px;
+    width: 1000px;
+    height: 200px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-left: 0px;
 }
 
+
+/*
 .md div.title {
     margin-top: 250px;
     margin-bottom: 40px;
@@ -12,6 +19,32 @@
     font-family: Corbel;
     counter-increment: page;
 }
+*/
+
+.md div.title {
+    margin-top: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+    padding-top: 360px;
+    padding-right: 20px;
+    padding-left: 80px;
+    padding-bottom: 200px;
+    font-size:  32pt;
+    font-weight: bold;
+    font-family: Corbel;
+    color: #FFFFFF;
+    counter-increment: page;
+}
+
+
+/*
+    background-image: url(img/title.png);
+    background-position: top center;
+    background-size: 960pt 540pt;
+    background-repeat: no-repeat;
+*/
+
 
 .md div.subtitle {
     font-size: 30pt;
@@ -22,14 +55,27 @@
 }
 
 body {
-    width: 960px;
+    width: 100%;
+    height: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
     max-width: 100%;
     font-size: 24pt;
     font-family: Corbel;
     color: #465055;
-    padding: 50px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-right: 50px;
+    padding-left: 50px;
     counter-reset: page;
     --accent-color: #465055;
+    background-image: url(img/title.png);
+    background-position: top center top;
+    /* background-size: 960pt 540pt; */
+    background-size: 100% 540pt;
+    background-repeat: no-repeat;
 }
 
 /* Disable section numbering */
@@ -43,7 +89,7 @@ body {
 /* Sections become presentation sections */
 .md h1, .md .nonumberh1 {
     page-break-before: always;
-    width: 1100px;
+    width: 960px;
     text-align: center;
     margin-top: 20px;
     margin-bottom: 20px;
@@ -67,7 +113,8 @@ body {
 /* Subsections become slides */
 .md h2, .md .nonumberh2 {
     page-break-before: always;
-    width: 1100px;
+    width: 100%;
+    height: 100%;
     text-align: left;
     color: #006778;
     margin-top: 20px;
@@ -112,7 +159,7 @@ body {
     
     .md h1, .md .nonumberh1 {
         /* Show slide divisions */
-        border-top: 2px solid black;
+        border-top: 1px solid black;
     }
 }
 
@@ -154,7 +201,7 @@ body {
     background-color: black;
     color: white;
     border: none;
-    font-family: Verdana,Helvetica,Arial,sans-serif;
+    font-family: Corbel;
 }
 
 .md table.table th + th {
