@@ -70,7 +70,7 @@ body {
     padding-left: 50px;
     counter-reset: page;
     --accent-color: #465055;
-    background-image: url(img/title.png);
+    background-image: url(../img/title.png);
     background-position: top center top;
     /* background-size: 960pt 540pt; */
     background-size: 100% 14.2875cm;
@@ -103,7 +103,7 @@ body {
     counter-increment: page;
 
     /* add top right corner logo to each new title slide */
-    background-image: url(img/logo.png);
+    background-image: url(../img/logo.png);
     background-position: right 50px top;
     background-size: 7%;
     background-repeat: no-repeat;
@@ -128,14 +128,14 @@ body {
     counter-increment: page;
 
     /* add top right corner logo to each new slide */
-    background-image: url(img/logo.png);
+    background-image: url(../img/logo.png);
     background-position: right 50px top; 
     background-size: 7%;
     background-repeat: no-repeat;
 }
 
 /*
-        background-image: url(img/line.png);
+        background-image: url(../img/line.png);
         background-size: 960px 15px;
         background-position: center bottom;
         background-repeat: no-repeat;
