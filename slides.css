@@ -1,17 +1,21 @@
 /* Request lanscape from the printer/browser */
 @page {
-    size: landscape;
-    width: 1000px;
-    height: 200px;
+    size: 25.4cm 12.9cm;
+    margin: 0pt;
+    padding: 0pt;
+}
+
+@page:first {
+    color: #FFFFFF;
+}
+
+/*
+.md div.title {
     margin-top: 0px;
     margin-bottom: 0px;
     margin-right: 0px;
     margin-left: 0px;
-}
 
-
-/*
-.md div.title {
     margin-top: 250px;
     margin-bottom: 40px;
     font-size:  32pt;
@@ -26,9 +30,9 @@
     margin-left: 0px;
     margin-right: 0px;
     margin-bottom: 0px;
-    padding-top: 360px;
-    padding-right: 20px;
-    padding-left: 80px;
+    padding-top: 270px;
+    padding-right: 30px;
+    padding-left: 100px;
     padding-bottom: 200px;
     font-size:  32pt;
     font-weight: bold;
@@ -38,21 +42,16 @@
 }
 
 
-/*
-    background-image: url(img/title.png);
-    background-position: top center;
-    background-size: 960pt 540pt;
-    background-repeat: no-repeat;
-*/
-
 
 .md div.subtitle {
     font-size: 30pt;
 }
 
+/*
 .md hr {
     page-break-before: always;
 }
+*/
 
 body {
     width: 100%;
@@ -74,7 +73,7 @@ body {
     background-image: url(img/title.png);
     background-position: top center top;
     /* background-size: 960pt 540pt; */
-    background-size: 100% 540pt;
+    background-size: 100% 14.2875cm;
     background-repeat: no-repeat;
 }
 
@@ -89,7 +88,7 @@ body {
 /* Sections become presentation sections */
 .md h1, .md .nonumberh1 {
     page-break-before: always;
-    width: 960px;
+    width: 100%;
     text-align: center;
     margin-top: 20px;
     margin-bottom: 20px;
