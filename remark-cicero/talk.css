@@ -1,16 +1,16 @@
 /* CSC colors
  *  (main)
- *   magenta:   #971964 (official #830051)
- *   teal:      #007a8b (official #006778)
- *   grey:      #717d84 (official #5e6a71)
+ *   magenta:   #830051
+ *   teal:      #006778
+ *   grey:      #5e6a71
  *
  *  (extra)
- *   green:     #8dca53 (official #7dc242)
- *   orange:    #ff6f00 (official #ff5800)
- *   purple:    #ea3589 (official #ea1d77)
- *   turquoise: #00cfc0 (official #00c7b2)
- *   dark blue: #004072 (official #002f5f)
- *   blue:      #0095c7 (official #0082bb)
+ *   green:     #7dc242
+ *   orange:    #ff5800
+ *   purple:    #ea1d77
+ *   turquoise: #00c7b2
+ *   dark blue: #002f5f
+ *   blue:      #0082bb
  */
 :root {
   --csc-magenta:   #830051;
@@ -103,27 +103,6 @@ img {
   left:  107px;
 }
 
-.alapalkki {
-  background-image: url(only-line.png);
-  background-size: 960px 15px;
-  background-repeat: no-repeat;
-  background-position: bottom;
-}
-.alapalkki img {
-  vertical-align: bottom;
-}
-
-.footnote {
-  position: absolute;
-  bottom: 3em;
-}
-li p { line-height: 1.25em; }
-.red { color: #fa0000; }
-a, a > code {
-  color: rgb(249, 38, 114);
-  text-decoration: none;
-}
-
 /* Multiple columns */
 .column:first-of-type {float:left}
 .column {float:right}
@@ -136,10 +115,5 @@ th, td {
 }
 .show-cells th, .show-cells td {
   background-color: var(--csc-green);
-}
-
-@page {
-  size: 1920px 1080px;
-  margin: 0;
 }
 
