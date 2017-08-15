@@ -1,6 +1,10 @@
-# slide-template
-Simple (experimental) markdown template for training slides in CSC style
+# Description
 
+Experimental templates to generate lecture slides in CSC style from markdown.
+Not meant for production use, i.e. very much **WORK-in-PROGRESS!**
 
-Internally we use the Markdeep (http://casual-effects.com/markdeep/) that is under the BSD license.
+## Templates under testing
+
+- [Markdeep](markdeep-slides) (http://casual-effects.com/markdeep/)
+- [Remark.js + Cicero](remark-cicero) (http://cicero.xyz/)
 
