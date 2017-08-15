@@ -1,3 +1,6 @@
 [submodule "markdeep"]
 	path = markdeep-slides/markdeep
 	url = https://github.com/morgan3d/markdeep.git
+[submodule "remark-cicero/cicero"]
+	path = remark-cicero/cicero
+	url = https://github.com/mlouhivu/cicero.git
