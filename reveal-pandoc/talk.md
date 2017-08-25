@@ -3,9 +3,9 @@
 
 CSC Training, 2017-08
 
---- 
+---
 
-# Slides for the comparison of different markdown presentation engines with some extra words to make it wrap { .title-slide data-background=img/title-fi.png }
+# Slides for the comparison of different markdown presentation engines with some extra words to make it wrap { .title-fi }
 
 CSC Training, 2017-08
 
@@ -31,13 +31,13 @@ Explanation of the pretty picture.
 # Two columns
 
 <div class="column">
-* my point 
+* my point
     - more detailed info
 * some longer line of text to see where it wraps and anything else funky
 </div>
 
 <div class="column">
-- other point 
+- other point
 - some longer line of text to see where it wraps and anything else funky
 </div>
 
@@ -46,7 +46,7 @@ Explanation of the pretty picture.
 # Two columns with a picture
 
 <div class="column">
-- my point 
+- my point
 - some longer line of text to see where it wraps and anything else funky
 </div>
 
@@ -94,17 +94,19 @@ example calling function ```foobar(args, x)``` would end up so.
 Default style (up) and alternative style (down).
 
 <div class="show-cells">
+
 |            |           | 1     | 2     | 4     | 8     |
 | ---------- | --------- | ----: | ----: | ----: | ----: |
 | **Case 1** | vanilla   | 0.757 | 0.719 | 0.574 | 0.547 |
 |            | optimised | 0.899 | 0.838 | 0.658 | 0.607 |
+
 </div>
 
 ---
 
 # Firstname Lastname { .author }
 
-Groupname, title, or something   
+Groupname, title, or something
 CSC – IT Center for Science Ltd.
 
 firstname.lastname@csc.fi
