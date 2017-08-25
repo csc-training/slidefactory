@@ -96,7 +96,7 @@ if __name__ == '__main__':
             'input':   args.input,
             'output':  args.output,
             'config':  ' '.join('-V ' + x for x in config),
-            'filter':  ' '.join('--filter ' + x for x in args.filter),
+            'filter':  ' '.join('--filter filter/' + x for x in args.filter),
             'mathjax': args.mathjax
             }
     # construct the pandoc command
