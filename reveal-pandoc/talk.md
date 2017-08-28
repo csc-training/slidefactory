@@ -106,7 +106,7 @@ Default style (up) and alternative style (down).
 
 # Firstname Lastname { .author }
 
-Groupname, title, or something
+Groupname, title, or something   
 CSC – IT Center for Science Ltd.
 
 firstname.lastname@csc.fi
