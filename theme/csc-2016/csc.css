@@ -386,7 +386,9 @@ body {
   font-size: 0.6em;
 }
 
-.reveal .author-slide h1, .reveal .author-slide p {
+.reveal .author-slide h1,
+.reveal .author-slide p,
+.reveal .author-slide div {
   margin-left: calc(0.24 * var(--xsize));
   text-align: left;
 }
@@ -398,7 +400,8 @@ body {
   font-size:   0.6em;
   font-weight: bold;
 }
-.reveal .author-slide p {
+.reveal .author-slide p,
+.reveal .author-slide div {
   padding-bottom: 1.4em;
   font-size:      0.5em;
 }
