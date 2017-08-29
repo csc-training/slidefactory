@@ -39,6 +39,9 @@ def remove_duplicates(config):
             order.append(key)
     return [key + '=' + tmp[key] for key in order]
 
+# highlight styles in pandoc
+highlight_styles = ['pygments', 'tango', 'espresso', 'zenburn', 'kate', \
+        'monochrome', 'breezedark', 'haddock']
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Convert a presentation
@@ -49,10 +52,14 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='output.html', nargs='?',
             help='filename for HTML5 presentation (optional; by default '
             + 'uses the basename of input, i.e. talk.md -> talk.html)')
+    parser.add_argument('-s', '--style', default='pygments',
+           choices=highlight_styles, metavar='name',
+           help='code highlight style: ' + ', '.join(highlight_styles) \
+                   + ' (default: pygments)')
     parser.add_argument('-l', '--local', action='store_true', default=False,
             help='use local copy of reveal.js (in sub-directory reveal.js/)')
     parser.add_argument('--config', action='append', default=config,
-            metavar='name=value',
+            metavar='key=value',
             help='reveal.js config option (multiple allowed)')
     parser.add_argument('--filter', action='append', default=filters,
             metavar='filter.py',
@@ -93,6 +100,7 @@ if __name__ == '__main__':
 
     # prepare command-line arguments
     flags = {
+            'style':   args.style,
             'input':   args.input,
             'output':  args.output,
             'config':  ' '.join('-V ' + x for x in config),
@@ -101,7 +109,7 @@ if __name__ == '__main__':
             }
     # construct the pandoc command
     cmd = ('pandoc {input} -s -t revealjs {config} --mathjax={mathjax} ' \
-            + '{filter} -o {output}').format(**flags)
+            + '--highlight-style={style} {filter} -o {output}').format(**flags)
 
     # display extra info?
     if args.verbose or args.dry_run:
