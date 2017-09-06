@@ -8,6 +8,7 @@
 #---------------------------------------------------------------------------#
 import argparse
 import os
+import sys
 
 # reveal.js configuration
 config = [
@@ -22,8 +23,11 @@ config = [
         ]
 
 # pandoc filters
-filters = ['contain-slide.py', 'csc-specials.py']
+filters = ['filter/contain-slide.py', 'filter/csc-specials.py']
 
+# use absolute paths, if executed from another directory
+if sys.path[0] != os.path.abspath('.'):
+    filters = [os.path.join(sys.path[0], x) for x in filters]
 
 def remove_duplicates(config):
     """Remove duplicate entries from a list of config options."""
@@ -104,7 +108,7 @@ if __name__ == '__main__':
             'input':   args.input,
             'output':  args.output,
             'config':  ' '.join('-V ' + x for x in config),
-            'filter':  ' '.join('--filter filter/' + x for x in args.filter),
+            'filter':  ' '.join('--filter ' + x for x in args.filter),
             'mathjax': args.mathjax
             }
     # construct the pandoc command
