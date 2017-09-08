@@ -225,7 +225,7 @@ body {
   font-size:     0.55em;
   line-height:   1.2em;
   word-wrap:     break-word;
-  border:        2px;
+  border:        2px solid;
 }
 .reveal pre,
 .reveal code {
