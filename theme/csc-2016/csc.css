@@ -426,3 +426,30 @@ body {
   left:  calc(0.073 * var(--xsize));
   border: 0;
 }
+
+/*********************************************
+ * PDF printing
+ *********************************************/
+.reveal .slides .pdf-page > section h1:first-child {
+  padding-bottom: 1.7em;
+}
+.reveal .slides .pdf-page > section h2:first-child,
+.reveal .slides .pdf-page > section h3:first-child,
+.reveal .slides .pdf-page > section h1:first-child + h2,
+.reveal .slides .pdf-page > section h1:first-child + h3,
+.reveal .column .pdf-page h2:first-child,
+.reveal .column .pdf-page h3:first-child {
+  padding-top: 0;
+}
+.reveal .slides .pdf-page > section:before {
+  content: "";
+  display: block;
+  margin-top: var(--ymargin);
+}
+
+.reveal .slides .pdf-page > section.title-slide h1:first-child {
+  padding-bottom: 1ex;
+}
+.reveal .slides .pdf-page > section.author-slide h1:first-child {
+  padding-bottom: 1.4em;
+}
