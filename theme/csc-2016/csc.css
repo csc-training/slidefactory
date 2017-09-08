@@ -157,10 +157,24 @@ body {
   float: right;
   margin-left: 1%;
 }
-.reveal .column:first-of-type ul {
+.reveal .column:first-of-type ul,
+.reveal .column:first-of-type p,
+.reveal .column:first-of-type h2,
+.reveal .column:first-of-type h3,
+.reveal .column:first-of-type pre,
+.reveal .column:first-of-type table,
+.reveal .column:first-of-type figure,
+.reveal .column:first-of-type video {
   margin-right: 0;
 }
-.reveal .column:last-of-type ul {
+.reveal .column:last-of-type ul,
+.reveal .column:last-of-type p,
+.reveal .column:last-of-type h2,
+.reveal .column:last-of-type h3,
+.reveal .column:last-of-type pre,
+.reveal .column:last-of-type table,
+.reveal .column:last-of-type figure,
+.reveal .column:last-of-type video {
   margin-left: 0;
 }
 
