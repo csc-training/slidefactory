@@ -44,7 +44,7 @@ body {
 }
 
 .reveal {
-  font-family: Corbel;
+  font-family: 'Corbel', 'Noto Sans', 'Cantarell', sans-serif;
   font-size:   var(--fontsize);
   color:       var(--csc-grey);
   font-weight: normal;
@@ -229,7 +229,7 @@ body {
 }
 .reveal pre,
 .reveal code {
-  font-family: 'Consolas', monospace;
+  font-family: 'Consolas', 'Inconsolata', 'Source Code Pro', monospace;
 }
 .reveal pre code {
   display:    block;
