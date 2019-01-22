@@ -37,7 +37,7 @@ def remove_duplicates(config):
         try:
             key, value = item.split('=', 1)
         except ValueError:
-            raise ValueError, 'Malformed config option: %s' % item
+            raise ValueError('Malformed config option: %s' % item)
         tmp[key] = value
         if key not in order:
             order.append(key)
