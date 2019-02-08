@@ -63,6 +63,7 @@ body {
 .reveal p,
 .reveal ul,
 .reveal ol,
+.reveal dl,
 .reveal table,
 .reveal pre,
 .reveal figure,
@@ -159,6 +160,7 @@ body {
 }
 .reveal .column:first-of-type ul,
 .reveal .column:first-of-type ol,
+.reveal .column:first-of-type dl,
 .reveal .column:first-of-type p,
 .reveal .column:first-of-type h2,
 .reveal .column:first-of-type h3,
@@ -170,6 +172,7 @@ body {
 }
 .reveal .column:last-of-type ul,
 .reveal .column:last-of-type ol,
+.reveal .column:last-of-type dl,
 .reveal .column:last-of-type p,
 .reveal .column:last-of-type h2,
 .reveal .column:last-of-type h3,
@@ -201,6 +204,12 @@ body {
 .reveal .slides > section > ol > li {
   margin-bottom: 1ex;
 }
+.reveal .slides > section > dl > dt {
+  margin-top: 1ex;
+}
+.reveal .slides > section > dl > dt:first-child {
+  margin-top: 0;
+}
 .reveal ul ul,
 .reveal ul ol,
 .reveal ol ol,
@@ -221,8 +230,15 @@ body {
   font-weight: bold;
 }
 .reveal dd {
-  margin-left: 0.5em;
+  margin-left: 1em;
 }
+.reveal dl p:first-child {
+  margin-top: 0;
+}
+.reveal dd p {
+  margin-left: 0;
+}
+
 
 /*********************************************
  * CODE
