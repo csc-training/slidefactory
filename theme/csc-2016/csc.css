@@ -51,7 +51,7 @@ body {
 }
 .reveal .slides {
   text-align:  left;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 .reveal .slides > section,
 .reveal .slides > section > section {
@@ -62,12 +62,16 @@ body {
 .reveal h3,
 .reveal p,
 .reveal ul,
+.reveal ol,
 .reveal table,
 .reveal pre,
 .reveal figure,
 .reveal video {
   margin-left:  var(--xmargin);
   margin-right: var(--xmargin);
+}
+.reveal p {
+  margin-top: 1ex;
 }
 .reveal .slides > section:before {
   content:    "";
@@ -101,11 +105,13 @@ body {
 }
 .reveal .slides > section h2:first-child,
 .reveal .slides > section h3:first-child,
+.reveal .slides > section h1:first-child + p,
 .reveal .slides > section h1:first-child + h2,
 .reveal .slides > section h1:first-child + h3,
 .reveal .column h2:first-child,
 .reveal .column h3:first-child {
   padding-top: 0;
+  margin-top: 0;
 }
 
 /*********************************************
@@ -125,7 +131,7 @@ body {
   font-weight: bold;
 }
 .reveal em {
-  font-weight: bold;
+  font-style: italic;
 }
 .reveal sup {
   vertical-align: super;
@@ -134,13 +140,7 @@ body {
   vertical-align: sub;
 }
 .reveal small {
-  display: inline-block;
-  font-size: 0.6em;
-  line-height: 1.2em;
-  vertical-align: top;
-}
-.reveal small * {
-  vertical-align: top;
+  font-size: 0.7em;
 }
 
 /*********************************************
@@ -158,6 +158,7 @@ body {
   margin-left: 1%;
 }
 .reveal .column:first-of-type ul,
+.reveal .column:first-of-type ol,
 .reveal .column:first-of-type p,
 .reveal .column:first-of-type h2,
 .reveal .column:first-of-type h3,
@@ -168,6 +169,7 @@ body {
   margin-right: 0;
 }
 .reveal .column:last-of-type ul,
+.reveal .column:last-of-type ol,
 .reveal .column:last-of-type p,
 .reveal .column:last-of-type h2,
 .reveal .column:last-of-type h3,
@@ -192,9 +194,12 @@ body {
 .reveal ul {
   list-style-type: disc;
 }
-.reveal ul ul,
-.reveal ul ul ul {
+.reveal ul ul {
   list-style-type: circle;
+}
+.reveal .slides > section > ul > li,
+.reveal .slides > section > ol > li {
+  margin-bottom: 1ex;
 }
 .reveal ul ul,
 .reveal ul ol,
@@ -206,6 +211,10 @@ body {
 .reveal li {
   margin-left:  1em;
   margin-right: 0;
+  margin-bottom: 0;
+}
+.reveal li li {
+  font-size: 0.9em;
 }
 /* description list */
 .reveal dt {
@@ -223,7 +232,7 @@ body {
   margin-top:    2px;
   margin-bottom: 1ex;
   font-size:     0.7em;
-  line-height:   1.2em;
+  line-height:   1.2;
   word-wrap:     break-word;
   border:        2px solid;
 }
