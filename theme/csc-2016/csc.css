@@ -295,6 +295,13 @@ body {
 .reveal table td[align="left"] {
   text-align: left;
 }
+/* cell highlight */
+.reveal table strong em,
+.reveal table b em {
+  color: var(--csc-orange);
+  font-style: normal;
+  font-weight: normal;
+}
 /* default style w/ only some horisontal lines */
 .reveal table thead {
   border-top: 4px solid;
@@ -303,19 +310,44 @@ body {
 .reveal table tbody {
   border-bottom: 4px solid;
 }
-/* alternative style w/ cells highlighted in colour */
-.reveal .show-cells table {
+/* alternative style w/ color accents */
+.reveal .table-colour table th,
+.reveal .table-colour table td:first-child {
+  color: var(--csc-blue);
+  font-weight: normal;
+}
+.reveal .table-colour table strong, b {
+  color: var(--csc-blue);
+  font-weight: normal;
+}
+/* alternative style w/ visible cells in colour */
+.reveal .table-grid table {
   border-collapse: separate;
-  border-spacing: 2px;
+  border-spacing: 0.1ex;
 }
-.reveal .show-cells table td,
-.reveal .show-cells table th {
-  background-color: var(--csc-green);
+.reveal .table-grid table th,
+.reveal .table-grid table td {
   padding: 0.1em 0.5em 0.1em 0.5em;
+  background-color: var(--csc-blue);
+  color: white;
 }
-.reveal .show-cells table thead,
-.reveal .show-cells table tbody {
+.reveal .table-grid table thead,
+.reveal .table-grid table tbody {
   border: none;
+}
+/* alternative style w/out any extra styling */
+.reveal .table-none table thead,
+.reveal .table-none table tbody {
+  border: none;
+}
+.reveal .table-none table th {
+  font-weight: normal;
+}
+.reveal .table-none table strong em,
+.reveal .table-none table b em {
+  color: var(--csc-grey);
+  font-style: italic;
+  font-weight: bold;
 }
 
 /*********************************************
