@@ -20,12 +20,6 @@ And then browse to the output (`talk.html`):
 - `$ open talk.html` (Mac)
 - `$ firefox talk.html` (Linux)
 
-## Convert reStructuredText
-```
-$ python convert.py reStructuredText/talk.rst reStructuredText/talk.html
-$ open reStructuredText/talk.html
-```
-
 ## More information
 
 Options for the helper script (`convert.py`) can be seen with
