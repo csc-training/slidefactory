@@ -1,14 +1,46 @@
 # Description
 
-Experimental templates to generate lecture slides in CSC style from markdown.
-Not meant for production use, i.e. very much **WORK-in-PROGRESS!**
+Experimental template to generate lecture slides in CSC style from markdown
+(or reStructuredText).
 
-## Templates under testing
+# Usage
 
-- [Markdeep](markdeep-slides) (http://casual-effects.com/markdeep/)
-- [Remark.js](remark) (https://remarkjs.com)
-- [Remark.js + Cicero](remark-cicero) (http://cicero.xyz/)
-- [Reveal.js](reveal) (http://lab.hakim.se/reveal-js/)
-- [Reveal.js + pandoc](reveal-pandoc) using markdown (http://pandoc.org/)
-    * or alternatively using [reStructuredText](reveal-pandoc/reStructuredText)
+## Install
 
+See Pandoc's install instructions (http://pandoc.org/installing.html) for
+detailed instructions on how to install Pandoc.
+
+## Convert markdown
+```
+$ cd /path/to/reveal-pandoc
+$ python convert.py talk.md
+```
+And then browse to the output (`talk.html`):
+
+- `$ open talk.html` (Mac)
+- `$ firefox talk.html` (Linux)
+
+## Convert reStructuredText
+```
+$ python convert.py reStructuredText/talk.rst reStructuredText/talk.html
+$ open reStructuredText/talk.html
+```
+
+## More information
+
+Options for the helper script (`convert.py`) can be seen with
+```
+$ python convert.py --help
+```
+
+and more detailed information, such as configuration options and the exact
+pandoc command, can be seen e.g. with
+```
+$ python convert.py --verbose talk.md
+```
+
+If needed, the URLs of the javascript libraries can also be changed. For more
+info, see
+```
+$ python convert.py --debug talk.md
+```
