@@ -251,6 +251,22 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum
 sem.
 
 
+# Section title 1 {.section}
+
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+
+
+# Section title 2 {.section}
+
+
+# Section title 3: Lorem ipsum dolor sit amet, consectetuer adipiscing elit. {.section}
+
+
+# Section title 4: Lorem ipsum dolor sit amet, consectetuer adipiscing elit. {.section}
+
+Sed posuere interdum sem.
+
+
 # Firstname Lastname { .author }
 
 | Groupname, title, or something
