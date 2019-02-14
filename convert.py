@@ -12,7 +12,7 @@ import sys
 
 # reveal.js configuration
 config = [
-        'theme=csc',
+        'theme=csc-2016',
         'width=1920',
         'height=1080',
         'history=true',
@@ -112,8 +112,9 @@ if __name__ == '__main__':
             'mathjax': args.mathjax
             }
     # construct the pandoc command
-    cmd = ('pandoc {input} -s -t revealjs {config} --mathjax={mathjax} ' \
-            + '--highlight-style={style} {filter} -o {output}').format(**flags)
+    cmd = ('pandoc {input} -s -t revealjs --template={template} {config} '
+            + '--mathjax={mathjax} --highlight-style={style} '
+            + '{filter} -o {output}').format(**flags)
 
     # display extra info?
     if args.verbose or args.dry_run:
