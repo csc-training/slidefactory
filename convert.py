@@ -12,7 +12,6 @@ import sys
 
 # reveal.js configuration
 config = [
-        'theme=csc-2016',
         'width=1920',
         'height=1080',
         'history=true',
@@ -47,6 +46,10 @@ def remove_duplicates(config):
 highlight_styles = ['pygments', 'tango', 'espresso', 'zenburn', 'kate', \
         'monochrome', 'breezedark', 'haddock']
 
+# find existing presentation themes
+themes = [x for x in os.listdir('theme')
+          if os.path.isdir(os.path.join('theme', x))]
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Convert a presentation
     from Markdown (or reStructuredText) to reveal.js powered HTML5 using
@@ -56,6 +59,10 @@ if __name__ == '__main__':
     parser.add_argument('output', metavar='output.html', nargs='?',
             help='filename for HTML5 presentation (optional; by default '
             + 'uses the basename of input, i.e. talk.md -> talk.html)')
+    parser.add_argument('-t', '--theme', default='csc-2016',
+            choices=themes, metavar='THEME',
+            help='presentation theme: ' + ', '.join(themes) \
+                    + ' (default: csc-2016)')
     parser.add_argument('-s', '--style', default='pygments',
            choices=highlight_styles, metavar='name',
            help='code highlight style: ' + ', '.join(highlight_styles) \
@@ -99,6 +106,8 @@ if __name__ == '__main__':
     # if using a remote reveal.js, add the URL to config options
     if not args.local:
         args.config.insert(0, 'revealjs-url=' + args.reveal)
+    # add theme to config options
+    args.config.insert(0, 'theme=' + args.theme)
     # check config options and remove duplicates (if any)
     config = remove_duplicates(args.config)
 
@@ -109,7 +118,8 @@ if __name__ == '__main__':
             'output':  args.output,
             'config':  ' '.join('-V ' + x for x in config),
             'filter':  ' '.join('--filter ' + x for x in args.filter),
-            'mathjax': args.mathjax
+            'mathjax': args.mathjax,
+            'template': 'theme/{0}/template.html'.format(args.theme)
             }
     # construct the pandoc command
     cmd = ('pandoc {input} -s -t revealjs --template={template} {config} '
