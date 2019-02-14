@@ -22,7 +22,7 @@ config = [
         ]
 
 # pandoc filters
-filters = ['filter/contain-slide.py', 'filter/csc-specials.py']
+filters = ['filter/contain-slide.py', 'filter/background-image.py']
 
 # use absolute paths, if executed from another directory
 if sys.path[0] != os.path.abspath('.'):
