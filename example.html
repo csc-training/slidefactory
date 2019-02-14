@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="generator" content="pandoc">
-  <title></title>
+  <meta name="author" content="CSC Training">
+  <title>Example slides for layout testing</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="http://rawgit.com/mlouhivu/reveal.js/csc/css/reveal.css">
+  <link rel="stylesheet" href="https://mlouhivu.github.io/static-engine/reveal/3.5.0/css/reveal.css">
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
 div.sourceCode { overflow-x: auto; }
@@ -46,74 +47,201 @@ code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Ann
 code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
 code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
   </style>
-  <link rel="stylesheet" href="http://rawgit.com/mlouhivu/reveal.js/csc/css/theme/csc.css" id="theme">
+  <link rel="stylesheet" href="theme/csc-2016/csc.css" id="theme">
+  <link rel="stylesheet" href="theme/csc-2016/fonts.css">
   <!-- Printing and PDF exports -->
   <script>
     var link = document.createElement( 'link' );
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.href = window.location.search.match( /print-pdf/gi ) ? 'http://rawgit.com/mlouhivu/reveal.js/csc/css/print/pdf.css' : 'http://rawgit.com/mlouhivu/reveal.js/csc/css/print/paper.css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'https://mlouhivu.github.io/static-engine/reveal/3.5.0/css/print/pdf.css' : 'https://mlouhivu.github.io/static-engine/reveal/3.5.0/css/print/paper.css';
     document.getElementsByTagName( 'head' )[0].appendChild( link );
   </script>
   <!--[if lt IE 9]>
-  <script src="http://rawgit.com/mlouhivu/reveal.js/csc/lib/js/html5shiv.js"></script>
+  <script src="https://mlouhivu.github.io/static-engine/reveal/3.5.0/lib/js/html5shiv.js"></script>
   <![endif]-->
-  <script src="http://rawgit.com/mathjax/MathJax/2.7.1/MathJax.js?config=TeX-AMS_HTML-full" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML-full" type="text/javascript"></script>
 </head>
 <body>
   <div class="reveal">
     <div class="slides">
 
+<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/csc-2016/img/title-en.png">
+  <h1>Example slides for layout testing</h1>
+  <p>CSC Training, 2019-02</p>
+</section>
 
-<section id="slides-for-the-comparison-of-different-markdown-presentation-engines" class="slide level1 title-slide" data-background-size="contain" data-background="img/title-en.png">
-<h1>Slides for the comparison of different markdown presentation engines</h1>
-<p>CSC Training, 2017-08</p>
-</section>
-<section id="slides-for-the-comparison-of-different-markdown-presentation-engines-with-some-extra-words-to-make-it-wrap" class="slide level1 title-slide" data-background-size="contain" data-background="img/title-fi.png">
-<h1>Slides for the comparison of different markdown presentation engines with some extra words to make it wrap</h1>
-<p>CSC Training, 2017-08</p>
-</section>
-<section id="example-text-slide" class="slide level1" data-background-size="contain">
-<h1>Example text slide</h1>
+<section id="font-size-and-weight" class="slide level1" data-background-size="contain">
+<h1>Font size and weight</h1>
 <ul>
-<li>some relevant fact
-<ul>
-<li>sub-point that includes also funky equations like <span class="math inline">\(e = mc^2\)</span> and <span class="math inline">\(\frac{\delta^2 u}{\delta t^2} = c^2 \nabla^2 u\)</span></li>
-</ul></li>
-<li>another point to make</li>
+<li>Lorem ipsum dolor sit amet, <em>consectetuer</em> adipiscing elit. Sed posuere <strong><em>interdum sem</em></strong>.</li>
+<li>Quisque ligula eros ullamcorper quis, <small>lacinia quis <strong><em>facilisis</em></strong> sed sapien</small>.</li>
+<li><strong>Mauris varius</strong> diam vitae arcu.</li>
 </ul>
 </section>
-<section id="example-picture" class="slide level1" data-background-size="contain">
-<h1>Example picture</h1>
+<section id="math-formulas" class="slide level1" data-background-size="contain">
+<h1>Math formulas</h1>
+<ul>
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.</li>
+<li>Quisque ligula eros ullamcorper quis (<span class="math inline">\(e = mc^2\)</span>), lacinia quis facilisis sed sapien.</li>
+<li>Mauris varius diam vitae arcu: <span class="math inline">\(\frac{\partial^2 u}{\partial t^2} = c^2 \nabla^2 v\)</span>
+<ul>
+<li>Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.</li>
+</ul></li>
+</ul>
+<p><span class="math display">\[\oint_{\partial \Sigma} E \cdot dl
+    = - \int_\Sigma \frac{\partial B}{\partial t} \cdot d A\]</span></p>
+</section>
+<section id="nesting-lists-1" class="slide level1" data-background-size="contain">
+<h1>Nesting lists 1</h1>
+<ul>
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.
+<ul>
+<li>Quisque ligula eros ullamcorper quis, lacinia quis facilisis sed sapien. Mauris varius diam vitae arcu.</li>
+<li>Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.
+<ul>
+<li>sed augue orci</li>
+<li>lacinia eu tincidunt et eleifend nec lacus</li>
+</ul></li>
+</ul></li>
+<li>Donec ultricies nisl ut felis, suspendisse potenti.
+<ul>
+<li>Lorem ipsum ligula ut hendrerit mollis, ipsum erat vehicula risus, eu suscipit sem libero nec erat.</li>
+</ul></li>
+</ul>
+</section>
+<section id="nesting-lists-2" class="slide level1" data-background-size="contain">
+<h1>Nesting lists 2</h1>
+<ol type="1">
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.
+<ul>
+<li>Quisque ligula eros ullamcorper quis, lacinia quis facilisis sed sapien. Mauris varius diam vitae arcu.</li>
+<li>Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.
+<ul>
+<li>sed augue orci</li>
+<li>lacinia eu tincidunt et eleifend nec lacus</li>
+</ul></li>
+</ul></li>
+<li>Donec ultricies nisl ut felis, suspendisse potenti.
+<ul>
+<li>Lorem ipsum ligula ut hendrerit mollis, ipsum erat vehicula risus, eu suscipit sem libero nec erat.</li>
+</ul></li>
+</ol>
+</section>
+<section id="nesting-lists-3" class="slide level1" data-background-size="contain">
+<h1>Nesting lists 3</h1>
+<ol type="1">
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.
+<ul>
+<li>Quisque ligula eros ullamcorper quis, lacinia quis facilisis sed sapien. Mauris varius diam vitae arcu.</li>
+<li>Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.
+<ol type="1">
+<li>sed augue orci</li>
+<li>lacinia eu tincidunt et eleifend nec lacus</li>
+</ol></li>
+</ul></li>
+<li>Donec ultricies nisl ut felis, suspendisse potenti.
+<ul>
+<li>Lorem ipsum ligula ut hendrerit mollis, ipsum erat vehicula risus, eu suscipit sem libero nec erat.</li>
+</ul></li>
+</ol>
+</section>
+<section id="nesting-lists-4" class="slide level1" data-background-size="contain">
+<h1>Nesting lists 4</h1>
+<ul>
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.
+<ol type="1">
+<li>Quisque ligula eros ullamcorper quis, lacinia quis facilisis sed sapien. Mauris varius diam vitae arcu.</li>
+<li>Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.
+<ul>
+<li>sed augue orci</li>
+<li>lacinia eu tincidunt et eleifend nec lacus</li>
+</ul></li>
+</ol></li>
+<li>Donec ultricies nisl ut felis, suspendisse potenti.
+<ul>
+<li>Lorem ipsum ligula ut hendrerit mollis, ipsum erat vehicula risus, eu suscipit sem libero nec erat.</li>
+</ul></li>
+</ul>
+</section>
+<section id="nesting-lists-5" class="slide level1" data-background-size="contain">
+<h1>Nesting lists 5</h1>
+<ul>
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.
+<ol type="1">
+<li>Quisque ligula eros ullamcorper quis, lacinia quis facilisis sed sapien. Mauris varius diam vitae arcu.</li>
+<li>Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.
+<ol type="1">
+<li>sed augue orci</li>
+<li>lacinia eu tincidunt et eleifend nec lacus</li>
+</ol></li>
+</ol></li>
+<li>Donec ultricies nisl ut felis, suspendisse potenti.
+<ul>
+<li>Lorem ipsum ligula ut hendrerit mollis, ipsum erat vehicula risus, eu suscipit sem libero nec erat.</li>
+</ul></li>
+</ul>
+</section>
+<section id="definition-list" class="slide level1" data-background-size="contain">
+<h1>Definition list</h1>
+<dl>
+<dt>Lorem</dt>
+<dd>ipsum dolor sit amet
+</dd>
+<dt>Consectetuer adipiscing elit</dt>
+<dd>Sed posuere interdum sem.
+</dd>
+<dd>Quisque ligula eros ullamcorper quis, lacinia quis facilisis sed sapien.
+</dd>
+<dt>Mauris</dt>
+<dd><p>varius diam vitae arcu</p>
+<p>Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.</p>
+</dd>
+</dl>
+</section>
+<section id="images-1" class="slide level1" data-background-size="contain">
+<h1>Images 1</h1>
 <figure>
 <img src="img/nuuksio-lake.jpg" />
 </figure>
-<p>Explanation of the pretty picture.</p>
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.</p>
 </section>
-<section id="two-columns" class="slide level1" data-background-size="contain">
-<h1>Two columns</h1>
+<section id="images-2" class="slide level1" data-background-size="contain">
+<h1>Images 2</h1>
+<figure>
+<img src="img/nuuksio-lake.jpg" style="width:50.0%" />
+</figure>
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.</p>
+</section>
+<section id="columns-1" class="slide level1" data-background-size="contain">
+<h1>Columns 1</h1>
 <div class="column">
 <ul>
-<li>my point
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.
 <ul>
-<li>more detailed info</li>
+<li>quisque ligula eros ullamcorper quis</li>
+<li>lacinia quis facilisis sed sapien</li>
 </ul></li>
-<li>some longer line of text to see where it wraps and anything else funky</li>
+<li>Mauris varius diam vitae arcu.</li>
 </ul>
 </div>
 <div class="column">
 <ul>
-<li>other point</li>
-<li>some longer line of text to see where it wraps and anything else funky</li>
+<li>Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.</li>
+<li>Sed augue orci, lacinia eu tincidunt et eleifend nec lacus.</li>
 </ul>
 </div>
 </section>
-<section id="two-columns-with-a-picture" class="slide level1" data-background-size="contain">
-<h1>Two columns with a picture</h1>
+<section id="columns-2" class="slide level1" data-background-size="contain">
+<h1>Columns 2</h1>
 <div class="column">
 <ul>
-<li>my point</li>
-<li>some longer line of text to see where it wraps and anything else funky</li>
+<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.
+<ul>
+<li>quisque ligula eros ullamcorper quis</li>
+<li>lacinia quis facilisis sed sapien</li>
+</ul></li>
+<li>Mauris varius diam vitae arcu.</li>
 </ul>
 </div>
 <div class="column">
@@ -122,8 +250,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </figure>
 </div>
 </section>
-<section id="code-snippets" class="slide level1" data-background-size="contain">
-<h1>Code snippets</h1>
+<section id="code-high-lighting" class="slide level1" data-background-size="contain">
+<h1>Code high-lighting</h1>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">import</span> os
 
 <span class="cf">if</span> os.path.isfile(<span class="st">&#39;foobar&#39;</span>):
@@ -137,10 +265,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
     printf(<span class="st">&quot;Going to square value %d.&quot;</span>, x);
     <span class="cf">return</span> x*x;
 }</code></pre></div>
-<p>In-line code looks like this: <code>count = x + y</code>. So this means that for example calling function <code>foobar(args, x)</code> would end up so.</p>
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit: <code>count = x + y</code>. Sed posuere interdum <code>foobar(args, x)</code> sem.</p>
 </section>
-<section id="tables-and-text" class="slide level1" data-background-size="contain">
-<h1>Tables and text</h1>
+<section id="tables-1-default" class="slide level1" data-background-size="contain">
+<h1>Tables 1 (default)</h1>
 <table>
 <thead>
 <tr class="header">
@@ -163,7 +291,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tr>
 <tr class="even">
 <td></td>
-<td>optimised</td>
+<td><em>optimised</em></td>
 <td style="text-align: right;">0.899</td>
 <td style="text-align: right;">0.838</td>
 <td style="text-align: right;">0.658</td>
@@ -179,7 +307,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tr>
 <tr class="even">
 <td> </td>
-<td>optimised</td>
+<td><em>optimised</em></td>
 <td style="text-align: right;"> 1.443</td>
 <td style="text-align: right;">1.277</td>
 <td style="text-align: right;"> 0.748</td>
@@ -187,8 +315,10 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tr>
 </tbody>
 </table>
-<p>Default style (up) and alternative style (down).</p>
-<div class="show-cells">
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.</p>
+</section>
+<section id="tables-2-default-highlighted-cells" class="slide level1" data-background-size="contain">
+<h1>Tables 2 (default + highlighted cells)</h1>
 <table>
 <thead>
 <tr class="header">
@@ -211,30 +341,196 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tr>
 <tr class="even">
 <td></td>
-<td>optimised</td>
+<td><em>optimised</em></td>
 <td style="text-align: right;">0.899</td>
 <td style="text-align: right;">0.838</td>
 <td style="text-align: right;">0.658</td>
 <td style="text-align: right;">0.607</td>
 </tr>
+<tr class="odd">
+<td> <strong>Case 2</strong></td>
+<td>vanilla</td>
+<td style="text-align: right;"> 1.252</td>
+<td style="text-align: right;"><strong><em>1.111</em></strong></td>
+<td style="text-align: right;"> 0.684</td>
+<td style="text-align: right;">0.756</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td><em>optimised</em></td>
+<td style="text-align: right;"> 1.443</td>
+<td style="text-align: right;">1.277</td>
+<td style="text-align: right;"> <strong><em>0.748</em></strong></td>
+<td style="text-align: right;">0.818</td>
+</tr>
 </tbody>
 </table>
-</div>
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.</p>
 </section>
-<section id="firstname-lastname" class="slide level1 author-slide" data-background-size="contain" data-background="img/author.png">
+<section id="tables-3-colour" class="slide level1 table-colour" data-background-size="contain">
+<h1>Tables 3 (colour)</h1>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td> <strong>Case 1</strong></td>
+<td>vanilla</td>
+<td style="text-align: right;"> 0.757</td>
+<td style="text-align: right;">0.719</td>
+<td style="text-align: right;"> 0.574</td>
+<td style="text-align: right;">0.547</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><em>optimised</em></td>
+<td style="text-align: right;">0.899</td>
+<td style="text-align: right;">0.838</td>
+<td style="text-align: right;">0.658</td>
+<td style="text-align: right;">0.607</td>
+</tr>
+<tr class="odd">
+<td> <strong>Case 2</strong></td>
+<td>vanilla</td>
+<td style="text-align: right;"> 1.252</td>
+<td style="text-align: right;"><strong><em>1.111</em></strong></td>
+<td style="text-align: right;"> 0.684</td>
+<td style="text-align: right;">0.756</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td><em>optimised</em></td>
+<td style="text-align: right;"> 1.443</td>
+<td style="text-align: right;">1.277</td>
+<td style="text-align: right;"> <strong><em>0.748</em></strong></td>
+<td style="text-align: right;">0.818</td>
+</tr>
+</tbody>
+</table>
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.</p>
+</section>
+<section id="tables-4-grid" class="slide level1 table-grid" data-background-size="contain">
+<h1>Tables 4 (grid)</h1>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td> <strong>Case 1</strong></td>
+<td>vanilla</td>
+<td style="text-align: right;"> 0.757</td>
+<td style="text-align: right;">0.719</td>
+<td style="text-align: right;"> 0.574</td>
+<td style="text-align: right;">0.547</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><em>optimised</em></td>
+<td style="text-align: right;">0.899</td>
+<td style="text-align: right;">0.838</td>
+<td style="text-align: right;">0.658</td>
+<td style="text-align: right;">0.607</td>
+</tr>
+<tr class="odd">
+<td> <strong>Case 2</strong></td>
+<td>vanilla</td>
+<td style="text-align: right;"> 1.252</td>
+<td style="text-align: right;"><strong><em>1.111</em></strong></td>
+<td style="text-align: right;"> 0.684</td>
+<td style="text-align: right;">0.756</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td><em>optimised</em></td>
+<td style="text-align: right;"> 1.443</td>
+<td style="text-align: right;">1.277</td>
+<td style="text-align: right;"> <strong><em>0.748</em></strong></td>
+<td style="text-align: right;">0.818</td>
+</tr>
+</tbody>
+</table>
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.</p>
+</section>
+<section id="tables-5-none" class="slide level1 table-none" data-background-size="contain">
+<h1>Tables 5 (none)</h1>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td> <strong>Case 1</strong></td>
+<td>vanilla</td>
+<td style="text-align: right;"> 0.757</td>
+<td style="text-align: right;">0.719</td>
+<td style="text-align: right;"> 0.574</td>
+<td style="text-align: right;">0.547</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><em>optimised</em></td>
+<td style="text-align: right;">0.899</td>
+<td style="text-align: right;">0.838</td>
+<td style="text-align: right;">0.658</td>
+<td style="text-align: right;">0.607</td>
+</tr>
+<tr class="odd">
+<td> <strong>Case 2</strong></td>
+<td>vanilla</td>
+<td style="text-align: right;"> 1.252</td>
+<td style="text-align: right;"><strong><em>1.111</em></strong></td>
+<td style="text-align: right;"> 0.684</td>
+<td style="text-align: right;">0.756</td>
+</tr>
+<tr class="even">
+<td> </td>
+<td><em>optimised</em></td>
+<td style="text-align: right;"> 1.443</td>
+<td style="text-align: right;">1.277</td>
+<td style="text-align: right;"> <strong><em>0.748</em></strong></td>
+<td style="text-align: right;">0.818</td>
+</tr>
+</tbody>
+</table>
+<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Sed posuere interdum sem.</p>
+</section>
+<section id="firstname-lastname" class="slide level1 author-slide" data-background-size="contain" data-background="theme/default/img/author.png">
 <h1>Firstname Lastname</h1>
-<div style="white-space: pre-line;">Groupname, title, or something
-CSC – IT Center for Science Ltd.</div>
+<p>Groupname, title, or something<br />
+CSC – IT Center for Science Ltd.</p>
 <p>firstname.lastname@csc.fi</p>
 <figure>
-<img src="img/csc-identicon.png" />
+<img src="theme/csc-2016/img/csc-identicon.png" />
 </figure>
 </section>
     </div>
   </div>
 
-  <script src="http://rawgit.com/mlouhivu/reveal.js/csc/lib/js/head.min.js"></script>
-  <script src="http://rawgit.com/mlouhivu/reveal.js/csc/js/reveal.js"></script>
+  <script src="https://mlouhivu.github.io/static-engine/reveal/3.5.0/lib/js/head.min.js"></script>
+  <script src="https://mlouhivu.github.io/static-engine/reveal/3.5.0/js/reveal.js"></script>
 
   <script>
 
@@ -259,9 +555,9 @@ CSC – IT Center for Science Ltd.</div>
 
         // Optional reveal.js plugins
         dependencies: [
-          { src: 'http://rawgit.com/mlouhivu/reveal.js/csc/lib/js/classList.js', condition: function() { return !document.body.classList; } },
-          { src: 'http://rawgit.com/mlouhivu/reveal.js/csc/plugin/zoom-js/zoom.js', async: true },
-              { src: 'http://rawgit.com/mlouhivu/reveal.js/csc/plugin/notes/notes.js', async: true }
+          { src: 'https://mlouhivu.github.io/static-engine/reveal/3.5.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: 'https://mlouhivu.github.io/static-engine/reveal/3.5.0/plugin/zoom-js/zoom.js', async: true },
+          { src: 'https://mlouhivu.github.io/static-engine/reveal/3.5.0/plugin/notes/notes.js', async: true }
         ]
       });
     </script>
