@@ -69,9 +69,9 @@ if __name__ == '__main__':
             metavar='filter.py',
             help='pandoc filter script (multiple allowed)')
     parser.add_argument('--reveal', help=argparse.SUPPRESS,
-            default='http://rawgit.com/mlouhivu/reveal.js/csc')
+            default='https://mlouhivu.github.io/static-engine/reveal/3.5.0')
     parser.add_argument('--mathjax', help=argparse.SUPPRESS,
-            default='http://rawgit.com/mathjax/MathJax/2.7.1/MathJax.js?config=TeX-AMS_HTML-full')
+            default='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML-full')
     parser.add_argument('--dry-run', '--show-command',
             action='store_true', default=False,
             help='do nothing, only show the full pandoc command'
