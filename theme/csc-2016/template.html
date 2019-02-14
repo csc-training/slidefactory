@@ -63,9 +63,17 @@ $endfor$
 
 $if(title)$
 $if(lang)$
-<section class="slide level1 title-slide" data-background-size="contain" data-background="img/title-$lang$.png">
+$if(theme)$
+<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/$theme$/img/title-$lang$.png">
 $else$
-<section class="slide level1 title-slide" data-background-size="contain" data-background="img/title-en.png">
+<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/default/img/title-$lang$.png">
+$endif$
+$else$
+$if(theme)$
+<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/$theme$/img/title-en.png">
+$else$
+<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/default/img/title-en.png">
+$endif$
 $endif$
   <h1>$title$</h1>
 $if(subtitle)$
