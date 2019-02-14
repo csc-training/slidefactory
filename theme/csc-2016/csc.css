@@ -39,7 +39,7 @@ body {
   background-color: #cacaca;
 }
 .slide-background {
-  background: url(https://github.com/csc-training/slide-template/raw/master/img/normal.png);
+  background: url(https://github.com/csc-training/slide-template/raw/master/theme/csc-2016/img/normal.png);
   background-size: contain;
 }
 
