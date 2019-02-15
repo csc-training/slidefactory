@@ -260,7 +260,7 @@ body {
   display:    block;
   padding:    5px;
   overflow:   auto;
-  max-height: calc(0.73 * var(--ysize));
+  max-height: calc(0.735 * var(--ysize));
   word-wrap:  normal;
 }
 .reveal p code {
