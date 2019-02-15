@@ -229,8 +229,20 @@ body {
 .reveal dt {
   font-weight: bold;
 }
+.reveal dt .input {
+  color: var(--csc-orange);
+}
+.reveal dt .output {
+  color: var(--csc-blue);
+}
 .reveal dd {
   margin-left: 1em;
+}
+.reveal dd dl {
+  margin-left: 0;
+}
+.reveal dd dl dd {
+  font-size: 0.7em;
 }
 .reveal dl p:first-child {
   margin-top: 0;
