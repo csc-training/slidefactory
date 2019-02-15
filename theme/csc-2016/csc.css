@@ -226,6 +226,9 @@ body {
 .reveal li li {
   font-size: 0.9em;
 }
+.reveal li p {
+  margin-left: 0;
+}
 /* description list */
 .reveal dt {
   font-weight: bold;
