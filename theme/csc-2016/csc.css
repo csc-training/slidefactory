@@ -248,6 +248,8 @@ body {
   margin-left: 0;
   margin-right: 0;
 }
+.reveal ul dl dd,
+.reveal ol dl dd,
 .reveal dd dl dd {
   font-size: 0.7em;
 }
