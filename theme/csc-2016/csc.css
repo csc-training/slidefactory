@@ -275,6 +275,10 @@ body {
   overflow:   auto;
   max-height: calc(0.735 * var(--ysize));
   word-wrap:  normal;
+  white-space: pre;
+}
+.reveal code {
+  white-space: pre-line;
 }
 .reveal p code {
   padding-left:  0.1em;
