@@ -275,6 +275,7 @@ body {
   margin-bottom: 1ex;
   border-collapse: collapse;
   border-spacing: 0;
+  max-width: calc(var(--xsize) - 2 * var(--xmargin));
 }
 .reveal table th {
   font-weight: bold;
