@@ -257,6 +257,15 @@ body {
 .reveal dd p {
   margin-left: 0;
 }
+.reveal .split-definition dd dl,
+.reveal .split-def-2 dd dl {
+  column-count: 2;
+  column-width: calc(0.5 * (var(--xsize) - 2 * var(--xmargin)) - 1em);
+}
+.reveal .split-def-3 dd dl {
+  column-count: 3;
+  column-width: calc(0.33 * (var(--xsize) - 2 * var(--xmargin)) - 1em);
+}
 
 
 /*********************************************
