@@ -251,7 +251,7 @@ body {
 .reveal ul dl dd,
 .reveal ol dl dd,
 .reveal dd dl dd {
-  font-size: 0.7em;
+  font-size: 0.8em;
 }
 .reveal dl p:first-child {
   margin-top: 0;
@@ -267,6 +267,12 @@ body {
 .reveal .split-def-3 dd dl {
   column-count: 3;
   column-width: calc(0.33 * (var(--xsize) - 2 * var(--xmargin)) - 1em);
+}
+.reveal .split-def-3 dd dl dt {
+  font-size: 0.9em;
+}
+.reveal .split-def-3 dd dl dd {
+  font-size: 0.7em;
 }
 
 
