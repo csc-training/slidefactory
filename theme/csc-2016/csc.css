@@ -235,12 +235,6 @@ body {
 .reveal dt {
   font-weight: bold;
 }
-.reveal dt .input {
-  color: var(--csc-orange);
-}
-.reveal dt .output {
-  color: var(--csc-blue);
-}
 .reveal dd {
   margin-left: 1em;
 }
@@ -306,6 +300,15 @@ body {
 .reveal p code {
   padding-left:  0.1em;
   padding-right: 0.1em;
+}
+.reveal code.input {
+  color: var(--csc-orange);
+}
+.reveal code.output {
+  color: var(--csc-blue);
+}
+.reveal code.ghost {
+  color: transparent;
 }
 
 /*********************************************
