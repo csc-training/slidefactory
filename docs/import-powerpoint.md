@@ -2,7 +2,41 @@
 
 Tips for converting powerpoint slides to Markdown.
 
-TODO: automatic conversion of bullet point items via html and pandoc
+
+## Extracting text
+
+Textual content (bullet point lists, source code etc.) can be extracted from a
+Powerpoint presentation quite easily in a semi-automated fashion.
+
+Steps:
+
+1. Open the Powerpoint presentation in Libreoffice
+
+2. Export the presentation as a HTML document:
+   File -> Export -> Change format to "HTML Document (Impress) (.html;.htm)"
+   -> Save -> Next -> Select "Single-document HTML" as "Publication Type"
+   -> Create
+   (Note: if asked to "Name HTML Design" after "Create", you can just close
+   the dialogue or press "Cancel")
+
+3. Convert the HTML document (`talk.html`) into Markdown (`talk.md`) using
+   Pandoc:
+   ```
+   pandoc -t commonmark --filter=fix-header.py talk.html -o talk.md
+   ```
+   (Note: the filter ([fix-header.py](../filter/fix-header.py)) used above is
+   optional, but it's quite handy to automatically remove bold font from
+   headers e.g. when converting from a CSC 2016 style presentation.)
+
+4. Manually fix the syntax of the resulting Markdown file.
+
+In practice, most slides will need at least minor tweaking in Step 4. Since
+all text in the slides will be included, slides with floating text boxes or
+other text objects in figures will typically need a bit more extra attention.
+
+As a guide for correct syntax (or at least syntax that works), you can refer
+to the [example markdown presentation](../example.md). It should have examples
+of most common slide layouts etc.
 
 
 ## Extracting figures
