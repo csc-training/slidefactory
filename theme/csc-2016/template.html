@@ -41,7 +41,11 @@ $endfor$
     var link = document.createElement( 'link' );
     link.rel = 'stylesheet';
     link.type = 'text/css';
-    link.href = window.location.search.match( /print-pdf/gi ) ? '$revealjs-url$/css/print/pdf.css' : '$revealjs-url$/css/print/paper.css';
+$if(theme)$
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'theme/$theme$/pdf.css' : '$revealjs-url$/css/print/paper.css';
+$else$
+    link.href = window.location.search.match( /print-pdf/gi ) ? 'theme/default/pdf.css' : '$revealjs-url$/css/print/paper.css';
+$endif$
     document.getElementsByTagName( 'head' )[0].appendChild( link );
   </script>
   <!--[if lt IE 9]>
