@@ -70,6 +70,18 @@ Using your favourite browser, open the output file (e.g. `talk.html`):
 3. Save the slides to PDF using the built-in print function of the browser.
    Remember to select "None" for margins and to include background graphics.
 
+## Using the template on an existing course (in separate directory)
+
+```bash
+git clone https://github.com/csc-training/slide-template
+git clone https://github.com/csc-training/advanced-parallel-prog
+cd advanced-parallel-prog/docs
+ln -s ../../slide-template/theme
+
+# ready to convert slides
+python ../../convert.py 04-Advanced-MPI-1.md
+```
+
 
 # Markdown file syntax
 
