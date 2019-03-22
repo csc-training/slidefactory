@@ -114,6 +114,22 @@ Mauris
     Sed arcu lectus auctor vitae, consectetuer et venenatis eget velit.
 
 
+# Function definition
+
+`Lorem(ipsum, dolor, sit, amet)`
+  : `ipsum`{.input}
+    : consectetuer adipiscing elit
+
+    `dolor`{.input}
+    : sed posuere interdum sem
+
+    `sit`{.input}
+    : quisque ligula eros
+
+    `amet`{.output}
+    : ullamcorper quis
+
+
 # Images 1
 
 ![](img/nuuksio-lake.jpg)
