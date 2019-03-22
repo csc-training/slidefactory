@@ -45,6 +45,17 @@ Using your favourite browser, open the output file (e.g. `talk.html`):
 - `open talk.html` (Mac)
 - `firefox talk.html` (Linux)
 
+## Generate PDFs
+
+1. Using Chromium (or Chrome), open the HTML slides as shown above.
+2. Add `?print-pdf` to the end of the URL and reload. This will change the
+   layout to be suitable for PDFs.
+   ```
+   file:///path/to/files/talk.html?print-pdf
+   ```
+3. Save the slides to PDF using the built-in print function of the browser.
+   Remember to select "None" for margins and to include background graphics.
+
 
 # Markdown file syntax
 
