@@ -7,8 +7,22 @@ Experimental template to generate lecture slides in CSC style from markdown
 
 ## Install
 
+### Pandoc
+
 See Pandoc's install instructions (http://pandoc.org/installing.html) for
 detailed instructions on how to install Pandoc.
+
+Known to work using pandoc 1.17.2 (Debian 9) and on latest Ubuntus.
+
+### Fonts
+
+Additional fonts (Noto Sans and Inconsolata) are needed for the slides. These
+can be easily installed on most distros using the package manager.
+
+For example, on Debian 9 the command would be:
+```bash
+sudo apt-get install fonts-noto fonts-inconsolata
+```
 
 ## Convert Markdown to HTML slides
 
