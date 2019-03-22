@@ -39,6 +39,23 @@ info, see
 $ python convert.py --debug talk.md
 ```
 
+
+# Markdown file syntax
+
+Every slide set should start with a metadata block (see [Syntax
+Guide](docs/syntax-guide.md) for details) followed by slides in Markdown
+syntax (Pandoc prefers Commonmark, but understands also other flavours).
+
+Slides are separated by using first-level headers.
+
+Even though Pandoc understands most flavours of Markdown syntax (and is quite
+good in handling minor differences), to avoid conversion errors, it is a good
+idea to be a bit picky about whitespaces etc. and to aim for consistent
+syntax.
+
+Please look at [example.md](example.md) for an example.
+
+
 # Importing an existing presentation
 
 In order to import an existing presentation, you need to:

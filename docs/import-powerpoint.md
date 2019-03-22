@@ -28,15 +28,16 @@ Steps:
    optional, but it's quite handy to automatically remove bold font from
    headers e.g. when converting from a CSC 2016 style presentation.)
 
-4. Manually fix the syntax of the resulting Markdown file.
+4. Manually fix the syntax of the resulting Markdown file (see
+   [example.md](../example.md) for a working example or the
+   [Syntax Guide](syntax-guide.md) for some general pointers)
+
+5. Add a presentation metadata block (title, author, language, date) into the
+   beginning of the file as described in the [Syntax Guide](syntax-guide.md).
 
 In practice, most slides will need at least minor tweaking in Step 4. Since
 all text in the slides will be included, slides with floating text boxes or
 other text objects in figures will typically need a bit more extra attention.
-
-As a guide for correct syntax (or at least syntax that works), you can refer
-to the [example markdown presentation](../example.md). It should have examples
-of most common slide layouts etc.
 
 
 ## Extracting figures
