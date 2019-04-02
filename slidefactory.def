@@ -1,0 +1,11 @@
+BootStrap: debootstrap
+OSVersion: bionic
+MirrorURL: http://fi.archive.ubuntu.com/ubuntu
+
+%post
+	apt-get update && apt-get install -y software-properties-common
+	apt-get update && add-apt-repository universe && apt-get update
+	apt-get install -y fonts-noto fonts-inconsolata pandoc python-pandocfilters
+
+%runscript
+        exec python "$@"
