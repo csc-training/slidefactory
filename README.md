@@ -48,7 +48,7 @@ python convert.py talk.md
 If you are using singularity:
 
 ``` bash
-singularity run slidefactory.sqfs convert.py talk.md
+singularity run slidefactory.sqfs talk.md
 ```
 
 ### More information

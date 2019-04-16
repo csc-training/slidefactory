@@ -2,10 +2,19 @@ BootStrap: debootstrap
 OSVersion: bionic
 MirrorURL: http://fi.archive.ubuntu.com/ubuntu
 
+%setup
+        mkdir -p $SINGULARITY_ROOTFS/slidetools/filter
+        cp convert.py $SINGULARITY_ROOTFS/slidetools/
+        cp filter/* $SINGULARITY_ROOTFS/slidetools/filter/
+
 %post
 	apt-get update && apt-get install -y software-properties-common
 	apt-get update && add-apt-repository universe && apt-get update
 	apt-get install -y fonts-noto fonts-inconsolata pandoc python-pandocfilters
+        apt-get install -y cabal-install
+        cabal update
+        cabal install --global pandoc-emphasize-code
+        apt-get remove -y --autoremove cabal-install
 
 %runscript
-        exec python "$@"
+        exec python /slidetools/convert.py "$@"
