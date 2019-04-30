@@ -201,6 +201,22 @@ int square(x) {
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit: ```count = x + y```.
 Sed posuere interdum ```foobar(args, x)``` sem.
 
+# Code high-lighting with emphasis
+
+```{.python emphasize=1:8-1:10,3-3}
+import os
+
+if os.path.isfile('foobar'):
+    with open('foobar') as fp:
+        txt = fp.read()
+    print('File contents:')
+    print(txt)
+```
+
+- emphasize syntax:
+  `line1[:col1]-line2[:col2],line3[:col3]-line4[:col4]`
+- Note: syntax highlighting does not work with emphasize
+
 
 # Tables 1 (default)
 
