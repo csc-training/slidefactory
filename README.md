@@ -29,12 +29,12 @@ sudo apt-get install fonts-noto fonts-inconsolata
 ### Building the container
 
 Singularity definitions for the Ubuntu Bionic version are in the
-`slidefactory.def` file. You can build the container with command:
+`slidefactory.def` file. If you are using CentOS/RHEL, you have to
+install `debootstrap` utility before building (`sudo yum install
+debootstrap`). Build the container with command:
 ``` bash
-sudo singularity build slidefactory build slidefactory.sqfs slidefactory.def
+sudo singularity build slidefactory.simg slidefactory.def
 ```
-Please note that you have to install the `debootstrap` utility for CentOS/RHEL
-before building.
 
 ## Convert Markdown to HTML slides
 
@@ -48,7 +48,7 @@ python convert.py talk.md
 If you are using singularity:
 
 ``` bash
-singularity run slidefactory.sqfs talk.md
+singularity run slidefactory.simg convert.py talk.md
 ```
 
 ### More information
