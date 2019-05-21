@@ -22,7 +22,8 @@ config = [
         ]
 
 # pandoc filters
-filters = ['filter/contain-slide.py', 'filter/background-image.py']
+filters = ['filter/contain-slide.py', 'filter/background-image.py', \
+           '/usr/local/bin/pandoc-emphasize-code']
 
 # use absolute paths, if executed from another directory
 if sys.path[0] != os.path.abspath('.'):
