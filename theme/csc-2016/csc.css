@@ -22,6 +22,7 @@
   --csc-turquoise: #00c7b2;
   --csc-dark-blue: #002f5f;
   --csc-blue:      #0082bb;
+  --csc-highlight: #ffc0b0;
 }
 /* Screen geometry + base size for text */
 :root {
@@ -309,6 +310,9 @@ body {
 }
 .reveal code.ghost {
   color: transparent;
+}
+.reveal mark {
+  background-color: var(--csc-highlight);
 }
 
 /*********************************************
