@@ -288,6 +288,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 }</code></pre></div>
 <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit: <code>count = x + y</code>. Sed posuere interdum <code>foobar(args, x)</code> sem.</p>
 </section>
+<section id="code-high-lighting-with-emphasis" class="slide level1" data-background-size="contain">
+<h1>Code high-lighting with emphasis</h1>
+<pre class="python"><code>import <mark class="inline">os</mark>
+
+<mark class="block">if os.path.isfile(&#39;foobar&#39;):</mark>
+    with open(&#39;foobar&#39;) as fp:
+        txt = fp.read()
+    print(&#39;File contents:&#39;)
+    print(txt)</code></pre>
+<ul>
+<li>emphasize syntax: <code>line1[:col1]-line2[:col2],line3[:col3]-line4[:col4]</code></li>
+<li>Note: syntax highlighting does not work with emphasize</li>
+</ul>
+</section>
 <section id="tables-1-default" class="slide level1" data-background-size="contain">
 <h1>Tables 1 (default)</h1>
 <table>
@@ -554,8 +568,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </section>
 <section id="firstname-lastname" class="slide level1 author-slide" data-background-size="contain" data-background="theme/default/img/author.png">
 <h1>Firstname Lastname</h1>
-<p>Groupname, title, or something<br />
-CSC – IT Center for Science Ltd.</p>
+<div style="white-space: pre-line;">Groupname, title, or something
+CSC – IT Center for Science Ltd.</div>
 <p>firstname.lastname@csc.fi</p>
 <figure>
 <img src="theme/csc-2016/img/csc-identicon.png" />
