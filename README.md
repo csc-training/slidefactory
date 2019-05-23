@@ -51,6 +51,12 @@ If you are using singularity:
 singularity run slidefactory.simg talk.md
 ```
 
+Tab completion of .md filenames does not necessarily work with singularity out-of-the-box, but you can add 
+``` bash
+complete -A file singularity
+```
+to `.bashrc` or separate bash customization file.
+
 ### More information
 
 Options for the helper script (`convert.py`) can be seen with
