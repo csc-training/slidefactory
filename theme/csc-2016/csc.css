@@ -32,6 +32,11 @@
   --ymargin:  84px;
   --fontsize: 50px;
 }
+/* Fonts */
+:root {
+  --csc-font-family: 'Corbel', 'Noto Sans', 'Cantarell', sans-serif;
+  --csc-code-font-family: 'Consolas', 'Inconsolata', 'Source Code Pro', monospace;
+}
 
 /*********************************************
  * GLOBAL STYLES
@@ -45,7 +50,7 @@ body {
 }
 
 .reveal {
-  font-family: 'Corbel', 'Noto Sans', 'Cantarell', sans-serif;
+  font-family: var(--csc-font-family);
   font-size:   var(--fontsize);
   color:       var(--csc-grey);
   font-weight: normal;
@@ -234,6 +239,7 @@ body {
 }
 /* description list */
 .reveal dt {
+  font-family: var(--csc-code-font-family);
   font-weight: bold;
 }
 .reveal dd {
@@ -285,7 +291,7 @@ body {
 }
 .reveal pre,
 .reveal code {
-  font-family: 'Consolas', 'Inconsolata', 'Source Code Pro', monospace;
+  font-family: var(--csc-code-font-family);
 }
 .reveal pre code {
   display:    block;
