@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# -*- coding: ISO-8859-1 -*-
 #---------------------------------------------------------------------------#
 # Function: Convert a presentation from Markdown (or reStructuredText) to   #
 #           reveal.js powered HTML5 using pandoc.                           #
@@ -49,8 +48,15 @@ highlight_styles = ['pygments', 'tango', 'espresso', 'zenburn', 'kate', \
         'monochrome', 'breezedark', 'haddock']
 
 # find existing presentation themes
-themes = [x for x in os.listdir('theme')
-          if os.path.isdir(os.path.join('theme', x))]
+try:
+    themes = [x for x in os.listdir('theme')
+              if os.path.isdir(os.path.join('theme', x))]
+    themespath = ''
+except OSError:
+    themes = [x for x in os.listdir('/slidetools/theme')
+              if os.path.isdir(os.path.join('/slidetools/theme', x))]
+    themespath = '/slidetools/'
+    print('Using the builtin themes from container')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Convert a presentation
@@ -121,7 +127,7 @@ if __name__ == '__main__':
             'config':  ' '.join('-V ' + x for x in config),
             'filter':  ' '.join('--filter ' + x for x in args.filter),
             'mathjax': args.mathjax,
-            'template': 'theme/{0}/template.html'.format(args.theme)
+            'template': '{0}theme/{1}/template.html'.format(themespath, args.theme)
             }
     # construct the pandoc command
     cmd = ('pandoc {input} -s -t revealjs --template={template} {config} '

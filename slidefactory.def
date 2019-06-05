@@ -3,15 +3,17 @@ OSVersion: bionic
 MirrorURL: http://fi.archive.ubuntu.com/ubuntu
 
 %setup
-        mkdir -p $SINGULARITY_ROOTFS/slidetools/filter
+        mkdir -p      $SINGULARITY_ROOTFS/slidetools/filter
+        mkdir         $SINGULARITY_ROOTFS/slidetools/theme
         cp convert.py $SINGULARITY_ROOTFS/slidetools/
-        cp filter/* $SINGULARITY_ROOTFS/slidetools/filter/
-
+        cp filter/*   $SINGULARITY_ROOTFS/slidetools/filter/
+        cp -r theme/* $SINGULARITY_ROOTFS/slidetools/theme/
+        
 %post
-	apt-get update && apt-get install -y software-properties-common
-	apt-get update && add-apt-repository universe && apt-get update
-	apt-get install -y fonts-noto fonts-inconsolata pandoc python-pandocfilters
-        apt-get install -y cabal-install
+        apt-get update && apt-get install -y software-properties-common
+        apt-get update && add-apt-repository universe && apt-get update
+        apt-get install -y fonts-noto fonts-inconsolata pandoc python-pandocfilters
+        apt-get install -y cabal-install nvi
         cabal update
         cabal install --global pandoc-emphasize-code
         apt-get remove -y --autoremove cabal-install
