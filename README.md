@@ -93,6 +93,11 @@ Using your favourite browser, open the output file (e.g. `talk.html`):
    ```
 3. Save the slides to PDF using the built-in print function of the browser.
    Remember to select "None" for margins and to include background graphics.
+   
+At least in Linux one can generate the PDFs also from commandline:
+```bash
+chromium-browser --headless --print-to-pdf=talk.pdf file:///full/path/to/files/talk.html?print-pdf
+```
 
 ## Using the template on an existing course (in separate directory)
 
