@@ -280,6 +280,9 @@ body {
 /*********************************************
  * CODE
  *********************************************/
+ .reveal div {
+  margin: 0.1em 0;
+}
 .reveal pre {
   display:       block;
   margin-top:    2px;
