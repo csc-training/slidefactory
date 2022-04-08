@@ -58,15 +58,16 @@ except OSError:
     themespath = '/slidetools/'
     print('Using the builtin themes from container')
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Convert a presentation
     from Markdown (or reStructuredText) to reveal.js powered HTML5 using
     pandoc.""")
-    parser.add_argument('input', metavar='input.md',
+    parser.add_argument('input', metavar='input.md', nargs='+',
             help='filename for presentation source (e.g. in Markdown)')
-    parser.add_argument('output', metavar='output.html', nargs='?',
-            help='filename for HTML5 presentation (optional; by default '
-            + 'uses the basename of input, i.e. talk.md -> talk.html)')
+    parser.add_argument('--output', metavar='prefix',
+            help='prefix for output filenames (by default uses the '
+            'basename of the input file, i.e. talk.md -> talk.html)')
     parser.add_argument('-t', '--theme', default='csc-2016',
             choices=themes, metavar='THEME',
             help='presentation theme: ' + ', '.join(themes) \
@@ -107,10 +108,6 @@ if __name__ == '__main__':
         print('    : ' + args.mathjax)
         parser.exit()
 
-    # if output is not defined, construct it based on input filename
-    if not args.output:
-        base, ext = os.path.splitext(args.input)
-        args.output = base + '.html'
     # if using a remote reveal.js, add the URL to config options
     if not args.local:
         args.config.insert(0, 'revealjs-url=' + args.reveal)
@@ -129,10 +126,6 @@ if __name__ == '__main__':
             'mathjax': args.mathjax,
             'template': '{0}theme/{1}/template.html'.format(themespath, args.theme)
             }
-    # construct the pandoc command
-    cmd = ('pandoc {input} -s -t revealjs --template={template} {config} '
-            + '--mathjax={mathjax} --highlight-style={style} '
-            + '{filter} -o {output}').format(**flags)
 
     # display extra info?
     if args.verbose or args.dry_run:
@@ -145,9 +138,31 @@ if __name__ == '__main__':
                 print('  {0}'.format(x))
         else:
             print('  (none)')
-        print('\nPandoc command:')
-        print('  {0}\n'.format(cmd))
 
-    # execute pandoc
-    if not args.dry_run:
-        os.system(cmd)
+    # convert files
+    for filename in args.input:
+        # figure out the output filename
+        base, ext = os.path.splitext(filename)
+        if not args.output:
+            output = base
+        else:
+            output = args.output + base
+        if not output.endswith('.html'):
+            output += '.html'
+        # add filenames to the command-line arguments
+        flags['input'] = filename
+        flags['output'] = output
+
+        # construct the pandoc command
+        cmd = ('pandoc {input} -s -t revealjs --template={template} {config} '
+                + '--mathjax={mathjax} --highlight-style={style} '
+                + '{filter} -o {output}').format(**flags)
+
+        # display pandoc command?
+        if args.verbose or args.dry_run:
+            print('\nPandoc command:')
+            print('  {0}\n'.format(cmd))
+
+        # execute pandoc
+        if not args.dry_run:
+            os.system(cmd)
