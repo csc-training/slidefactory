@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from pandocfilters import toJSONFilter, Header, attributes
 
 def contain(key, value, format, meta):
