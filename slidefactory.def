@@ -1,6 +1,5 @@
 BootStrap: library
 From: ubuntu:20.04
-MirrorURL: http://fi.archive.ubuntu.com/ubuntu
 
 %setup
         mkdir -p      $SINGULARITY_ROOTFS/slidetools/filter
@@ -16,6 +15,7 @@ MirrorURL: http://fi.archive.ubuntu.com/ubuntu
         apt install -y fonts-noto fonts-inconsolata
         apt install -y cabal-install nvi
         cabal update
+        mkdir -p /root/.cabal/bin
         cabal install pandoc-types-1.17.5.4
         cabal install pandoc-emphasize-code
         apt-get remove -y --autoremove cabal-install
