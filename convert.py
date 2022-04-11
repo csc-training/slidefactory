@@ -20,14 +20,29 @@ config = [
         'backgroundTransition=none'
         ]
 
+# figure out the paths to files
+cwd = os.getcwd()
+path = os.environ.get('SLIDE_FACTORY', os.path.abspath('.'))
+if not os.path.isdir(path):
+    raise FileNotFoundError('Invalid root path: {0}'.format(path))
+for path_themes in [os.path.join(cwd, 'theme'),
+                   os.path.join(path, 'theme')]:
+    if os.path.isdir(path_themes):
+        break
+else:
+    raise FileNotFoundError('Invalid theme path: {0}'.format(path_themes))
+for path_filters in [os.path.join(cwd, 'filter'),
+                    os.path.join(path, 'filter')]:
+    if os.path.isdir(path_filters):
+        break
+else:
+    raise FileNotFoundError('Invalid filter path: {0}'.format(path_filters))
+
 # pandoc filters
-filters = ['filter/contain-slide.py', 'filter/background-image.py']
+filters = [os.path.join(path_filters, x) for x in [
+           'contain-slide.py', 'background-image.py']]
 if os.path.exists('/usr/local/bin/pandoc-emphasize-code'):
     filters.append('/usr/local/bin/pandoc-emphasize-code')
-
-# use absolute paths, if executed from another directory
-if sys.path[0] != os.path.abspath('.'):
-    filters = [os.path.join(sys.path[0], x) for x in filters]
 
 def remove_duplicates(config):
     """Remove duplicate entries from a list of config options."""
@@ -49,14 +64,10 @@ highlight_styles = ['pygments', 'tango', 'espresso', 'zenburn', 'kate', \
 
 # find existing presentation themes
 try:
-    themes = [x for x in os.listdir('theme')
+    themes = [x for x in os.listdir(path_themes)
               if os.path.isdir(os.path.join('theme', x))]
-    themespath = 'theme'
 except OSError:
-    themespath = os.path.join(os.environ.get('SLIDE_FACTORY', '/slide-factory'),
-                              'theme')
-    themes = [x for x in os.listdir(themespath)
-              if os.path.isdir(os.path.join(themespath, x))]
+    raise FileNotFoundError('Invalid theme path: {0}'.format(path_themes))
 
 
 if __name__ == '__main__':
@@ -124,12 +135,12 @@ if __name__ == '__main__':
             'config':  ' '.join('-V ' + x for x in config),
             'filter':  ' '.join('--filter ' + x for x in args.filter),
             'mathjax': args.mathjax,
-            'template': os.path.join(themespath, args.theme, 'template.html')
+            'template': os.path.join(path_themes, args.theme, 'template.html')
             }
 
     # display extra info?
     if args.verbose or args.dry_run:
-        print('Using theme from: ' + os.path.join(themespath, args.theme))
+        print('Using theme from: ' + os.path.join(path_themes, args.theme))
         print('\nReveal.js configuration:')
         for x in config:
             print('  {0}'.format(x))
