@@ -131,6 +131,10 @@ if __name__ == '__main__':
     meta = [
             'themepath=' + os.path.join(path_themes, args.theme)
             ]
+    # extra template variables to pandoc
+    variables = [
+            'themepath=' + os.path.join(path_themes, args.theme),
+            ]
 
     # prepare command-line arguments
     flags = {
@@ -138,6 +142,7 @@ if __name__ == '__main__':
             'input':   args.input,
             'output':  args.output,
             'meta':    ' '.join('-M ' + x for x in meta),
+            'vars':    ' '.join('-V ' + x for x in variables),
             'config':  ' '.join('-V ' + x for x in config),
             'filter':  ' '.join('--filter ' + x for x in args.filter),
             'mathjax': args.mathjax,
@@ -172,8 +177,9 @@ if __name__ == '__main__':
         flags['output'] = output
 
         # construct the pandoc command
-        cmd = ('pandoc {input} -s -t revealjs --template={template} {meta} '
-                + '{config} --mathjax={mathjax} --highlight-style={style} '
+        cmd = ('pandoc {input} -s -t revealjs --template={template} '
+                + '{meta} {vars} {config} '
+                + '--mathjax={mathjax} --highlight-style={style} '
                 + '{filter} -o {output}').format(**flags)
 
         # display pandoc command?
