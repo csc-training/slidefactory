@@ -161,6 +161,14 @@ if __name__ == '__main__':
                 print('  {0}'.format(x))
         else:
             print('  (none)')
+        print('\nPandoc variables:')
+        if meta or variables:
+            for x in meta:
+                print('  -M {0}'.format(x))
+            for x in variables:
+                print('  -V {0}'.format(x))
+        else:
+            print('  (none)')
 
     # convert files
     for filename in args.input:
