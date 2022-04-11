@@ -2,12 +2,12 @@
 from pandocfilters import toJSONFilter, Header, attributes
 
 def cscify(key, value, format, meta):
-    # image location depends on the theme
+    # setup a template with correct path to the theme
     try:
-        theme = meta['theme']['c'][0]['c']
+        path = meta['themepath']['c']
     except:
-        theme = 'default'
-    template = u'theme/{0}/img/%s.png'.format(theme)
+        path = 'theme'
+    template = u'{0}/img/%s.png'.format(path)
     # markdown: special class names trigger loading of a data background image
     #           and replacement with a corresponding generic class name
     if key == 'Header' and value[0] == 1:
