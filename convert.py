@@ -51,12 +51,12 @@ highlight_styles = ['pygments', 'tango', 'espresso', 'zenburn', 'kate', \
 try:
     themes = [x for x in os.listdir('theme')
               if os.path.isdir(os.path.join('theme', x))]
-    themespath = ''
+    themespath = 'theme'
 except OSError:
-    themes = [x for x in os.listdir('/slidetools/theme')
-              if os.path.isdir(os.path.join('/slidetools/theme', x))]
-    themespath = '/slidetools/'
-    print('Using the builtin themes from container')
+    themespath = os.path.join(os.environ.get('SLIDE_FACTORY', '/slide-factory'),
+                              'theme')
+    themes = [x for x in os.listdir(themespath)
+              if os.path.isdir(os.path.join(themespath, x))]
 
 
 if __name__ == '__main__':
@@ -124,11 +124,12 @@ if __name__ == '__main__':
             'config':  ' '.join('-V ' + x for x in config),
             'filter':  ' '.join('--filter ' + x for x in args.filter),
             'mathjax': args.mathjax,
-            'template': '{0}theme/{1}/template.html'.format(themespath, args.theme)
+            'template': os.path.join(themespath, args.theme, 'template.html')
             }
 
     # display extra info?
     if args.verbose or args.dry_run:
+        print('Using theme from: ' + os.path.join(themespath, args.theme))
         print('\nReveal.js configuration:')
         for x in config:
             print('  {0}'.format(x))
