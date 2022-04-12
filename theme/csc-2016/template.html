@@ -26,13 +26,8 @@ $if(highlighting-css)$
 $highlighting-css$
   </style>
 $endif$
-$if(theme)$
-  <link rel="stylesheet" href="theme/$theme$/csc.css" id="theme">
-  <link rel="stylesheet" href="theme/$theme$/fonts.css">
-$else$
-  <link rel="stylesheet" href="theme/default/csc.css" id="theme">
-  <link rel="stylesheet" href="theme/default/fonts.css">
-$endif$
+  <link rel="stylesheet" href="$themepath$/csc.css" id="theme">
+  <link rel="stylesheet" href="$themepath$/fonts.css">
 $for(css)$
   <link rel="stylesheet" href="$css$"/>
 $endfor$
@@ -41,11 +36,7 @@ $endfor$
     var link = document.createElement( 'link' );
     link.rel = 'stylesheet';
     link.type = 'text/css';
-$if(theme)$
-    link.href = window.location.search.match( /print-pdf/gi ) ? 'theme/$theme$/pdf.css' : '$revealjs-url$/css/print/paper.css';
-$else$
-    link.href = window.location.search.match( /print-pdf/gi ) ? 'theme/default/pdf.css' : '$revealjs-url$/css/print/paper.css';
-$endif$
+    link.href = window.location.search.match( /print-pdf/gi ) ? '$themepath$/pdf.css' : '$revealjs-url$/css/print/paper.css';
     document.getElementsByTagName( 'head' )[0].appendChild( link );
   </script>
   <!--[if lt IE 9]>
@@ -67,17 +58,9 @@ $endfor$
 
 $if(title)$
 $if(lang)$
-$if(theme)$
-<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/$theme$/img/title-$lang$.png">
+<section class="slide level1 title-slide" data-background-size="contain" data-background="$themepath$/img/title-$lang$.png">
 $else$
-<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/default/img/title-$lang$.png">
-$endif$
-$else$
-$if(theme)$
-<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/$theme$/img/title-en.png">
-$else$
-<section class="slide level1 title-slide" data-background-size="contain" data-background="theme/default/img/title-en.png">
-$endif$
+<section class="slide level1 title-slide" data-background-size="contain" data-background="$themepath$/img/title-en.png">
 $endif$
   <h1>$title$</h1>
 $if(subtitle)$
