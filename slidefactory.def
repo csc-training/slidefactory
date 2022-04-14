@@ -2,7 +2,7 @@ BootStrap: library
 From: ubuntu:20.04
 
 %environment
-    export SLIDE_FACTORY_CONTAINER=/slide-factory
+    export SLIDEFACTORY_CONTAINER=/slidefactory
 
 %post
     apt update && apt install -y software-properties-common
@@ -17,11 +17,11 @@ From: ubuntu:20.04
     apt-get remove -y --autoremove cabal-install
     apt install -y git
     url=https://github.com/csc-training/slide-template
-    git clone $url $SINGULARITY_ROOTFS/slide-factory
+    git clone $url $SINGULARITY_ROOTFS/slidefactory
 
 %runscript
-    if test "$SLIDE_FACTORY" = ""
+    if test "$SLIDEFACTORY" = ""
     then
-	    export SLIDE_FACTORY=$SLIDE_FACTORY_CONTAINER
+	    export SLIDEFACTORY=$SLIDEFACTORY_CONTAINER
     fi
-	exec python3 $SLIDE_FACTORY/convert.py "$@"
+	exec python3 $SLIDEFACTORY/convert.py "$@"
