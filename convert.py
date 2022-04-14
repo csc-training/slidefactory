@@ -21,10 +21,20 @@ config = [
         ]
 
 # figure out the paths to files
+#   order of preference: current working directory, environment variable,
+#                        default installation path, location of this script
+_default_path = os.path.join(
+        os.environ.get('HOME', '~'), '.local/lib/slidefactory')
 cwd = os.getcwd()
-path = os.environ.get('SLIDE_FACTORY', os.path.abspath('.'))
-if not os.path.isdir(path):
-    raise FileNotFoundError('Invalid root path: {0}'.format(path))
+try:
+    path = os.environ['SLIDEFACTORY']
+    if not os.path.isdir(path):
+        raise FileNotFoundError('Invalid root path: {0}'.format(path))
+except KeyError:
+    if os.path.isdir(_default_path):
+        path = _default_path
+    else:
+        path = os.path.abspath('.')
 for path_themes in [os.path.join(cwd, 'theme'),
                    os.path.join(path, 'theme')]:
     if os.path.isdir(path_themes):
