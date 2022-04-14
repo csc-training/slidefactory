@@ -140,7 +140,6 @@ if __name__ == '__main__':
             ]
     # extra template variables to pandoc
     variables = [
-            'themepath=' + os.path.join(path_themes, args.theme),
             ]
 
     # prepare command-line arguments
