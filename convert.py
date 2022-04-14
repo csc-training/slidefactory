@@ -97,8 +97,6 @@ if __name__ == '__main__':
            choices=highlight_styles, metavar='name',
            help='code highlight style: ' + ', '.join(highlight_styles) \
                    + ' (default: pygments)')
-    parser.add_argument('-l', '--local', action='store_true', default=False,
-            help='use local copy of reveal.js (in sub-directory reveal.js/)')
     parser.add_argument('--config', action='append', default=config,
             metavar='key=value',
             help='reveal.js config option (multiple allowed)')
@@ -129,9 +127,8 @@ if __name__ == '__main__':
         print('    : ' + args.mathjax)
         parser.exit()
 
-    # if using a remote reveal.js, add the URL to config options
-    if not args.local:
-        args.config.insert(0, 'revealjs-url=' + args.reveal)
+    # add reveal.js URL to config options
+    args.config.insert(0, 'revealjs-url=' + args.reveal)
     # add theme to config options
     args.config.insert(0, 'theme=' + args.theme)
     # check config options and remove duplicates (if any)
