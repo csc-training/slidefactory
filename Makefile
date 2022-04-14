@@ -2,7 +2,7 @@ DEF=slidefactory.def
 SIF=slidefactory.sif
 
 ifndef PREFIX
-	PREFIX=$(HOME)/.local
+	PREFIX=$(HOME)
 endif
 INSTALL_BIN=$(PREFIX)/bin
 INSTALL_GIT=$(PREFIX)/lib/slidefactory
@@ -23,7 +23,7 @@ install: build
 	@if [ ! -d $(INSTALL_BIN) ]; then \
 		mkdir -p $(INSTALL_BIN); \
 	fi
-	cp $(SIF) $(INSTALL_BIN)/
+	cp -i $(SIF) $(INSTALL_BIN)/
 	git clone $(GIT) $(INSTALL_GIT)
 	@echo ""
 	@echo "Installed:"

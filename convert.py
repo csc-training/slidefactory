@@ -24,7 +24,7 @@ config = [
 #   order of preference: current working directory, environment variable,
 #                        default installation path, location of this script
 _default_path = os.path.join(
-        os.environ.get('HOME', '~'), '.local/lib/slidefactory')
+        os.environ.get('HOME', '~'), 'lib/slidefactory')
 cwd = os.getcwd()
 try:
     path = os.environ['SLIDEFACTORY']
