@@ -127,16 +127,14 @@ if __name__ == '__main__':
         print('    : ' + args.mathjax)
         parser.exit()
 
-    # add reveal.js URL to config options
-    args.config.insert(0, 'revealjs-url=' + args.reveal)
-    # add theme to config options
-    args.config.insert(0, 'theme=' + args.theme)
     # check config options and remove duplicates (if any)
     config = remove_duplicates(args.config)
 
     # meta variables to pandoc
     meta = [
-            'themepath=' + os.path.join(path_themes, args.theme)
+            'theme=' + args.theme,
+            'themepath=' + os.path.join(path_themes, args.theme),
+            'revealjs-url=' + args.reveal,
             ]
     # extra template variables to pandoc
     variables = [
