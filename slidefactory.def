@@ -22,6 +22,6 @@ From: ubuntu:20.04
 %runscript
     if test "$SLIDEFACTORY" = ""
     then
-	    export SLIDEFACTORY=$SLIDEFACTORY_CONTAINER
+        export SLIDEFACTORY=$SLIDEFACTORY_CONTAINER
     fi
-	exec python3 $SLIDEFACTORY/convert.py "$@"
+    exec python3 $SLIDEFACTORY/convert.py "$@"
