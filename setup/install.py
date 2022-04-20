@@ -85,9 +85,13 @@ def run():
         print('')
     os.system(cmd)
 
+    print('')
     print('Installed:')
     print('  {0}'.format(install_sif))
     print('  {0}'.format(install_git))
+    print('')
+    print('Please add the following into your .bashrc or similar:')
+    print('  export SLIDEFACTORY={0}'.format(install_git))
 
     # check if bin in PATH
     path = os.environ.get('PATH', '').split(':')

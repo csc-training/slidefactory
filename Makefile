@@ -29,6 +29,9 @@ install: build
 	@echo "Installed:"
 	@echo "  $(INSTALL_BIN)/$(SIF)"
 	@echo "  $(INSTALL_GIT)/"
+	@echo ""
+	@echo "Please add the following into your .bashrc or similar"
+	@echo "  export SLIDEFACTORY=$(INSTALL_GIT)"
 
 uninstall:
 	@echo "Removing:"
