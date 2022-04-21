@@ -14,7 +14,10 @@ def get_install_path():
         return os.path.abspath(
                 os.path.join(os.environ['SLIDEFACTORY'], '../..'))
     else:
-        return os.environ.get('HOME', os.path.expanduser('~'))
+        path = os.environ.get('HOME', os.path.expanduser('~'))
+        if os.path.isdir(os.path.join(path, 'lib/slidefactory')):
+            return path
+        raise Exception
 
 @contextmanager
 def change_dir(path):
@@ -29,6 +32,8 @@ def run():
     desc = 'Update slidefactory repository (and maybe container)'
     parser = argparse.ArgumentParser(description=desc)
     parser.set_defaults(image='slidefactory.sif')
+    parser.add_argument('--as-container', action='store_true', default=False,
+            help=argparse.SUPPRESS)
     parser.add_argument('-c', '--container', action='store_true', default=False,
             help='update also container')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
@@ -37,7 +42,17 @@ def run():
     args = parser.parse_args()
 
     # figure out install paths
-    install_prefix = get_install_path()
+    try:
+        install_prefix = get_install_path()
+    except Exception:
+        print('Could not find files to update. Please set correct path '
+                + 'to the environment variable SLIDEFACTORY.')
+        print("If you haven't yet installed slidefactory, please first run:")
+        if args.as_container:
+            print('  slidefactory.sif --install')
+        else:
+            print('  python3 setup/install.py')
+        return 1
     install_git = os.path.join(install_prefix, 'lib/slidefactory')
     install_sif = os.path.join(install_prefix, 'bin', args.image)
 
