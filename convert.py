@@ -8,6 +8,7 @@
 import argparse
 import os
 import sys
+import subprocess
 
 # reveal.js configuration
 config = [
@@ -244,4 +245,4 @@ if __name__ == '__main__':
                 print('  {0}'.format(cmd))
                 print('')
             if not args.dry_run:
-                os.system(cmd)
+                subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL)
