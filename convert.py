@@ -23,6 +23,8 @@ config = [
 # figure out the paths to files
 #   order of preference: current working directory, environment variable,
 #                        default installation path, location of this script
+no_local_theme = False
+_not_installed = False
 _default_path = os.path.join(
         os.environ.get('HOME', os.path.expanduser('~')), 'lib/slidefactory')
 cwd = os.getcwd()
@@ -35,12 +37,14 @@ except KeyError:
         path = _default_path
     else:
         path = os.path.abspath('.')
-for path_themes in [os.path.join(cwd, 'theme'),
-                   os.path.join(path, 'theme')]:
-    if os.path.isdir(path_themes):
-        break
-else:
-    raise FileNotFoundError('Invalid theme path: {0}'.format(path_themes))
+        _not_installed = True
+path_themes = os.path.join(cwd, 'theme')
+if not os.path.isdir(path_themes):
+    path_themes = os.path.join(path, 'theme')
+    if _not_installed:
+        no_local_theme = True
+    if not os.path.isdir(path_themes):
+        raise FileNotFoundError('Invalid theme path: {0}'.format(path_themes))
 for path_filters in [os.path.join(cwd, 'filter'),
                     os.path.join(path, 'filter')]:
     if os.path.isdir(path_filters):
@@ -97,6 +101,11 @@ if __name__ == '__main__':
            choices=highlight_styles, metavar='name',
            help='code highlight style: ' + ', '.join(highlight_styles) \
                    + ' (default: pygments)')
+    parser.set_defaults(html=True)
+    parser.add_argument('-p', '--pdf', action='store_true', default=False,
+            help='convert HTMLs to PDFs')
+    parser.add_argument('-b', '--browser', default='chromium-browser',
+            help='browser to use for converting PDFs (default: %(default)s)')
     parser.add_argument('--config', action='append', default=config,
             metavar='key=value',
             help='reveal.js config option (multiple allowed)')
@@ -107,6 +116,8 @@ if __name__ == '__main__':
             default='https://mlouhivu.github.io/static-engine/reveal/3.5.0')
     parser.add_argument('--mathjax', help=argparse.SUPPRESS,
             default='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML-full')
+    parser.add_argument('--as-container', help=argparse.SUPPRESS,
+            action='store_true', default=False)
     parser.add_argument('--dry-run', '--show-command',
             action='store_true', default=False,
             help='do nothing, only show the full pandoc command'
@@ -126,6 +137,18 @@ if __name__ == '__main__':
         print('  --mathjax             URL of the MathJax.js to use')
         print('    : ' + args.mathjax)
         parser.exit()
+
+    if args.as_container and no_local_theme:
+        args.pdf = True
+        args.html = False
+        if args.verbose:
+            print('Could not find a local installation of slidefactory. '
+                    + 'Converting to PDFs only.')
+            print('If you want HTMLs, please set correct path to the '
+                    + 'environment variable SLIDEFACTORY or install '
+                    + 'slidefactory with:')
+            print('  slidefactory.sif --install')
+            print('')
 
     # check config options and remove duplicates (if any)
     config = remove_duplicates(args.config)
@@ -178,15 +201,12 @@ if __name__ == '__main__':
     for filename in args.input:
         # figure out the output filename
         base, ext = os.path.splitext(filename)
-        if not args.output:
-            output = base
-        else:
-            output = args.output + base
-        if not output.endswith('.html'):
-            output += '.html'
+        if args.output:
+            base = args.output + base
+        html = base + '.html'
         # add filenames to the command-line arguments
         flags['input'] = filename
-        flags['output'] = output
+        flags['output'] = html
 
         # construct the pandoc command
         cmd = ('pandoc {input} -s -t revealjs --template={template} '
@@ -202,3 +222,26 @@ if __name__ == '__main__':
         # execute pandoc
         if not args.dry_run:
             os.system(cmd)
+
+        # convert to pdfs?
+        if args.pdf:
+            pdf = base + '.pdf'
+            flags = [
+                    '--headless',
+                    '--virtual-time-budget=10000',
+                    '--run-all-compositor-stages-before-draw',
+                    ]
+            cmd = ('{browser} {flags} --print-to-pdf={pdf} '
+                    + 'file://{path}/{html}?print-pdf').format(
+                            browser=args.browser,
+                            flags=' '.join(flags),
+                            pdf=pdf,
+                            path=os.path.abspath(cwd),
+                            html=html)
+            if args.verbose or args.dry_run:
+                print('')
+                print('Command to convert to PDF:')
+                print('  {0}'.format(cmd))
+                print('')
+            if not args.dry_run:
+                os.system(cmd)
