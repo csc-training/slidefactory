@@ -21,6 +21,14 @@ config = [
         'backgroundTransition=none'
         ]
 
+# check environment variables
+for env in ['SLIDEFACTORY', 'SLIDEFACTORY_CONTAINER']:
+    path = os.environ.get(env, False)
+    if path and not os.path.isdir(path):
+        print('Invalid path in environment variable {env}: {path}'.format(
+            env=env, path=os.environ[env]))
+        sys.exit(1)
+
 # figure out the paths to files
 #   order of preference: current working directory, environment variable,
 #                        default installation path, location of this script
@@ -29,16 +37,16 @@ _not_installed = False
 _default_path = os.path.join(
         os.environ.get('HOME', os.path.expanduser('~')), 'lib/slidefactory')
 cwd = os.getcwd()
-try:
-    path = os.environ['SLIDEFACTORY']
-    if not os.path.isdir(path):
-        raise FileNotFoundError('Invalid root path: {0}'.format(path))
-except KeyError:
-    if os.path.isdir(_default_path):
-        path = _default_path
-    else:
-        path = os.path.abspath('.')
-        _not_installed = True
+# .. base path
+for path in [os.environ.get('SLIDEFACTORY', False),
+             _default_path,
+             os.environ.get('SLIDEFACTORY_CONTAINER', False)]:
+    if path and os.path.isdir(path):
+        break
+else:
+    path = os.path.abspath('.')
+    _not_installed = True
+# .. path to themes
 path_themes = os.path.join(cwd, 'theme')
 if not os.path.isdir(path_themes):
     path_themes = os.path.join(path, 'theme')
@@ -46,6 +54,7 @@ if not os.path.isdir(path_themes):
         no_local_theme = True
     if not os.path.isdir(path_themes):
         raise FileNotFoundError('Invalid theme path: {0}'.format(path_themes))
+# .. path to filters
 for path_filters in [os.path.join(cwd, 'filter'),
                     os.path.join(path, 'filter')]:
     if os.path.isdir(path_filters):
