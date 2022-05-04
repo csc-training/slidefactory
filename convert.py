@@ -53,14 +53,16 @@ if not os.path.isdir(path_themes):
     if _not_installed:
         no_local_theme = True
     if not os.path.isdir(path_themes):
-        raise FileNotFoundError('Invalid theme path: {0}'.format(path_themes))
+        print('Invalid theme path: {0}'.format(path_themes))
+        sys.exit(1)
 # .. path to filters
 for path_filters in [os.path.join(cwd, 'filter'),
                     os.path.join(path, 'filter')]:
     if os.path.isdir(path_filters):
         break
 else:
-    raise FileNotFoundError('Invalid filter path: {0}'.format(path_filters))
+    print('Invalid filter path: {0}'.format(path_filters))
+    sys.exit(1)
 
 # pandoc filters
 filters = [os.path.join(path_filters, x) for x in [
@@ -76,7 +78,8 @@ def remove_duplicates(config):
         try:
             key, value = item.split('=', 1)
         except ValueError:
-            raise ValueError('Malformed config option: %s' % item)
+            print('Malformed config option: %s' % item)
+            sys.exit(1)
         tmp[key] = value
         if key not in order:
             order.append(key)
@@ -91,7 +94,8 @@ try:
     themes = [x for x in os.listdir(path_themes)
               if os.path.isdir(os.path.join('theme', x))]
 except OSError:
-    raise FileNotFoundError('Invalid theme path: {0}'.format(path_themes))
+    print('Invalid theme path: {0}'.format(path_themes))
+    sys.exit(1)
 
 
 if __name__ == '__main__':
