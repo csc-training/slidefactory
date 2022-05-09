@@ -51,7 +51,8 @@ for path in [os.environ.get('SLIDEFACTORY', False),
     if path and os.path.isdir(path):
         break
 else:
-    path = os.path.abspath('.')
+    path = os.path.dirname(
+            os.path.abspath(inspect.getsourcefile(lambda: None)))
     _not_installed = True
 # .. path to themes
 path_themes = os.path.join(cwd, 'theme')
