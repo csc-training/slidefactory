@@ -6,9 +6,17 @@
 # Help:  python convert.py --help                                           #
 #---------------------------------------------------------------------------#
 import argparse
+import inspect
 import os
 import sys
 import subprocess
+
+def error(msg, code=1):
+    print(inspect.cleandoc(msg))
+    print('')
+    if code == 1: # setup error (invalid path etc.)
+        print('Please see README.md for installation instructions.')
+    sys.exit(code)
 
 # reveal.js configuration
 config = [
@@ -25,9 +33,8 @@ config = [
 for env in ['SLIDEFACTORY', 'SLIDEFACTORY_CONTAINER']:
     path = os.environ.get(env, False)
     if path and not os.path.isdir(path):
-        print('Invalid path in environment variable {env}: {path}'.format(
+        error('Invalid path in environment variable {env}: {path}'.format(
             env=env, path=os.environ[env]))
-        sys.exit(1)
 
 # figure out the paths to files
 #   order of preference: current working directory, environment variable,
@@ -53,16 +60,16 @@ if not os.path.isdir(path_themes):
     if _not_installed:
         no_local_theme = True
     if not os.path.isdir(path_themes):
-        print('Invalid theme path: {0}'.format(path_themes))
-        sys.exit(1)
+        error('Invalid theme path: {0}'.format(
+            os.path.join('.', os.path.relpath(path_themes, start=cwd))))
 # .. path to filters
 for path_filters in [os.path.join(cwd, 'filter'),
                     os.path.join(path, 'filter')]:
     if os.path.isdir(path_filters):
         break
 else:
-    print('Invalid filter path: {0}'.format(path_filters))
-    sys.exit(1)
+    error('Invalid filter path: {0}'.format(
+            os.path.join('.', os.path.relpath(path_filters, start=cwd))))
 
 # pandoc filters
 filters = [os.path.join(path_filters, x) for x in [
@@ -78,8 +85,7 @@ def remove_duplicates(config):
         try:
             key, value = item.split('=', 1)
         except ValueError:
-            print('Malformed config option: %s' % item)
-            sys.exit(1)
+            error('Malformed config option: %s' % item, code=2)
         tmp[key] = value
         if key not in order:
             order.append(key)
@@ -94,8 +100,7 @@ try:
     themes = [x for x in os.listdir(path_themes)
               if os.path.isdir(os.path.join('theme', x))]
 except OSError:
-    print('Invalid theme path: {0}'.format(path_themes))
-    sys.exit(1)
+    error('Invalid theme path: {0}'.format(path_themes))
 
 
 if __name__ == '__main__':
