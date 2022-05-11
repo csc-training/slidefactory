@@ -15,16 +15,33 @@ build: $(SIF)
 clean:
 	rm $(SIF)
 
-install: build
+check:
 	@if [ -e $(INSTALL_GIT) ]; then \
 		echo "Already installed. Please run 'make uninstall' to remove old installation."; \
 		exit 1; \
 	fi
+
+clone:
+	git clone . $(INSTALL_GIT)
+	cd $(INSTALL_GIT) && git remote set-url origin $(GIT) && git fetch origin
+
+git:
+	@make -s check
+	@make -s clone
+	@echo ""
+	@echo "Installed:"
+	@echo "  $(INSTALL_GIT)/"
+	@echo ""
+	@echo "Please add the following into your .bashrc or similar"
+	@echo "  export SLIDEFACTORY=$(INSTALL_GIT)"
+
+install: build
+	@make -s check
 	@if [ ! -d $(INSTALL_BIN) ]; then \
 		mkdir -p $(INSTALL_BIN); \
 	fi
 	cp -i $(SIF) $(INSTALL_BIN)/
-	git clone $(GIT) $(INSTALL_GIT)
+	@make -s clone
 	@echo ""
 	@echo "Installed:"
 	@echo "  $(INSTALL_BIN)/$(SIF)"
@@ -35,11 +52,15 @@ install: build
 
 uninstall:
 	@echo "Removing:"
-	@echo "  $(INSTALL_BIN)/$(SIF)"
+	@if [ -e $(INSTALL_BIN)/$(SIF) ]; then \
+		echo "  $(INSTALL_BIN)/$(SIF)"; \
+	fi
 	@echo "  $(INSTALL_GIT)/"
 	@read -r -p "Proceed [Y/n]? " OK; \
 	[ "$$OK" = "y" ] || [ "$$OK" = "Y" ] || [ "$$OK" = "" ] || (exit 1;)
-	rm -f $(INSTALL_BIN)/$(SIF)
+	@if [ -e $(INSTALL_BIN)/$(SIF) ]; then \
+		rm -f $(INSTALL_BIN)/$(SIF); \
+	fi
 	rm -rf $(INSTALL_GIT)
 
 %.sif: %.def
