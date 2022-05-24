@@ -9,6 +9,7 @@ INSTALL_GIT=$(PREFIX)/lib/slidefactory
 GIT=https://github.com/csc-training/slide-template
 
 .PHONY: build clean install uninstall
+.PHONY: check clone git
 
 build: $(SIF)
 
