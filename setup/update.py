@@ -124,7 +124,8 @@ def run():
 
     print('Updated:')
     print('  {0}'.format(install_git))
-    print('  {0}'.format(install_sif))
+    if args.container:
+        print('  {0}'.format(install_sif))
 
     # the end.
     return 0
