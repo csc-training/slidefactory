@@ -1,115 +1,90 @@
-# Description
+# slidefactory
 
-Experimental template to generate lecture slides in CSC style from markdown
-(or reStructuredText).
+Generate lecture slides in CSC style from markdown (or reStructuredText).
 
-# Usage
+
+## Usage
+
+Convert slides from Markdown to HTML:
+```bash
+slidefactory.sif example.md
+```
+
+and add `--pdf` flag to generate also a PDF:
+```bash
+slidefactory.sif --pdf example.md
+```
+
+or the same if not using the singularity container:
+```bash
+python3 $SLIDEFACTORY/convert.py example.md
+python3 $SLIDEFACTORY/convert.py --pdf example.md
+```
+
+To see more detailed information when running, such as configuration options
+and the exact pandoc command, you can add `--verbose` to the commands above.
+
+Use `--help` to see descriptions of all the available arguments.
+
 
 ## Install
 
-### Pandoc
+Slidefactory consists of two parts: 1) a **git repo** containing files
+defining the slide layout (aka themes), pandoc filters, and a convenience
+script (`convert.py`) to ease the use of pandoc, and 2) a
+**singularity container** with a self-contained software environment that is
+tested to work with slidefactory.
 
-See Pandoc's install instructions (http://pandoc.org/installing.html) for
-detailed instructions on how to install Pandoc.
-
-Known to work using pandoc 1.17.2 (Debian 9) and on latest Ubuntus.
-
-### Fonts
-
-Additional fonts (Noto Sans and Inconsolata) are needed for the slides. These
-can be easily installed on most distros using the package manager.
-
-For example, on Debian 9 the command would be:
-```bash
-sudo apt-get install fonts-noto fonts-inconsolata
+Get the source code, build the singularity container and install
+slidefactory:
 ```
-
-## Singularity
-
-### Building the container
-
-Singularity definitions for the Ubuntu Bionic version are in the
-`slidefactory.def` file. If you are using CentOS/RHEL, you have to
-install `debootstrap` utility before building (`sudo yum install
-debootstrap`). Build the container with command:
-``` bash
-sudo singularity build slidefactory.simg slidefactory.def
-```
-
-## Convert Markdown to HTML slides
-
-### Quick start
-
-```bash
-cd /path/to/slide-template
-python convert.py talk.md
-```
-
-If you are using singularity:
-
-``` bash
-singularity run slidefactory.simg talk.md
-```
-
-Tab completion of .md filenames does not necessarily work with singularity out-of-the-box, but you can add 
-``` bash
-complete -A file singularity
-```
-to `.bashrc` or separate bash customization file.
-
-### More information
-
-Options for the helper script (`convert.py`) can be seen with
-```bash
-python convert.py --help
-```
-
-and more detailed information, such as configuration options and the exact
-pandoc command, can be seen e.g. with
-```bash
-python convert.py --verbose talk.md
-```
-
-If needed, the URLs of the javascript libraries can also be changed. For more
-info, see
-```bash
-python convert.py --debug talk.md
-```
-
-## Show the HTML slides
-
-Using your favourite browser, open the output file (e.g. `talk.html`):
-
-- `open talk.html` (Mac)
-- `firefox talk.html` (Linux)
-
-## Generate PDFs
-
-1. Using Chromium (or Chrome), open the HTML slides as shown above.
-2. Add `?print-pdf` to the end of the URL and reload. This will change the
-   layout to be suitable for PDFs.
-   ```
-   file:///path/to/files/talk.html?print-pdf
-   ```
-3. Save the slides to PDF using the built-in print function of the browser.
-   Remember to select "None" for margins and to include background graphics.
-   
-At least in Linux one can generate the PDFs also from commandline:
-```bash
-chromium-browser --headless --print-to-pdf=talk.pdf file:///full/path/to/files/talk.html?print-pdf
-```
-
-## Using the template on an existing course (in separate directory)
-
-```bash
 git clone https://github.com/csc-training/slide-template
-git clone https://github.com/csc-training/advanced-parallel-prog
-cd advanced-parallel-prog/docs
-ln -s ../../slide-template/theme
-
-# ready to convert slides
-python ../../convert.py 04-Advanced-MPI-1.md
+cd slide-template
+make
+make install
 ```
+
+As prompted by the installer, please add the environment variable
+`SLIDEFACTORY` to your `.bashrc` (or similar) and make sure that the directory
+containing the container image is in the `PATH`.
+
+If needed, please see [INSTALL.md](INSTALL.md) for more detailed installation
+instructions (and alternative installation options).
+
+
+### Uninstall
+
+To uninstall slidefactory, you can say `slidefactory.sif --uninstall` (or
+without the container `python3 $SLIDEFACTORY/setup/uninstall.py`). If in the
+directory containing the source code, also `make uninstall` will work.
+
+
+## Update
+
+The installed git repo can be updated (to get new themes etc.) with:
+```
+slidefactory.sif --update
+```
+
+or without the singularity container:
+```
+python3 $SLIDEFACTORY/setup/update.py
+```
+
+or just simply by using git:
+```
+cd $SLIDEFACTORY
+git pull
+cd -
+```
+
+If you want to update the git repo included inside the container (used only if
+no local installation is found), then you can add `--container` flag to the
+command above. This will unpack the container, update it, and rebuild the
+image.
+
+If the container image definition has changed, you need to re-install
+slidefactory to get a new version of the image.
 
 
 # Markdown file syntax
