@@ -192,8 +192,10 @@ if __name__ == '__main__':
         urlencode = os.path.join(path_filters, 'url-encode.py')
         if urlencode not in args.filter:
             args.filter.append(urlencode)
+        meta.append('revealjs-css-url=' + os.path.join(path, 'reveal.js'))
         contained = '--self-contained'
     else:
+        meta.append('revealjs-css-url=' + args.reveal)
         contained = ''
 
     # prepare command-line arguments
