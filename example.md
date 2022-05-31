@@ -306,5 +306,5 @@ Sed posuere interdum sem.
 
 firstname.lastname@csc.fi
 
-![](theme/csc-2016/img/csc-identicon.png)
+![](img/csc-identicon.png)
 
