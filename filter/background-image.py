@@ -2,41 +2,41 @@
 from pandocfilters import toJSONFilter, Header, attributes
 
 def cscify(key, value, format, meta):
+    # language
+    try:
+        lang = meta['lang']['c']
+    except:
+        lang = 'en'
     # setup a template with correct path to the theme
     try:
         path = meta['themepath']['c']
     except:
         path = 'theme'
     template = u'{0}/img/%s.png'.format(path)
-    # markdown: special class names trigger loading of a data background image
-    #           and replacement with a corresponding generic class name
+    # markdown: special class name triggers the setting of a data background
+    #           image unless already present
     if key == 'Header' and value[0] == 1:
         if 'data-background-image' not in [x[0] for x in value[1][2]]:
-            for key in ['title-en', 'title-fi', 'author', 'section']:
+            for key in ['title', 'author', 'section']:
                 if key in value[1][1]:
-                    value[1][1].remove(key)
-                    value[1][2].append([u'data-background-image', template % key])
-                    if key == 'author':
-                        value[1][1].append(u'author')
-                    elif key == 'section':
-                        value[1][1].append(u'section')
-                    else:
-                        value[1][1].append(u'title')
+                    if key == 'title':
+                        key = key + '-' + lang
+                    value[1][2].append(
+                            [u'data-background-image', template % key])
+                    break
         return Header(value[0], value[1], value[2])
     # reST: special class name in a container Div triggers the same as above,
     #       but only the modified Header is returned
     elif key == 'Div' and value[1][0]['t'] == 'Header':
-        for key in ['title-en', 'title-fi', 'author', 'section']:
+        for key in ['title', 'author', 'section']:
             if key in value[0][1]:
                 header = value[1][0]['c']
+                header[1][1].append(key)
+                if key == 'title':
+                    key = key + '-' + lang
                 header[1][2].append([u'data-background-image', template % key])
-                if key == 'author':
-                    header[1][1].append(u'author')
-                elif key == 'section':
-                    header[1][1].append(u'section')
-                else:
-                    header[1][1].append(u'title')
                 return Header(header[0], header[1], header[2])
+
 
 if __name__ == '__main__':
     toJSONFilter(cscify)
