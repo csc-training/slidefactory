@@ -11,11 +11,11 @@ def cscify(key, value, format, meta):
     # markdown: special class names trigger loading of a data background image
     #           and replacement with a corresponding generic class name
     if key == 'Header' and value[0] == 1:
-        if 'data-background' not in [x[0] for x in value[1][2]]:
+        if 'data-background-image' not in [x[0] for x in value[1][2]]:
             for key in ['title-en', 'title-fi', 'author', 'section']:
                 if key in value[1][1]:
                     value[1][1].remove(key)
-                    value[1][2].append([u'data-background', template % key])
+                    value[1][2].append([u'data-background-image', template % key])
                     if key == 'author':
                         value[1][1].append(u'author-slide')
                     elif key == 'section':
@@ -29,7 +29,7 @@ def cscify(key, value, format, meta):
         for key in ['title-en', 'title-fi', 'author', 'section']:
             if key in value[0][1]:
                 header = value[1][0]['c']
-                header[1][2].append([u'data-background', template % key])
+                header[1][2].append([u'data-background-image', template % key])
                 if key == 'author':
                     header[1][1].append(u'author-slide')
                 elif key == 'section':
