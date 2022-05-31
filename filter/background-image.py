@@ -17,11 +17,11 @@ def cscify(key, value, format, meta):
                     value[1][1].remove(key)
                     value[1][2].append([u'data-background-image', template % key])
                     if key == 'author':
-                        value[1][1].append(u'author-slide')
+                        value[1][1].append(u'author')
                     elif key == 'section':
-                        value[1][1].append(u'section-slide')
+                        value[1][1].append(u'section')
                     else:
-                        value[1][1].append(u'title-slide')
+                        value[1][1].append(u'title')
         return Header(value[0], value[1], value[2])
     # reST: special class name in a container Div triggers the same as above,
     #       but only the modified Header is returned
@@ -31,11 +31,11 @@ def cscify(key, value, format, meta):
                 header = value[1][0]['c']
                 header[1][2].append([u'data-background-image', template % key])
                 if key == 'author':
-                    header[1][1].append(u'author-slide')
+                    header[1][1].append(u'author')
                 elif key == 'section':
-                    header[1][1].append(u'section-slide')
+                    header[1][1].append(u'section')
                 else:
-                    header[1][1].append(u'title-slide')
+                    header[1][1].append(u'title')
                 return Header(header[0], header[1], header[2])
 
 if __name__ == '__main__':
