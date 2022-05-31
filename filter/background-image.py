@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pandocfilters import toJSONFilter, Header, attributes
 
-def cscify(key, value, format, meta):
+def background(key, value, format, meta):
     # language
     try:
         lang = meta['lang']['c']
@@ -42,4 +42,4 @@ def cscify(key, value, format, meta):
 
 
 if __name__ == '__main__':
-    toJSONFilter(cscify)
+    toJSONFilter(background)
