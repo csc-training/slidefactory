@@ -124,6 +124,9 @@ if __name__ == '__main__':
     parser.set_defaults(html=True)
     parser.add_argument('-p', '--pdf', action='store_true', default=False,
             help='convert HTMLs to PDFs')
+    parser.add_argument('-c', '--self-contained',
+            action='store_true', default=False,
+            help='produce as self-contained HTMLs as possible')
     parser.add_argument('-b', '--browser', default='chromium-browser',
             help='browser to use for converting PDFs (default: %(default)s)')
     parser.add_argument('--config', action='append', default=config,
@@ -179,9 +182,19 @@ if __name__ == '__main__':
             'themepath=' + os.path.join(path_themes, args.theme),
             'revealjs-url=' + args.reveal,
             ]
+
     # extra template variables to pandoc
     variables = [
             ]
+
+    # self contained HTML
+    if args.self_contained:
+        urlencode = os.path.join(path_filters, 'url-encode.py')
+        if urlencode not in args.filter:
+            args.filter.append(urlencode)
+        contained = '--self-contained'
+    else:
+        contained = ''
 
     # prepare command-line arguments
     flags = {
@@ -193,7 +206,8 @@ if __name__ == '__main__':
             'config':  ' '.join('-V ' + x for x in config),
             'filter':  ' '.join('--filter ' + x for x in args.filter),
             'mathjax': args.mathjax,
-            'template': os.path.join(path_themes, args.theme, 'template.html')
+            'template': os.path.join(path_themes, args.theme, 'template.html'),
+            'contained': contained,
             }
 
     # display extra info?
@@ -230,7 +244,7 @@ if __name__ == '__main__':
 
         # construct the pandoc command
         cmd = ('pandoc {input} -s -t revealjs --template={template} '
-                + '{meta} {vars} {config} '
+                + '{meta} {vars} {config} {contained} '
                 + '--mathjax={mathjax} --highlight-style={style} '
                 + '{filter} -o {output}').format(**flags)
 
