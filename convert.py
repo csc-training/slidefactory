@@ -31,6 +31,7 @@ url_mathjax = (
 
 def error(msg, code=1):
     """Custom error messages"""
+    print('')
     print(inspect.cleandoc(msg))
     print('')
     if code == 1: # setup error (invalid path etc.)
@@ -289,6 +290,11 @@ if __name__ == '__main__':
                 print('  -V {0}'.format(x))
         else:
             print('  (none)')
+        print('\nPandoc options:')
+        print('  --highlight-style={0}'.format(args.style))
+        print('  --mathjax={0}'.format(args.mathjax))
+        if args.self_contained:
+            print('  ' + contained)
 
     # convert files
     for filename in args.input:
