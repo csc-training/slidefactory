@@ -12,7 +12,7 @@ import sys
 import subprocess
 
 # reveal.js configuration
-config = [
+default_config = [
         'width=1920',
         'height=1080',
         'history=true',
@@ -130,7 +130,7 @@ if __name__ == '__main__':
             help='produce as self-contained HTMLs as possible')
     parser.add_argument('-b', '--browser', default='chromium-browser',
             help='browser to use for converting PDFs (default: %(default)s)')
-    parser.add_argument('--config', action='append', default=config,
+    parser.add_argument('--config', action='append', default=default_config,
             metavar='key=value',
             help='reveal.js config option (multiple allowed)')
     parser.add_argument('--filter', action='append', default=filters,
