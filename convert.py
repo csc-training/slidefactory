@@ -22,6 +22,13 @@ default_config = [
         'backgroundTransition=none'
         ]
 
+# online URLS for the javascript libs
+url_reveal = 'https://mlouhivu.github.io/static-engine/reveal/3.5.0'
+config_mathjax = '?config=TeX-AMS_HTML-full'
+url_mathjax = (
+        'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js'
+        + config_mathjax)
+
 def error(msg, code=1):
     """Custom error messages"""
     print(inspect.cleandoc(msg))
@@ -51,10 +58,15 @@ for env in ['SLIDEFACTORY', 'SLIDEFACTORY_CONTAINER']:
         error('Invalid path in environment variable {env}: {path}'.format(
             env=env, path=os.environ[env]))
 
+# check if running in a container
+_in_container = bool(os.environ.get('SLIDEFACTORY_CONTAINER', False))
+
 # figure out the paths to files
 #   order of preference: current working directory, environment variable,
 #                        default installation path, location of this script
 no_local_theme = False
+no_local_reveal = False
+no_local_mathjax = False
 _not_installed = False
 _default_path = os.path.join(
         os.environ.get('HOME', os.path.expanduser('~')), 'lib/slidefactory')
@@ -69,11 +81,13 @@ else:
     path = os.path.dirname(
             os.path.abspath(inspect.getsourcefile(lambda: None)))
     _not_installed = True
+if path == os.environ.get('SLIDEFACTORY_CONTAINER', False):
+    _not_installed = True
 # .. path to themes
 path_themes = os.path.join(cwd, 'theme')
 if not os.path.isdir(path_themes):
     path_themes = os.path.join(path, 'theme')
-    if _not_installed:
+    if _in_container and _not_installed:
         no_local_theme = True
     if not os.path.isdir(path_themes):
         error('Invalid theme path: {0}'.format(
@@ -86,6 +100,29 @@ for path_filters in [os.path.join(cwd, 'filter'),
 else:
     error('Invalid filter path: {0}'.format(
             os.path.join('.', os.path.relpath(path_filters, start=cwd))))
+# .. path to reveal
+for path_reveal in [os.path.join(cwd, 'reveal.js'),
+                    os.path.join(path, 'reveal.js')]:
+    if os.path.isdir(path_reveal):
+        break
+else:
+    path_reveal = ''
+    no_local_reveal = True
+# .. path to mathjax
+for path_mathjax in [os.path.join(cwd, 'mathjax/MathJax.js'),
+                     os.path.join(path, 'mathjax/MathJax.js')]:
+    if os.path.isfile(path_mathjax):
+        break
+else:
+    path_mathjax = ''
+    no_local_mathjax = True
+path_mathjax = path_mathjax + config_mathjax
+# .. only files outside of a container are accessible afterwards
+if _in_container and _not_installed:
+    if path_reveal != os.path.join(cwd, 'reveal.js'):
+        no_local_reveal = True
+    if path_mathjax != os.path.join(cwd, 'mathjax/MathJax.js'):
+        no_local_mathjax = True
 
 # pandoc filters
 filters = [os.path.join(path_filters, x) for x in [
@@ -136,10 +173,8 @@ if __name__ == '__main__':
     parser.add_argument('--filter', action='append', default=filters,
             metavar='filter.py',
             help='pandoc filter script (multiple allowed)')
-    parser.add_argument('--reveal', help=argparse.SUPPRESS,
-            default='https://mlouhivu.github.io/static-engine/reveal/3.5.0')
-    parser.add_argument('--mathjax', help=argparse.SUPPRESS,
-            default='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML-full')
+    parser.add_argument('--reveal', help=argparse.SUPPRESS, default=None)
+    parser.add_argument('--mathjax', help=argparse.SUPPRESS, default=None)
     parser.add_argument('--as-container', help=argparse.SUPPRESS,
             action='store_true', default=False)
     parser.add_argument('--dry-run', '--show-command',
@@ -162,6 +197,7 @@ if __name__ == '__main__':
         print('    : ' + args.mathjax)
         parser.exit()
 
+    # without a local theme, container can only produce PDFs
     if args.as_container and no_local_theme:
         args.pdf = True
         args.html = False
@@ -174,6 +210,35 @@ if __name__ == '__main__':
             print('  slidefactory.sif --install')
             print('')
 
+    # check if given URLs are actually paths
+    if args.reveal and os.path.isdir(args.reveal):
+        no_local_reveal = False
+        path_reveal = args.reveal
+    if args.mathjax and os.path.isfile(args.mathjax):
+        no_local_mathjax = False
+        path_mathjax = args.mathjax
+
+    # select local or remote reveal and mathjax
+    if args.self_contained or no_local_reveal:
+        args.reveal = args.reveal or url_reveal
+    else:
+        args.reveal = args.reveal or path_reveal
+    if args.self_contained or no_local_mathjax:
+        args.mathjax = args.mathjax or url_mathjax
+    else:
+        args.mathjax = args.mathjax or path_mathjax
+
+    # self contained HTML
+    if args.self_contained:
+        if no_local_reveal:
+            error('Local copy of reveal.js is needed for --self-contained.')
+        urlencode = os.path.join(path_filters, 'url-encode.py')
+        if urlencode not in args.filter:
+            args.filter.append(urlencode)
+        contained = '--self-contained'
+    else:
+        contained = ''
+
     # check config options and remove duplicates (if any)
     config = remove_duplicates(args.config)
 
@@ -182,22 +247,13 @@ if __name__ == '__main__':
             'theme=' + args.theme,
             'themepath=' + os.path.join(path_themes, args.theme),
             'revealjs-url=' + args.reveal,
+            'revealjs-css-url=' + (
+                path_reveal if args.self_contained else args.reveal),
             ]
 
     # extra template variables to pandoc
     variables = [
             ]
-
-    # self contained HTML
-    if args.self_contained:
-        urlencode = os.path.join(path_filters, 'url-encode.py')
-        if urlencode not in args.filter:
-            args.filter.append(urlencode)
-        meta.append('revealjs-css-url=' + os.path.join(path, 'reveal.js'))
-        contained = '--self-contained'
-    else:
-        meta.append('revealjs-css-url=' + args.reveal)
-        contained = ''
 
     # prepare command-line arguments
     flags = {
