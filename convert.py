@@ -11,13 +11,6 @@ import os
 import sys
 import subprocess
 
-def error(msg, code=1):
-    print(inspect.cleandoc(msg))
-    print('')
-    if code == 1: # setup error (invalid path etc.)
-        print('Please see README.md for installation instructions.')
-    sys.exit(code)
-
 # reveal.js configuration
 config = [
         'width=1920',
@@ -28,6 +21,28 @@ config = [
         'transition=none',
         'backgroundTransition=none'
         ]
+
+def error(msg, code=1):
+    """Custom error messages"""
+    print(inspect.cleandoc(msg))
+    print('')
+    if code == 1: # setup error (invalid path etc.)
+        print('Please see README.md for installation instructions.')
+    sys.exit(code)
+
+def remove_duplicates(config):
+    """Remove duplicate entries from a list of config options."""
+    tmp = {}
+    order = []
+    for item in config:
+        try:
+            key, value = item.split('=', 1)
+        except ValueError:
+            error('Malformed config option: %s' % item, code=2)
+        tmp[key] = value
+        if key not in order:
+            order.append(key)
+    return [key + '=' + tmp[key] for key in order]
 
 # check environment variables
 for env in ['SLIDEFACTORY', 'SLIDEFACTORY_CONTAINER']:
@@ -78,30 +93,16 @@ filters = [os.path.join(path_filters, x) for x in [
 if os.path.exists('/usr/local/bin/pandoc-emphasize-code'):
     filters.append('/usr/local/bin/pandoc-emphasize-code')
 
-def remove_duplicates(config):
-    """Remove duplicate entries from a list of config options."""
-    tmp = {}
-    order = []
-    for item in config:
-        try:
-            key, value = item.split('=', 1)
-        except ValueError:
-            error('Malformed config option: %s' % item, code=2)
-        tmp[key] = value
-        if key not in order:
-            order.append(key)
-    return [key + '=' + tmp[key] for key in order]
-
-# highlight styles in pandoc
-highlight_styles = subprocess.check_output(
-        'pandoc --list-highlight-styles', shell=True).decode().split()
-
 # find existing presentation themes
 try:
     themes = [x for x in os.listdir(path_themes)
               if os.path.isdir(os.path.join('theme', x))]
 except OSError:
     error('Invalid theme path: {0}'.format(path_themes))
+
+# highlight styles in pandoc
+highlight_styles = subprocess.check_output(
+        'pandoc --list-highlight-styles', shell=True).decode().split()
 
 
 if __name__ == '__main__':
