@@ -93,8 +93,8 @@ def remove_duplicates(config):
     return [key + '=' + tmp[key] for key in order]
 
 # highlight styles in pandoc
-highlight_styles = ['pygments', 'tango', 'espresso', 'zenburn', 'kate', \
-        'monochrome', 'breezedark', 'haddock']
+highlight_styles = subprocess.check_output(
+        'pandoc --list-highlight-styles', shell=True).decode().split()
 
 # find existing presentation themes
 try:
