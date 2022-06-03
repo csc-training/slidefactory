@@ -52,98 +52,130 @@ def remove_duplicates(config):
             order.append(key)
     return [key + '=' + tmp[key] for key in order]
 
-# check environment variables
-for env in ['SLIDEFACTORY', 'SLIDEFACTORY_CONTAINER']:
-    path = os.environ.get(env, False)
-    if path and not os.path.isdir(path):
-        error('Invalid path in environment variable {env}: {path}'.format(
-            env=env, path=os.environ[env]))
+def check_environment():
+    """Check environment variables."""
+    for env in ['SLIDEFACTORY', 'SLIDEFACTORY_CONTAINER']:
+        path = os.environ.get(env, False)
+        if path and not os.path.isdir(path):
+            error('Invalid path in environment variable {env}: {path}'.format(
+                env=env, path=os.environ[env]))
 
-# check if running in a container
-_in_container = bool(os.environ.get('SLIDEFACTORY_CONTAINER', False))
-
-# figure out the paths to files
-#   order of preference: current working directory, environment variable,
-#                        default installation path, location of this script
+# global flags
 no_local_theme = False
 no_local_reveal = False
 no_local_mathjax = False
-_not_installed = False
-_default_path = os.path.join(
-        os.environ.get('HOME', os.path.expanduser('~')), 'lib/slidefactory')
-cwd = os.getcwd()
-# .. base path
-for path in [os.environ.get('SLIDEFACTORY', False),
-             _default_path,
-             os.environ.get('SLIDEFACTORY_CONTAINER', False)]:
-    if path and os.path.isdir(path):
-        break
-else:
-    path = os.path.dirname(
-            os.path.abspath(inspect.getsourcefile(lambda: None)))
-    _not_installed = True
-if path == os.environ.get('SLIDEFACTORY_CONTAINER', False):
-    _not_installed = True
-# .. path to themes
-path_themes = os.path.join(cwd, 'theme')
-if not os.path.isdir(path_themes):
-    path_themes = os.path.join(path, 'theme')
-    if _in_container and _not_installed:
-        no_local_theme = True
+
+def get_paths():
+    """
+    Figure out the paths to files
+      order of preference: current working directory, environment variable,
+                           default installation path, location of this script
+    """
+    global no_local_theme
+    global no_local_reveal
+    global no_local_mathjax
+    in_container = bool(os.environ.get('SLIDEFACTORY_CONTAINER', False))
+    not_installed = False
+    default_path = os.path.join(
+            os.environ.get('HOME', os.path.expanduser('~')),
+            'lib/slidefactory')
+    cwd = os.getcwd()
+    # .. base path
+    for path in [os.environ.get('SLIDEFACTORY', False),
+                 default_path,
+                 os.environ.get('SLIDEFACTORY_CONTAINER', False)]:
+        if path and os.path.isdir(path):
+            break
+    else:
+        path = os.path.dirname(
+                os.path.abspath(inspect.getsourcefile(lambda: None)))
+        not_installed = True
+    if path == os.environ.get('SLIDEFACTORY_CONTAINER', False):
+        not_installed = True
+    # .. path to themes
+    path_themes = os.path.join(cwd, 'theme')
     if not os.path.isdir(path_themes):
-        error('Invalid theme path: {0}'.format(
-            os.path.join('.', os.path.relpath(path_themes, start=cwd))))
-# .. path to filters
-for path_filters in [os.path.join(cwd, 'filter'),
-                    os.path.join(path, 'filter')]:
-    if os.path.isdir(path_filters):
-        break
-else:
-    error('Invalid filter path: {0}'.format(
-            os.path.join('.', os.path.relpath(path_filters, start=cwd))))
-# .. path to reveal
-for path_reveal in [os.path.join(cwd, 'reveal.js'),
-                    os.path.join(path, 'reveal.js')]:
-    if os.path.isdir(path_reveal):
-        break
-else:
-    path_reveal = ''
-    no_local_reveal = True
-# .. path to mathjax
-for path_mathjax in [os.path.join(cwd, 'mathjax/MathJax.js'),
-                     os.path.join(path, 'mathjax/MathJax.js')]:
-    if os.path.isfile(path_mathjax):
-        break
-else:
-    path_mathjax = ''
-    no_local_mathjax = True
-path_mathjax = path_mathjax + config_mathjax
-# .. only files outside of a container are accessible afterwards
-if _in_container and _not_installed:
-    if path_reveal != os.path.join(cwd, 'reveal.js'):
+        path_themes = os.path.join(path, 'theme')
+        if in_container and not_installed:
+            no_local_theme = True
+        if not os.path.isdir(path_themes):
+            error('Invalid theme path: {0}'.format(
+                os.path.join('.', os.path.relpath(path_themes, start=cwd))))
+    # .. path to filters
+    for path_filters in [os.path.join(cwd, 'filter'),
+                        os.path.join(path, 'filter')]:
+        if os.path.isdir(path_filters):
+            break
+    else:
+        error('Invalid filter path: {0}'.format(
+                os.path.join('.', os.path.relpath(path_filters, start=cwd))))
+    # .. path to reveal
+    for path_reveal in [os.path.join(cwd, 'reveal.js'),
+                        os.path.join(path, 'reveal.js')]:
+        if os.path.isdir(path_reveal):
+            break
+    else:
+        path_reveal = ''
         no_local_reveal = True
-    if path_mathjax != os.path.join(cwd, 'mathjax/MathJax.js'):
+    # .. path to mathjax
+    for path_mathjax in [os.path.join(cwd, 'mathjax/MathJax.js'),
+                         os.path.join(path, 'mathjax/MathJax.js')]:
+        if os.path.isfile(path_mathjax):
+            break
+    else:
+        path_mathjax = ''
         no_local_mathjax = True
+    path_mathjax = path_mathjax + config_mathjax
+    # .. only files outside of a container are accessible afterwards
+    if in_container and not_installed:
+        if path_reveal != os.path.join(cwd, 'reveal.js'):
+            no_local_reveal = True
+        if path_mathjax != os.path.join(cwd, 'mathjax/MathJax.js'):
+            no_local_mathjax = True
+    return {
+            'base': path,
+            'themes': path_themes,
+            'filters': path_filters,
+            'reveal': path_reveal,
+            'mathjax': path_mathjax,
+            }
 
-# pandoc filters
-filters = [os.path.join(path_filters, x) for x in [
-           'contain-slide.py', 'background-image.py']]
-if os.path.exists('/usr/local/bin/pandoc-emphasize-code'):
-    filters.append('/usr/local/bin/pandoc-emphasize-code')
+def get_filters(path_filters):
+    """Get paths to pandoc filters."""
+    filters = [os.path.join(path_filters, x) for x in [
+               'contain-slide.py', 'background-image.py']]
+    if os.path.exists('/usr/local/bin/pandoc-emphasize-code'):
+        filters.append('/usr/local/bin/pandoc-emphasize-code')
+    return filters
 
-# find existing presentation themes
-try:
-    themes = [x for x in os.listdir(path_themes)
-              if os.path.isdir(os.path.join('theme', x))]
-except OSError:
-    error('Invalid theme path: {0}'.format(path_themes))
+def get_themes(path_themes):
+    """Find existing presentation themes."""
+    try:
+        themes = [x for x in os.listdir(path_themes)
+                  if os.path.isdir(os.path.join('theme', x))]
+    except OSError:
+        error('Invalid theme path: {0}'.format(path_themes))
+    return themes
 
-# highlight styles in pandoc
-highlight_styles = subprocess.check_output(
-        'pandoc --list-highlight-styles', shell=True).decode().split()
+def get_highlight_styles():
+    """Get highlight styles supported by pandoc."""
+    output = subprocess.check_output('pandoc --list-highlight-styles',
+                                     shell=True)
+    return output.decode().split()
 
 
-if __name__ == '__main__':
+def run():
+    global no_local_theme
+    global no_local_reveal
+    global no_local_mathjax
+
+    # find out the environment we are running in
+    check_environment()
+    path = get_paths()
+    themes = get_themes(path['themes'])
+    filters = get_filters(path['filters'])
+    highlight_styles = get_highlight_styles()
+
     parser = argparse.ArgumentParser(description="""Convert a presentation
     from Markdown (or reStructuredText) to reveal.js powered HTML5 using
     pandoc.""")
@@ -214,26 +246,26 @@ if __name__ == '__main__':
     # check if given URLs are actually paths
     if args.reveal and os.path.isdir(args.reveal):
         no_local_reveal = False
-        path_reveal = args.reveal
+        path['reveal'] = args.reveal
     if args.mathjax and os.path.isfile(args.mathjax):
         no_local_mathjax = False
-        path_mathjax = args.mathjax
+        path['mathjax'] = args.mathjax
 
     # select local or remote reveal and mathjax
     if args.self_contained or no_local_reveal:
         args.reveal = args.reveal or url_reveal
     else:
-        args.reveal = args.reveal or path_reveal
+        args.reveal = args.reveal or path['reveal']
     if args.self_contained or no_local_mathjax:
         args.mathjax = args.mathjax or url_mathjax
     else:
-        args.mathjax = args.mathjax or path_mathjax
+        args.mathjax = args.mathjax or path['mathjax']
 
     # self contained HTML
     if args.self_contained:
         if no_local_reveal:
             error('Local copy of reveal.js is needed for --self-contained.')
-        urlencode = os.path.join(path_filters, 'url-encode.py')
+        urlencode = os.path.join(path['filters'], 'url-encode.py')
         if urlencode not in args.filter:
             args.filter.append(urlencode)
         contained = '--self-contained'
@@ -246,10 +278,10 @@ if __name__ == '__main__':
     # meta variables to pandoc
     meta = [
             'theme=' + args.theme,
-            'themepath=' + os.path.join(path_themes, args.theme),
+            'themepath=' + os.path.join(path['themes'], args.theme),
             'revealjs-url=' + args.reveal,
             'revealjs-css-url=' + (
-                path_reveal if args.self_contained else args.reveal),
+                path['reveal'] if args.self_contained else args.reveal),
             ]
 
     # extra template variables to pandoc
@@ -266,13 +298,14 @@ if __name__ == '__main__':
             'config':  ' '.join('-V ' + x for x in config),
             'filter':  ' '.join('--filter ' + x for x in args.filter),
             'mathjax': args.mathjax,
-            'template': os.path.join(path_themes, args.theme, 'template.html'),
+            'template': os.path.join(
+                path['themes'], args.theme, 'template.html'),
             'contained': contained,
             }
 
     # display extra info?
     if args.verbose or args.dry_run:
-        print('Using theme from: ' + os.path.join(path_themes, args.theme))
+        print('Using theme from: ' + os.path.join(path['themes'], args.theme))
         print('\nReveal.js configuration:')
         for x in config:
             print('  {0}'.format(x))
@@ -335,7 +368,7 @@ if __name__ == '__main__':
                             browser=args.browser,
                             flags=' '.join(flags),
                             pdf=pdf,
-                            path=os.path.abspath(cwd),
+                            path=os.path.abspath(os.getcwd()),
                             html=html)
             if args.verbose or args.dry_run:
                 print('')
@@ -344,3 +377,7 @@ if __name__ == '__main__':
                 print('')
             if not args.dry_run:
                 subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(run())
