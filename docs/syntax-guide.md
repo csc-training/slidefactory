@@ -10,8 +10,10 @@ title and language of the title set. The metadata block is used to
 automatically generate a title slide for the presentation.
 
 The following metadata will be used to generate the title slide:
-- title: title for the presentation
-- lang: language of the presentation (en/fi/..)
+- title: title of the presentation
+- lang: language of the presentation (en/fi)
+- (optional) subtitle: subtitle of the presentation
+- (optional) course: name of the course/meeting
 - (optional) author: author(s) of the presentation
 - (optional) date: date of the presentation
 
@@ -21,14 +23,11 @@ for the slide. Currently valid values are: `en` or `fi`.
 For example:
 ```
 ---
-title:  Hybrid MPI+OpenMP programming
-author: CSC Training
-date:   2019-02
+title:  HIP and GPU kernels
+course: GPU programming with HIP
+date:   2021-11
 lang:   en
 ---
-
-
-# Processes and threads
 ```
 
 ## Slide separation
@@ -45,4 +44,3 @@ If you want, you can also separate slides explicitly by using a triple dash
 As a guide for correct syntax (or at least syntax that works), you can refer
 to the [example markdown presentation](../example.md). It should have examples
 of most common slide layouts etc.
-
