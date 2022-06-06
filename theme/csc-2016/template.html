@@ -62,16 +62,19 @@ $if(title)$
 $if(subtitle)$
   <p>$subtitle$</p>
 $endif$
-$if(author)$
+$if(course)$
 $if(date)$
-  <p>$author$, $date$</p>
+  <p>$course$, $date$</p>
 $else$
-  <p>$author$</p>
+  <p>$course$</p>
 $endif$
 $else$
 $if(date)$
   <p>$date$</p>
 $endif$
+$endif$
+$if(author)$
+  <p>$author$</p>
 $endif$
 </section>
 $endif$
