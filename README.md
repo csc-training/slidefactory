@@ -10,21 +10,40 @@ Convert slides from Markdown to HTML:
 slidefactory.sif example.md
 ```
 
-and add `--pdf` flag to generate also a PDF:
-```bash
-slidefactory.sif --pdf example.md
-```
-
 or the same if not using the singularity container:
 ```bash
 python3 $SLIDEFACTORY/convert.py example.md
-python3 $SLIDEFACTORY/convert.py --pdf example.md
 ```
 
 To see more detailed information when running, such as configuration options
 and the exact pandoc command, you can add `--verbose` to the commands above.
 
 Use `--help` to see descriptions of all the available arguments.
+
+
+### option: `--pdf`
+
+To generate also a PDF version of the slides, add `--pdf` to the command
+above, e.g.:
+
+```bash
+slidefactory.sif --pdf example.md
+```
+
+
+### option: `--self-contained`
+
+One can also use the option `--self-contained` to embed images and other
+assets into the HTML file with the aim to produce a file that is as
+"self-contained" as possible.
+
+```bash
+slidefactory.sif --self-contained example.md
+```
+
+Beware that **files produces in this way can become very large** and that not
+everything will be contained in the HTML file, so e.g. math formulas will
+require internet connection to work.
 
 
 ## Install
@@ -55,8 +74,8 @@ instructions (and alternative installation options).
 ### Uninstall
 
 To uninstall slidefactory, you can say `slidefactory.sif --uninstall` (or
-without the container `python3 $SLIDEFACTORY/setup/uninstall.py`). If in the
-directory containing the source code, also `make uninstall` will work.
+without the container `python3 $SLIDEFACTORY/setup/uninstall.py`). If one is
+in the directory containing the source code, `make uninstall` will also work.
 
 
 ## Update
