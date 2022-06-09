@@ -13,7 +13,7 @@ The following metadata will be used to generate the title slide:
 - title: title of the presentation
 - lang: language of the presentation (en/fi)
 - (optional) subtitle: subtitle of the presentation
-- (optional) course: name of the course/meeting
+- (optional) event: name of the course/meeting
 - (optional) author: author(s) of the presentation
 - (optional) date: date of the presentation
 
@@ -24,7 +24,7 @@ For example:
 ```
 ---
 title:  HIP and GPU kernels
-course: GPU programming with HIP
+event:  GPU programming with HIP
 date:   2021-11
 lang:   en
 ---
