@@ -23,7 +23,7 @@ check:
 	fi
 
 clone:
-	git clone . $(INSTALL_GIT)
+	git clone --recursive . $(INSTALL_GIT)
 	cd $(INSTALL_GIT) && git remote set-url origin $(GIT) && git fetch origin
 
 git:

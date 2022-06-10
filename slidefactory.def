@@ -21,7 +21,7 @@ From: ubuntu:20.04
     cabal install pandoc-emphasize-code
     apt-get remove -y --autoremove cabal-install
     url=https://github.com/csc-training/slide-template
-    git clone $url $SINGULARITY_ROOTFS/lib/slidefactory
+    git clone --recursive $url $SINGULARITY_ROOTFS/lib/slidefactory
 
 %runscript
     _SLIDEFACTORY_PATH=$SLIDEFACTORY

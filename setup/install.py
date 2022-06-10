@@ -97,7 +97,7 @@ def run():
     os.system(cmd)
 
     # clone git repository
-    cmd = 'git clone {0} {1}'.format(args.repository, install_git)
+    cmd = 'git clone --recursive {0} {1}'.format(args.repository, install_git)
     if args.verbose:
         print('Cloning repository...')
         print('  ' + cmd)
