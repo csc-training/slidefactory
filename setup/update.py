@@ -74,7 +74,7 @@ def run():
         print('')
 
     # update repository
-    cmd = 'git pull'
+    cmd = 'git pull && git submodule update --init'
     if args.verbose:
         print('Updating repository...')
         print('  ' + cmd)
@@ -101,7 +101,7 @@ def run():
                 print('Unable to unpack container: {0}'.format(install_sif))
             # update the git repo
             path = os.path.join(sandbox, 'slidefactory')
-            cmd = 'git pull'
+            cmd = 'git pull && git submodule update --init'
             if args.verbose:
                 print('Updating repository (in container)...')
                 print('  ' + cmd)
