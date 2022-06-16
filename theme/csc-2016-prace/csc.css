@@ -34,8 +34,8 @@
 }
 /* Fonts */
 :root {
-  --csc-font-family: 'Corbel', 'Noto Sans', 'Cantarell', sans-serif;
-  --csc-code-font-family: 'Consolas', 'Inconsolata', 'Source Code Pro', monospace;
+  --csc-font-family: 'Noto Sans';
+  --csc-code-font-family: 'Inconsolata';
 }
 
 /*********************************************
