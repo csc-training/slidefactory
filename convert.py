@@ -152,7 +152,7 @@ def get_themes(path_themes):
     """Find existing presentation themes."""
     try:
         themes = [x for x in os.listdir(path_themes)
-                  if os.path.isdir(os.path.join('theme', x))]
+                  if os.path.isdir(os.path.join(path_themes, x))]
     except OSError:
         error('Invalid theme path: {0}'.format(path_themes))
     return themes
