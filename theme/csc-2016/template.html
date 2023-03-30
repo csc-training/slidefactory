@@ -54,15 +54,23 @@ $if(title)$
 $if(subtitle)$
   <p class="subtitle">$subtitle$</p>
 $endif$
+$if(event)$
+$if(date)$
+  <p class="event">$event$, $date$</p>
+$else$
+  <p class="event">$event$</p>
+$endif$
+$else$
+$if(date)$
+  <p class="date">$date$</p>
+$endif$
+$endif$
 $for(author)$
   <p class="author">$author$</p>
 $endfor$
 $for(institute)$
   <p class="institute">$institute$</p>
 $endfor$
-$if(date)$
-  <p class="date">$date$</p>
-$endif$
 </section>
 $endif$
 $if(toc)$
