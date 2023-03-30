@@ -24,7 +24,9 @@ $endif$
     }
     $styles.html()$
   </style>
-$if(theme)$
+$if(theme-url)$
+  <link rel="stylesheet" href="$theme-url$" id="theme">
+$elseif(theme)$
   <link rel="stylesheet" href="$revealjs-url$/dist/theme/$theme$.css" id="theme">
 $else$
   <link rel="stylesheet" href="$revealjs-url$/dist/theme/black.css" id="theme">
