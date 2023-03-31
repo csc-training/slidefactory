@@ -44,8 +44,11 @@
 .reveal-viewport {
   background-color: black;
 }
+
 .slide-background {
   background: url("img/normal.png");
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: contain;
 }
 
