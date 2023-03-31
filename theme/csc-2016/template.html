@@ -40,6 +40,11 @@ $endif$
 $for(header-includes)$
   $header-includes$
 $endfor$
+  <style type="text/css">
+    html.print-pdf .reveal .slides .pdf-page:last-child {
+      page-break-after: avoid;
+    }
+  </style>
 </head>
 <body>
 $for(include-before)$
