@@ -52,6 +52,14 @@
   background-size: contain;
 }
 
+.slide-background.title {
+  background-image: url("img/title-en.png");
+}
+
+.slide-background.section {
+  background-image: url("img/section-leaf.png");
+}
+
 .reveal {
   font-family: var(--csc-font-family);
   font-size:   var(--fontsize);
