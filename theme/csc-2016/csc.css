@@ -56,6 +56,10 @@
   background-image: url("img/title-en.png");
 }
 
+:lang(fi) .slide-background.title {
+  background-image: url("img/title-fi.png");
+}
+
 .slide-background.section {
   background-image: url("img/section-leaf.png");
 }
