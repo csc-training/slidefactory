@@ -64,6 +64,10 @@
   background-image: url("img/section.png");
 }
 
+.slide-background.author {
+  background-image: url("img/author.png");
+}
+
 .reveal {
   font-family: var(--csc-font-family);
   font-size:   var(--fontsize);
