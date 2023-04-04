@@ -1,6 +1,15 @@
 # slidefactory
 
-Generate lecture slides in CSC style from markdown (or reStructuredText).
+Tool to generate lecture slides in CSC style from markdown.
+
+This repository contains the recipe to build a new *slidefactory* container
+image and the files needed by the tool to generate slides in CSC style.
+
+If you are looking for an example of how to write slides using slidefactory,
+please have a look at the empty
+[slidefactory template](https://github.com/csc-training/slidefactory-template)
+that can be used as a basis for new courses. Besides some convenience tooling,
+it also contains a syntax guide and an example slide set.
 
 
 ## Usage
@@ -106,28 +115,11 @@ If the container image definition has changed, you need to re-install
 slidefactory to get a new version of the image.
 
 
-# Markdown file syntax
+## Example: template for new courses
 
-Every slide set should start with a metadata block (see [Syntax
-Guide](docs/syntax-guide.md) for details) followed by slides in Markdown
-syntax (Pandoc prefers Commonmark, but understands also other flavours).
-
-Slides are separated by using first-level headers.
-
-Even though Pandoc understands most flavours of Markdown syntax (and is quite
-good in handling minor differences), to avoid conversion errors, it is a good
-idea to be a bit picky about whitespaces etc. and to aim for consistent
-syntax.
-
-Please look at [example.md](example.md) for an example.
-
-
-# Importing an existing presentation
-
-In order to import an existing presentation, you need to:
-1. convert all texts (bullet points, source code etc.) into Markdown syntax
-2. convert all figures into separate files (e.g. into PNGs or SVGs)
-
-If you want to convert a Powerpoint presentation, please see
-[some tips for converting a Powerpoint](docs/import-powerpoint.md).
-
+Examples and more information on how to write slides using slidefactory are
+available in the
+[slidefactory template](https://github.com/csc-training/slidefactory-template)
+repository. The repository contains an empty template for slidefactory slides
+that can be used as a basis for new courses. Please read the `README.md`
+included in the repository for more details.
