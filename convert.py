@@ -341,7 +341,7 @@ def run():
         flags['output'] = html
 
         # construct the pandoc command
-        cmd = ('pandoc {input} -s -t revealjs --template={template} '
+        cmd = ('pandoc {input} -s -f markdown-native_divs -t revealjs --template={template} '
                 + '{meta} {vars} {config} {contained} '
                 + '--mathjax={mathjax} --highlight-style={style} '
                 + '{filter} -o {output}').format(**flags)
