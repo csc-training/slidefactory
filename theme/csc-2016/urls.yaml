@@ -1,5 +1,6 @@
 ---
 theme-url: https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/csc-2016/csc.css
+css: https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i|Inconsolata:400,700&subset=greek,latin-ext
 revealjs-url: https://cdn.jsdelivr.net/npm/reveal.js@4.4.0
 mathjaxurl: https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js
 ---
