@@ -142,8 +142,7 @@ def get_paths():
 
 def get_filters(path_filters):
     """Get paths to pandoc filters."""
-    filters = [os.path.join(path_filters, x) for x in [
-               'contain-slide.py', 'background-image.py']]
+    filters = []
     if os.path.exists('/usr/local/bin/pandoc-emphasize-code'):
         filters.append('/usr/local/bin/pandoc-emphasize-code')
     return filters
