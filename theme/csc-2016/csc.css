@@ -344,6 +344,7 @@
 }
 .reveal pre,
 .reveal code,
+.reveal code.sourceCode,
 .reveal code.sourceCode > span {
   font-family: var(--csc-code-font-family);
 }
