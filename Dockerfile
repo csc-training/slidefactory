@@ -8,6 +8,8 @@ RUN apk update && \
       chromium \
       pandoc \
       font-freefont \
+      python3 \
+      py3-pandocfilters \
       && \
     rm -rf /var/cache/apk/*
 
