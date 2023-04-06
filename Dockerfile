@@ -5,8 +5,8 @@ LABEL org.opencontainers.image.source=https://github.com/csc-training/slidefacto
 RUN apk update && \
     apk add --no-cache \
       ca-certificates \
-      chromium~=111.0 \
-      pandoc~=2.19 \
+      chromium \
+      pandoc \
       && \
     rm -rf /var/cache/apk/*
 
