@@ -8,8 +8,31 @@
 import argparse
 import inspect
 import os
+import shlex
 import sys
 import subprocess
+
+from pathlib import Path
+
+
+def run(run_args, *, verbose=False, dry_run=False):
+    run_args = [str(a) for a in run_args]
+
+    if verbose or dry_run:
+        print(shlex.join(run_args), flush=True)
+
+    if not dry_run:
+        p = subprocess.run(run_args,
+                           check=False, shell=False,
+                           capture_output=True)
+        if p.returncode != 0:
+            print(f'error: {repr(run_args[0])} failed '
+                  f'with exit code {p.returncode}',
+                  file=sys.stderr, flush=True)
+            print(p.stderr.decode(),
+                  file=sys.stderr, flush=True)
+            sys.exit(1)
+
 
 # reveal.js configuration
 default_config = [
@@ -163,7 +186,7 @@ def get_highlight_styles():
     return output.decode().split()
 
 
-def run():
+def main():
     global no_local_theme
     global no_local_reveal
     global no_local_mathjax
@@ -178,7 +201,7 @@ def run():
     parser = argparse.ArgumentParser(description="""Convert a presentation
     from Markdown (or reStructuredText) to reveal.js powered HTML5 using
     pandoc.""")
-    parser.add_argument('input', metavar='input.md', nargs='+',
+    parser.add_argument('input', metavar='input.md', nargs='+', type=Path,
             help='filename for presentation source (e.g. in Markdown)')
     parser.add_argument('--output', metavar='prefix',
             help='prefix for output filenames (by default uses the '
@@ -329,54 +352,38 @@ def run():
             print('  ' + contained)
 
     # convert files
+    theme_dpath = Path(os.environ['SLIDEFACTORY_THEME_ROOT']) / args.theme
+
     for filename in args.input:
-        # figure out the output filename
-        base, ext = os.path.splitext(filename)
+        html = filename.with_suffix('.html')
         if args.output:
-            base = args.output + base
-        html = base + '.html'
-        # add filenames to the command-line arguments
-        flags['input'] = filename
-        flags['output'] = html
+            html = Path(args.output + str(html))
 
-        # construct the pandoc command
-        cmd = ('pandoc {input} -s -f markdown-native_divs -t revealjs --template={template} '
-                + '{meta} {vars} {config} {contained} '
-                + '--mathjax={mathjax} --highlight-style={style} '
-                + '{filter} -o {output}').format(**flags)
+        run_args = [
+            'pandoc',
+            f'--defaults={theme_dpath / "defaults.yaml"}',
+            f'--template={theme_dpath / "template.html"}',
+            f'--metadata-file={theme_dpath / "urls.yaml"}',
+            f'--output={html}',
+            filename,
+            ]
+        run(run_args, verbose=args.verbose, dry_run=args.dry_run)
 
-        # display pandoc command?
-        if args.verbose or args.dry_run:
-            print('\nPandoc command:')
-            print('  {0}\n'.format(cmd))
-
-        # execute pandoc
-        if not args.dry_run:
-            os.system(cmd)
-
-        # convert to pdfs?
         if args.pdf:
-            pdf = base + '.pdf'
-            flags = [
-                    '--headless',
-                    '--virtual-time-budget=10000',
-                    '--run-all-compositor-stages-before-draw',
-                    ]
-            cmd = ('{browser} {flags} --print-to-pdf={pdf} '
-                    + 'file://{path}/{html}?print-pdf').format(
-                            browser=args.browser,
-                            flags=' '.join(flags),
-                            pdf=pdf,
-                            path=os.path.abspath(os.getcwd()),
-                            html=html)
-            if args.verbose or args.dry_run:
-                print('')
-                print('Command to convert to PDF:')
-                print('  {0}'.format(cmd))
-                print('')
-            if not args.dry_run:
-                subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL)
-    return 0
+            pdf = html.with_suffix('.pdf')
+            run_args = [
+                args.browser,
+                '--headless',
+                '--disable-gpu',
+                '--disable-software-rasterizer',
+                '--hide-scrollbars',
+                '--virtual-time-budget=10000000',
+                '--run-all-compositor-stages-before-draw',
+                f'--print-to-pdf={pdf}',
+                f'file://{html.absolute()}?print-pdf'
+                ]
+            run(run_args, verbose=args.verbose, dry_run=args.dry_run)
+
 
 if __name__ == '__main__':
-    sys.exit(run())
+    main()
