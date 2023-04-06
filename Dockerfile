@@ -7,6 +7,7 @@ RUN apk update && \
       ca-certificates \
       chromium \
       pandoc \
+      font-freefont \
       && \
     rm -rf /var/cache/apk/*
 
