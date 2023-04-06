@@ -55,11 +55,11 @@ ENV SLIDEFACTORY_THEME_ROOT=$SLIDEFACTORY_ROOT/theme \
     PATH=$SLIDEFACTORY_ROOT/bin:$PATH
 
 ADD theme/ $SLIDEFACTORY_THEME_ROOT/
-ADD convert.sh $SLIDEFACTORY_ROOT/bin/
+ADD convert.py $SLIDEFACTORY_ROOT/bin/
 
 RUN mkdir /work
 
 WORKDIR /work
 
-ENTRYPOINT ["convert.sh"]
+ENTRYPOINT ["convert.py"]
 CMD ["-h"]

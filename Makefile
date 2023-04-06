@@ -3,7 +3,7 @@ IMAGE=slidefactory
 TAG=0.2.0
 
 
-build: Dockerfile convert.sh
+build: Dockerfile convert.py
 	podman build --format docker \
 		-t ${IMAGE_ROOT}/${IMAGE}:${TAG} \
 		.
