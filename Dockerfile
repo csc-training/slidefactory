@@ -46,6 +46,8 @@ RUN for FONT in 'Noto Sans' 'Noto Sans Mono' 'Inconsolata'; do \
       :; \
     done
 
+ADD css/fonts.css $SLIDEFACTORY_ROOT/fonts
+
 ENV SLIDEFACTORY_THEME_ROOT=$SLIDEFACTORY_ROOT/theme \
     PATH=$SLIDEFACTORY_ROOT/bin:$PATH
 
