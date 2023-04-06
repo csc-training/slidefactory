@@ -15,12 +15,14 @@ RUN apk update && \
 
 ENV SLIDEFACTORY_ROOT=/slidefactory
 
+# Reveal.js
 RUN wget https://github.com/hakimel/reveal.js/archive/refs/tags/4.4.0.zip -O tmp.zip && \
     unzip tmp.zip 'reveal.js-4.4.0/LICENSE' -d $SLIDEFACTORY_ROOT && \
     unzip tmp.zip 'reveal.js-4.4.0/dist/*' -d $SLIDEFACTORY_ROOT && \
     unzip tmp.zip 'reveal.js-4.4.0/plugin/*' -d $SLIDEFACTORY_ROOT && \
     rm -f tmp.zip
 
+# MathJax
 RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.zip && \
     unzip tmp.zip 'MathJax-3.2.2/LICENSE' -d $SLIDEFACTORY_ROOT && \
     unzip tmp.zip 'MathJax-3.2.2/es5/tex-chtml-full.js' -d $SLIDEFACTORY_ROOT && \
