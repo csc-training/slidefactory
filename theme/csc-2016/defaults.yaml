@@ -1,5 +1,6 @@
 ---
 standalone: true
+from: markdown-native_divs
 to: revealjs
 variables:
     width: 1920
