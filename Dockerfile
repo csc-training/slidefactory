@@ -7,16 +7,7 @@ RUN apk update && \
       ca-certificates \
       chromium~=111.0 \
       pandoc~=2.19 \
-      # Fonts required by the CSC style \
-      font-noto \
-      font-inconsolata \
-      # Common fonts \
-      font-freefont \
-      font-dejavu \
       && \
-    # Remove Noto Display fonts; \
-    # those get wrongly picked to the pdf \
-    rm -f /usr/share/fonts/noto/*Display*.ttf && \
     rm -rf /var/cache/apk/*
 
 ENV SLIDEFACTORY_ROOT=/slidefactory
@@ -33,6 +24,27 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     unzip tmp.zip 'MathJax-3.2.2/es5/input/tex/extensions/*' -d $SLIDEFACTORY_ROOT && \
     unzip tmp.zip 'MathJax-3.2.2/es5/output/chtml/fonts/woff-v2/*' -d $SLIDEFACTORY_ROOT && \
     unzip tmp.zip 'MathJax-3.2.2/es5/adaptors/*' -d $SLIDEFACTORY_ROOT && \
+    rm -f tmp.zip
+
+# Fonts: Noto Sans
+RUN wget https://fonts.google.com/download?family=Noto+Sans -O tmp.zip && \
+    unzip tmp.zip -d $SLIDEFACTORY_ROOT/fonts/NotoSans && \
+    rm -f tmp.zip
+
+# Fonts: Noto Sans Mono
+RUN wget https://fonts.google.com/download?family=Noto+Sans+Mono -O tmp.zip && \
+    unzip tmp.zip 'static/NotoSansMono' -d $SLIDEFACTORY_ROOT/fonts/ && \
+    mv $SLIDEFACTORY_ROOT/fonts/static/NotoSansMono $SLIDEFACTORY_ROOT/fonts/ && \
+    rmdir mv $SLIDEFACTORY_ROOT/fonts/static && \
+    unzip tmp.zip 'OFL.txt' -d $SLIDEFACTORY_ROOT/fonts/NotoSansMono && \
+    rm -f tmp.zip
+
+# Fonts: Inconsolata
+RUN wget https://fonts.google.com/download?family=Inconsolata -O tmp.zip && \
+    unzip tmp.zip 'static/Inconsolata' -d $SLIDEFACTORY_ROOT/fonts/ && \
+    mv $SLIDEFACTORY_ROOT/fonts/static/Inconsolata $SLIDEFACTORY_ROOT/fonts/ && \
+    rmdir $SLIDEFACTORY_ROOT/fonts/static && \
+    unzip tmp.zip 'OFL.txt' -d $SLIDEFACTORY_ROOT/fonts/Inconsolata && \
     rm -f tmp.zip
 
 ENV SLIDEFACTORY_THEME_ROOT=$SLIDEFACTORY_ROOT/theme \
