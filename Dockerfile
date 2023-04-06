@@ -26,26 +26,25 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     unzip tmp.zip 'MathJax-3.2.2/es5/adaptors/*' -d $SLIDEFACTORY_ROOT && \
     rm -f tmp.zip
 
-# Fonts: Noto Sans
-RUN wget https://fonts.google.com/download?family=Noto+Sans -O tmp.zip && \
-    unzip tmp.zip -d $SLIDEFACTORY_ROOT/fonts/NotoSans && \
-    rm -f tmp.zip
-
-# Fonts: Noto Sans Mono
-RUN wget https://fonts.google.com/download?family=Noto+Sans+Mono -O tmp.zip && \
-    unzip tmp.zip 'static/NotoSansMono' -d $SLIDEFACTORY_ROOT/fonts/ && \
-    mv $SLIDEFACTORY_ROOT/fonts/static/NotoSansMono $SLIDEFACTORY_ROOT/fonts/ && \
-    rmdir mv $SLIDEFACTORY_ROOT/fonts/static && \
-    unzip tmp.zip 'OFL.txt' -d $SLIDEFACTORY_ROOT/fonts/NotoSansMono && \
-    rm -f tmp.zip
-
-# Fonts: Inconsolata
-RUN wget https://fonts.google.com/download?family=Inconsolata -O tmp.zip && \
-    unzip tmp.zip 'static/Inconsolata' -d $SLIDEFACTORY_ROOT/fonts/ && \
-    mv $SLIDEFACTORY_ROOT/fonts/static/Inconsolata $SLIDEFACTORY_ROOT/fonts/ && \
-    rmdir $SLIDEFACTORY_ROOT/fonts/static && \
-    unzip tmp.zip 'OFL.txt' -d $SLIDEFACTORY_ROOT/fonts/Inconsolata && \
-    rm -f tmp.zip
+# Fonts
+RUN for FONT in 'Noto Sans' 'Noto Sans Mono' 'Inconsolata'; do \
+      FONT_URL=$(echo "$FONT" | tr ' ' +) && \
+      FONT_DIR=$(echo "$FONT" | tr -d ' ') && \
+      wget "https://fonts.google.com/download?family=$FONT_URL" -O tmp.zip && \
+      mkdir -p $SLIDEFACTORY_ROOT/fonts/$FONT_DIR && \
+      if unzip -l tmp.zip | grep -q 'static'; then \
+        unzip tmp.zip "static/$FONT_DIR/*" -d $SLIDEFACTORY_ROOT/fonts/ && \
+        mv $SLIDEFACTORY_ROOT/fonts/static/$FONT_DIR $SLIDEFACTORY_ROOT/fonts/ && \
+        rmdir $SLIDEFACTORY_ROOT/fonts/static && \
+        unzip tmp.zip 'OFL.txt' -d $SLIDEFACTORY_ROOT/fonts/$FONT_DIR && \
+        :; \
+      else \
+        unzip tmp.zip -d $SLIDEFACTORY_ROOT/fonts/$FONT_DIR && \
+        :; \
+      fi && \
+      rm -f tmp.zip && \
+      :; \
+    done
 
 ENV SLIDEFACTORY_THEME_ROOT=$SLIDEFACTORY_ROOT/theme \
     PATH=$SLIDEFACTORY_ROOT/bin:$PATH
