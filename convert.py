@@ -130,7 +130,7 @@ def main():
     parser.add_argument('--filter', action='append', default=[],
             metavar='filter.py',
             help='pandoc filter script (multiple allowed)')
-    parser.add_argument('--dry-run', '--show-command',
+    parser.add_argument('-n', '--dry-run', '--show-command',
             action='store_true', default=False,
             help='do nothing, only show the full commands to be run')
     parser.add_argument('--verbose', action='store_true', default=False,
