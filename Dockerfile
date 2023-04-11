@@ -68,11 +68,10 @@ css: file://$SLIDEFACTORY_ROOT/fonts/fonts.css\n\
 ---\
 " > $SLIDEFACTORY_ROOT/urls_local.yaml
 
-ENV SLIDEFACTORY_THEME_ROOT=$SLIDEFACTORY_ROOT/theme \
-    PATH=$SLIDEFACTORY_ROOT/bin:$PATH
-
-ADD theme/ $SLIDEFACTORY_THEME_ROOT/
+ADD theme/ $SLIDEFACTORY_ROOT/theme/
 ADD convert.py $SLIDEFACTORY_ROOT/bin/
+
+ENV PATH=$SLIDEFACTORY_ROOT/bin:$PATH
 
 RUN mkdir /work
 
