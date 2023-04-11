@@ -53,6 +53,14 @@ RUN for FONT in 'Noto Sans' 'Noto Sans Mono' 'Inconsolata'; do \
 
 ADD css/fonts.css $SLIDEFACTORY_ROOT/fonts
 
+RUN echo -e "\
+---\n\
+revealjs-url: https://cdn.jsdelivr.net/npm/reveal.js@4.4.0\n\
+mathjaxurl: https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js\n\
+css: https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i|Inconsolata:400,700&subset=greek,latin-ext\n\
+---\
+" > $SLIDEFACTORY_ROOT/urls.yaml && \
+
 ENV SLIDEFACTORY_THEME_ROOT=$SLIDEFACTORY_ROOT/theme \
     PATH=$SLIDEFACTORY_ROOT/bin:$PATH
 

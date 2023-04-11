@@ -55,6 +55,7 @@ def get_themes(path_themes):
 
 
 def main():
+    root = Path(os.environ['SLIDEFACTORY_ROOT'])
     theme_root = Path(os.environ['SLIDEFACTORY_THEME_ROOT'])
     available_themes = get_themes(theme_root)
     default_theme = 'csc-2016'
@@ -109,7 +110,8 @@ def main():
             'pandoc',
             f'--defaults={theme_dpath / "defaults.yaml"}',
             f'--template={theme_dpath / "template.html"}',
-            f'--metadata-file={theme_dpath / "urls.yaml"}',
+            f'--metadata-file={root / "urls.yaml"}',
+            f'--metadata=theme-url:https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css',
             f'--output={html}',
             filename,
             ]
