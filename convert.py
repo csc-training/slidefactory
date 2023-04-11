@@ -63,7 +63,8 @@ def find_theme(theme, theme_root):
 
 
 def create_html(input_fpath, html_fpath, args, *,
-                theme_dpath, urls_fpath, theme_url):
+                theme_dpath, urls_fpath, theme_url,
+                pandoc_args=[]):
     run_args = [
         'pandoc',
         f'--defaults={theme_dpath / "defaults.yaml"}',
@@ -73,6 +74,7 @@ def create_html(input_fpath, html_fpath, args, *,
         f'--output={html_fpath}',
         input_fpath,
         ]
+    run_args += pandoc_args
     run_args += [f'--filter={f}' for f in args.filter]
     run(run_args, verbose=args.verbose, dry_run=args.dry_run)
 
@@ -120,11 +122,8 @@ def main():
     parser.add_argument('-t', '--theme', metavar='THEME', default='csc-2016',
             help=(f'presentation theme (default: %(default)s)'))
     parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
-            choices=['pdf', 'html', 'html-offline'],
+            choices=['pdf', 'html', 'html-offline', 'html-offline-complete'],
             help='output format (default: %(default)s; available: %(choices)s)')
-    parser.add_argument('-c', '--self-contained',
-            action='store_true', default=False,
-            help='produce as self-contained HTMLs as possible')
     parser.add_argument('-b', '--browser', default='chromium-browser',
             help='browser to use for converting PDFs (default: %(default)s)')
     parser.add_argument('--filter', action='append', default=[],
@@ -145,15 +144,6 @@ def main():
         install(args.install)
         sys.exit(0)
 
-    # self contained HTML
-    if args.self_contained:
-        urlencode = os.path.join(path['filters'], 'url-encode.py')
-        if urlencode not in args.filter:
-            args.filter.append(urlencode)
-        contained = '--self-contained'
-    else:
-        contained = ''
-
     if args.format == 'html-offline' and not args.slidefactory:
         error('Install and use local slidefactory in order to create offline htmls.')
 
@@ -166,16 +156,22 @@ def main():
 
     # choose theme url
     theme_dpath, is_custom_theme = find_theme(args.theme, slidefactory_root / 'theme')
-    if is_custom_theme or args.slidefactory or args.format in ['pdf', 'html-offline']:
+    if (is_custom_theme
+            or args.slidefactory
+            or args.format in ['pdf', 'html-offline', 'html-offline-complete']):
         theme_url = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'
     else:
         theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
 
     # choose other urls
-    if args.format in ['pdf', 'html-offline']:
+    if args.format in ['pdf', 'html-offline', 'html-offline-complete']:
         urls_fpath = slidefactory_root / 'urls_local.yaml'
     else:
         urls_fpath = slidefactory_root / 'urls.yaml'
+
+    pandoc_args = []
+    if args.format == 'html-offline-complete':
+        pandoc_args += ['--embed-resources']
 
     # convert files
     for filename in args.input:
@@ -196,7 +192,7 @@ def main():
             html = output.with_suffix('.html')
             create_html(filename, html, args,
                         theme_dpath=theme_dpath, urls_fpath=urls_fpath,
-                        theme_url=theme_url)
+                        theme_url=theme_url, pandoc_args=pandoc_args)
 
 
 if __name__ == '__main__':
