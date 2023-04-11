@@ -9,14 +9,13 @@ import argparse
 import inspect
 import os
 import shlex
+import shutil
 import sys
 import subprocess
 import tempfile
+from urllib.parse import quote as url_quote
 
 from pathlib import Path
-
-slidefactory_root = Path(os.environ['SLIDEFACTORY_ROOT'])
-slidefactory_is_custom = os.environ['SLIDEFACTORY_ROOT'] != '/slidefactory'
 
 
 def run(run_args, *, verbose=False, dry_run=False):
@@ -43,7 +42,7 @@ def error(msg, code=1):
     sys.exit(code)
 
 
-def find_theme(theme):
+def find_theme(theme, theme_root):
     is_custom = False
     if os.sep in str(theme):
         is_custom = True
@@ -51,7 +50,6 @@ def find_theme(theme):
         if not p.is_dir():
             error(f'Nonexistent theme directory {p.absolute()}')
     else:
-        theme_root = slidefactory_root / 'theme'
         p = theme_root / theme
         if not p.is_dir():
             available_themes = [str(x.name) for x in theme_root.iterdir() if x.is_dir()]
@@ -64,21 +62,8 @@ def find_theme(theme):
     return p, is_custom
 
 
-def create_html(input_fpath, html_fpath, args):
-    # choose theme url
-    theme_dpath, is_custom_theme = find_theme(args.theme)
-    if is_custom_theme or slidefactory_is_custom or args.format in ['pdf', 'html-offline']:
-        theme_url = f'file://{theme_dpath.absolute()}/csc.css'
-    else:
-        theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
-
-    # choose other urls
-    if args.format in ['pdf', 'html-offline']:
-        urls_fpath = slidefactory_root / 'urls_local.yaml'
-    else:
-        urls_fpath = slidefactory_root / 'urls.yaml'
-
-    # convert
+def create_html(input_fpath, html_fpath, args, *,
+                theme_dpath, urls_fpath, theme_url):
     run_args = [
         'pandoc',
         f'--defaults={theme_dpath / "defaults.yaml"}',
@@ -107,11 +92,27 @@ def create_pdf(html_fpath, pdf_fpath, args):
     run(run_args, verbose=args.verbose, dry_run=args.dry_run)
 
 
+def install(path):
+    if path.exists():
+        error(f'Installation path {path} exists. Exiting.')
+
+    slidefactory_in_container = os.environ['SLIDEFACTORY_ROOT']
+    shutil.copytree(slidefactory_in_container, path)
+
+    # Update paths in local urls
+    fpath = path / 'urls_local.yaml'
+    with open(fpath, 'r+') as f:
+        s = f.read().replace(slidefactory_in_container,
+                             url_quote(str(path.absolute())))
+        f.seek(0)
+        f.write(s)
+
+
 def main():
     parser = argparse.ArgumentParser(description="""Convert a presentation
     from Markdown (or reStructuredText) to reveal.js powered HTML5 using
     pandoc.""")
-    parser.add_argument('input', metavar='input.md', nargs='+', type=Path,
+    parser.add_argument('input', metavar='input.md', nargs='*', type=Path,
             help='filename for presentation source (e.g. in Markdown)')
     parser.add_argument('--output', metavar='prefix',
             help='prefix for output filenames (by default uses the '
@@ -134,7 +135,15 @@ def main():
             help='do nothing, only show the full commands to be run')
     parser.add_argument('--verbose', action='store_true', default=False,
             help='be loud and noisy')
+    parser.add_argument('--install', metavar='PATH', type=Path,
+            help='install local slidefactory to %(metavar)s (ignores all other arguments)')
+    parser.add_argument('--slidefactory', metavar='PATH', type=Path,
+            help='use local slidefactory from %(metavar)s')
     args = parser.parse_args()
+
+    if args.install:
+        install(args.install)
+        sys.exit(0)
 
     # self contained HTML
     if args.self_contained:
@@ -145,8 +154,28 @@ def main():
     else:
         contained = ''
 
-    if args.format == 'html-offline' and not slidefactory_is_custom:
-        error('Install slidefactory locally in order to create offline htmls.')
+    if args.format == 'html-offline' and not args.slidefactory:
+        error('Install and use local slidefactory in order to create offline htmls.')
+
+    if args.slidefactory:
+        slidefactory_root = args.slidefactory
+        if not slidefactory_root.is_dir():
+            error(f'Slidefactory directory {slidefactory_root.absolute()} does not exist.')
+    else:
+        slidefactory_root = Path(os.environ['SLIDEFACTORY_ROOT'])
+
+    # choose theme url
+    theme_dpath, is_custom_theme = find_theme(args.theme, slidefactory_root / 'theme')
+    if is_custom_theme or args.slidefactory or args.format in ['pdf', 'html-offline']:
+        theme_url = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'
+    else:
+        theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
+
+    # choose other urls
+    if args.format in ['pdf', 'html-offline']:
+        urls_fpath = slidefactory_root / 'urls_local.yaml'
+    else:
+        urls_fpath = slidefactory_root / 'urls.yaml'
 
     # convert files
     for filename in args.input:
@@ -159,11 +188,15 @@ def main():
             with tempfile.TemporaryDirectory() as tmpdir:
                 html = Path(tmpdir) / 'tmp.html'
                 pdf = output.with_suffix('.pdf')
-                create_html(filename, html, args)
+                create_html(filename, html, args,
+                            theme_dpath=theme_dpath, urls_fpath=urls_fpath,
+                            theme_url=theme_url)
                 create_pdf(html, pdf, args)
         else:
             html = output.with_suffix('.html')
-            create_html(filename, html, args)
+            create_html(filename, html, args,
+                        theme_dpath=theme_dpath, urls_fpath=urls_fpath,
+                        theme_url=theme_url)
 
 
 if __name__ == '__main__':
