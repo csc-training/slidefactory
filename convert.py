@@ -76,7 +76,7 @@ def create_html(input_fpath, html_fpath, args):
         theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
 
     # choose other urls
-    if slidefactory_is_custom or args.format in ['pdf', 'html-offline']:
+    if args.format in ['pdf', 'html-offline']:
         urls_fpath = slidefactory_root / 'urls_local.yaml'
     else:
         urls_fpath = slidefactory_root / 'urls.yaml'
