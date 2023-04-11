@@ -11,6 +11,7 @@ import os
 import shlex
 import sys
 import subprocess
+import tempfile
 
 from pathlib import Path
 
@@ -66,6 +67,49 @@ def find_theme(theme):
     return p, is_custom
 
 
+def create_html(input_fpath, html_fpath, args):
+    # choose theme url
+    theme_dpath, is_custom_theme = find_theme(args.theme)
+    if is_custom_theme or slidefactory_is_custom or args.format in ['pdf', 'html-offline']:
+        theme_url = f'file://{theme_dpath.absolute()}/csc.css'
+    else:
+        theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
+
+    # choose other urls
+    if slidefactory_is_custom or args.format in ['pdf', 'html-offline']:
+        urls_fpath = slidefactory_root / 'urls_local.yaml'
+    else:
+        urls_fpath = slidefactory_root / 'urls.yaml'
+
+    # convert
+    run_args = [
+        'pandoc',
+        f'--defaults={theme_dpath / "defaults.yaml"}',
+        f'--template={theme_dpath / "template.html"}',
+        f'--metadata-file={urls_fpath}',
+        f'--metadata=theme-url:{theme_url}',
+        f'--output={html_fpath}',
+        input_fpath,
+        ]
+    run_args += [f'--filter={f}' for f in args.filter]
+    run(run_args, verbose=args.verbose, dry_run=args.dry_run)
+
+
+def create_pdf(html_fpath, pdf_fpath, args):
+    run_args = [
+        args.browser,
+        '--headless',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--hide-scrollbars',
+        '--virtual-time-budget=10000000',
+        '--run-all-compositor-stages-before-draw',
+        f'--print-to-pdf={pdf_fpath}',
+        f'file://{html_fpath.absolute()}?print-pdf'
+        ]
+    run(run_args, verbose=args.verbose, dry_run=args.dry_run)
+
+
 def main():
     parser = argparse.ArgumentParser(description="""Convert a presentation
     from Markdown (or reStructuredText) to reveal.js powered HTML5 using
@@ -77,8 +121,9 @@ def main():
             'basename of the input file, i.e. talk.md -> talk.html)')
     parser.add_argument('-t', '--theme', metavar='THEME', default='csc-2016',
             help=(f'presentation theme (default: %(default)s)'))
-    parser.add_argument('-p', '--pdf', action='store_true', default=False,
-            help='convert HTMLs to PDFs')
+    parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
+            choices=['pdf', 'html', 'html-offline'],
+            help='output format (default: %(default)s; available: %(choices)s)')
     parser.add_argument('-c', '--self-contained',
             action='store_true', default=False,
             help='produce as self-contained HTMLs as possible')
@@ -103,43 +148,25 @@ def main():
     else:
         contained = ''
 
+    if args.format == 'html-offline' and not slidefactory_is_custom:
+        error('Install slidefactory locally in order to create offline htmls.')
+
     # convert files
-    theme_dpath, is_custom_theme = find_theme(args.theme)
-    if is_custom_theme or slidefactory_is_custom:
-        theme_url = f'file://{theme_dpath.absolute()}/csc.css'
-    else:
-        theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
     for filename in args.input:
-        html = filename.with_suffix('.html')
+        output = filename
         if args.output:
-            html = Path(args.output + str(html))
+            output = Path(args.output + str(output))
 
-        run_args = [
-            'pandoc',
-            f'--defaults={theme_dpath / "defaults.yaml"}',
-            f'--template={theme_dpath / "template.html"}',
-            f'--metadata-file={slidefactory_root / "urls.yaml"}',
-            f'--metadata=theme-url:{theme_url}',
-            f'--output={html}',
-            filename,
-            ]
-        run_args += [f'--filter={f}' for f in args.filter]
-        run(run_args, verbose=args.verbose, dry_run=args.dry_run)
-
-        if args.pdf:
-            pdf = html.with_suffix('.pdf')
-            run_args = [
-                args.browser,
-                '--headless',
-                '--disable-gpu',
-                '--disable-software-rasterizer',
-                '--hide-scrollbars',
-                '--virtual-time-budget=10000000',
-                '--run-all-compositor-stages-before-draw',
-                f'--print-to-pdf={pdf}',
-                f'file://{html.absolute()}?print-pdf'
-                ]
-            run(run_args, verbose=args.verbose, dry_run=args.dry_run)
+        if args.format == 'pdf':
+            # use temporary html output for pdf
+            with tempfile.TemporaryDirectory() as tmpdir:
+                html = Path(tmpdir) / 'tmp.html'
+                pdf = output.with_suffix('.pdf')
+                create_html(filename, html, args)
+                create_pdf(html, pdf, args)
+        else:
+            html = output.with_suffix('.html')
+            create_html(filename, html, args)
 
 
 if __name__ == '__main__':
