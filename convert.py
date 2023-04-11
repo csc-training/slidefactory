@@ -30,18 +30,15 @@ def run(run_args, *, verbose=False, dry_run=False):
                            check=False, shell=False,
                            capture_output=True)
         if p.returncode != 0:
-            print(f'error: {repr(run_args[0])} failed '
-                  f'with exit code {p.returncode}',
-                  file=sys.stderr, flush=True)
-            print(p.stderr.decode(),
-                  file=sys.stderr, flush=True)
-            sys.exit(1)
+            error(f'error: {repr(run_args[0])} failed '
+                  f'with exit code {p.returncode}')
 
 
 def error(msg, code=1):
     """Custom error messages"""
     print('')
-    print(inspect.cleandoc(msg))
+    print(inspect.cleandoc(msg),
+          file=sys.stderr, flush=True)
     print('')
     sys.exit(code)
 
