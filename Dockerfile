@@ -62,9 +62,9 @@ css: https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i|Inconso
 " > $SLIDEFACTORY_ROOT/urls.yaml && \
     echo -e "\
 ---\n\
-revealjs-url: $SLIDEFACTORY_ROOT/reveal.js-4.4.0\n\
-mathjaxurl: $SLIDEFACTORY_ROOT/MathJax-3.2.2/es5/tex-chtml-full.js\n\
-css: $SLIDEFACTORY_ROOT/fonts/fonts.css\n\
+revealjs-url: file://$SLIDEFACTORY_ROOT/reveal.js-4.4.0\n\
+mathjaxurl: file://$SLIDEFACTORY_ROOT/MathJax-3.2.2/es5/tex-chtml-full.js\n\
+css: file://$SLIDEFACTORY_ROOT/fonts/fonts.css\n\
 ---\
 " > $SLIDEFACTORY_ROOT/urls_local.yaml
 
