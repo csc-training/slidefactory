@@ -133,7 +133,7 @@ def main():
     parser.add_argument('-n', '--dry-run', '--show-command',
             action='store_true', default=False,
             help='do nothing, only show the full commands to be run')
-    parser.add_argument('--verbose', action='store_true', default=False,
+    parser.add_argument('-v', '--verbose', action='store_true', default=False,
             help='be loud and noisy')
     parser.add_argument('--install', metavar='PATH', type=Path,
             help='install local slidefactory to %(metavar)s (ignores all other arguments)')
