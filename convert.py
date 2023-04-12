@@ -14,8 +14,10 @@ import sys
 import subprocess
 import tempfile
 from urllib.parse import quote as url_quote
-
 from pathlib import Path
+
+
+slidefactory_root = Path(__file__).absolute().parent
 
 
 def run(run_args, *, verbose=False, dry_run=False):
@@ -98,13 +100,12 @@ def install(path):
     if path.exists():
         error(f'Installation path {path} exists. Exiting.')
 
-    slidefactory_in_container = os.environ['SLIDEFACTORY_ROOT']
-    shutil.copytree(slidefactory_in_container, path)
+    shutil.copytree(slidefactory_root, path)
 
     # Update paths in local urls
     fpath = path / 'urls_local.yaml'
     with open(fpath, 'r+') as f:
-        s = f.read().replace(slidefactory_in_container,
+        s = f.read().replace(url_quote(str(slidefactory_root)),
                              url_quote(str(path.absolute())))
         f.seek(0)
         f.write(s)
@@ -136,28 +137,24 @@ def main():
             help='be loud and noisy')
     parser.add_argument('--install', metavar='PATH', type=Path,
             help='install local slidefactory to %(metavar)s (ignores all other arguments)')
-    parser.add_argument('--slidefactory', metavar='PATH', type=Path,
-            help='use local slidefactory from %(metavar)s')
     args = parser.parse_args()
 
     if args.install:
         install(args.install)
         sys.exit(0)
 
-    if args.format == 'html-offline' and not args.slidefactory:
+    in_container = slidefactory_root == Path(os.environ['SLIDEFACTORY_ROOT'])
+
+    if args.format == 'html-offline' and in_container:
         error('Install and use local slidefactory in order to create offline htmls.')
 
-    if args.slidefactory:
-        slidefactory_root = args.slidefactory
-        if not slidefactory_root.is_dir():
-            error(f'Slidefactory directory {slidefactory_root.absolute()} does not exist.')
-    else:
-        slidefactory_root = Path(os.environ['SLIDEFACTORY_ROOT'])
+    if not slidefactory_root.is_dir():
+        error(f'Slidefactory directory {slidefactory_root} does not exist.')
 
     # choose theme url
     theme_dpath, is_custom_theme = find_theme(args.theme, slidefactory_root / 'theme')
     if (is_custom_theme
-            or args.slidefactory
+            or not in_container
             or args.format in ['pdf', 'html-offline', 'html-offline-complete']):
         theme_url = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'
     else:

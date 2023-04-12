@@ -69,13 +69,11 @@ css: file://$SLIDEFACTORY_ROOT/fonts/fonts.css\n\
 " > $SLIDEFACTORY_ROOT/urls_local.yaml
 
 ADD theme/ $SLIDEFACTORY_ROOT/theme/
-ADD convert.py $SLIDEFACTORY_ROOT/bin/
-
-ENV PATH=$SLIDEFACTORY_ROOT/bin:$PATH
+ADD convert.py $SLIDEFACTORY_ROOT/
 
 RUN mkdir /work
 
 WORKDIR /work
 
-ENTRYPOINT ["convert.py"]
+ENTRYPOINT ["/slidefactory/convert.py"]
 CMD ["-h"]
