@@ -64,7 +64,7 @@ Install slidefactory files from the container to a local directory:
 ```
 and create an alias for using the local installation:
 ```bash
-alias local-slidefactory="singularity exec \"$PWD/slidefactory.sif\" \"$HOME/slidefactory/convert.py\""
+alias local-slidefactory="singularity exec \"$HOME/slidefactory/slidefactory.sif\" \"$HOME/slidefactory/convert.py\""
 ```
 
 Then use the local slidefactory installation:

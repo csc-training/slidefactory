@@ -105,6 +105,7 @@ def install(path):
     if path.exists():
         error(f'Installation path {path} exists. Exiting.')
 
+    # Copy slidefactory files
     shutil.copytree(slidefactory_root, path)
 
     # Update paths in local urls
@@ -114,6 +115,9 @@ def install(path):
                              url_quote(str(path.absolute())))
         f.seek(0)
         f.write(s)
+
+    # Copy singularity image
+    shutil.copy2(os.environ['SINGULARITY_CONTAINER'], path)
 
 
 def main():
@@ -157,7 +161,7 @@ def main():
         error('Install and use local slidefactory in order to create local offline htmls.'
               '\n\nIn short (see README for details):\n\n'
               './slidefactory.sif --install "$HOME/slidefactory"\n'
-              r'alias local-slidefactory="singularity exec \"$PWD/slidefactory.sif\" \"$HOME/slidefactory/convert.py\""' '\n'
+              r'alias local-slidefactory="singularity exec \"$HOME/slidefactory/slidefactory.sif\" \"$HOME/slidefactory/convert.py\""' '\n'
               f'local-slidefactory --format {args.format} slides.md\n'
               )
 
