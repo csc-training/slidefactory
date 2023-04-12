@@ -36,9 +36,8 @@ Change the theme with `--theme`:
 ```bash
 ./slidefactory.sif --theme csc-2016 slides.md
 ```
-See `./slidefactory --list-themes` for available themes.
 
-Use help for more options:
+Use help for available themes and all other options:
 ```bash
 ./slidefactory.sif --help
 ```

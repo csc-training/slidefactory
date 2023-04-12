@@ -44,6 +44,11 @@ def error(msg, code=1):
     sys.exit(code)
 
 
+def get_available_themes(theme_root):
+    available_themes = sorted([str(x.name) for x in theme_root.iterdir() if x.is_dir()])
+    return available_themes
+
+
 def find_theme(theme, theme_root):
     is_custom = False
     if os.sep in str(theme):
@@ -54,7 +59,7 @@ def find_theme(theme, theme_root):
     else:
         p = theme_root / theme
         if not p.is_dir():
-            available_themes = [str(x.name) for x in theme_root.iterdir() if x.is_dir()]
+            available_themes = get_available_themes(theme_root)
             error(f'Invalid theme {theme}.'
                   f' Available themes: {", ".join(available_themes)}.')
     for fname in ['defaults.yaml', 'template.html', 'csc.css']:
@@ -112,6 +117,8 @@ def install(path):
 
 
 def main():
+    theme_root = slidefactory_root / 'theme'
+
     parser = argparse.ArgumentParser(description="""Convert a presentation
     from Markdown (or reStructuredText) to reveal.js powered HTML5 using
     pandoc.""")
@@ -121,7 +128,8 @@ def main():
             help='prefix for output filenames (by default uses the '
             'basename of the input file, i.e. talk.md -> talk.html)')
     parser.add_argument('-t', '--theme', metavar='THEME', default='csc-2016',
-            help=(f'presentation theme (default: %(default)s)'))
+            help=('presentation theme name or path (default: %(default)s, '
+                  f'available: {", ".join(get_available_themes(theme_root))})'))
     parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
             choices=['pdf', 'html', 'html-local', 'html-standalone'],
             help='output format (default: %(default)s; available: %(choices)s)')
@@ -152,7 +160,7 @@ def main():
         error(f'Slidefactory directory {slidefactory_root} does not exist.')
 
     # choose theme url
-    theme_dpath, is_custom_theme = find_theme(args.theme, slidefactory_root / 'theme')
+    theme_dpath, is_custom_theme = find_theme(args.theme, theme_root)
     if (is_custom_theme
             or not in_container
             or args.format in ['pdf', 'html-local', 'html-standalone']):
