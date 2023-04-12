@@ -186,8 +186,10 @@ def main():
 
         if args.format == 'pdf':
             # use temporary html output for pdf
-            with tempfile.TemporaryDirectory() as tmpdir:
-                html = Path(tmpdir) / 'tmp.html'
+            with tempfile.NamedTemporaryFile(dir=filename.parent,
+                                             prefix=f'{filename.stem}-',
+                                             suffix='.html') as tmpfile:
+                html = Path(tmpfile.name)
                 pdf = output.with_suffix('.pdf')
                 create_html(filename, html, args,
                             theme_dpath=theme_dpath, urls_fpath=urls_fpath,
