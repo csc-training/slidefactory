@@ -24,7 +24,7 @@ def run(run_args, *, verbose=False, dry_run=False):
     run_args = [str(a) for a in run_args]
 
     if verbose or dry_run:
-        print(shlex.join(run_args), flush=True)
+        info(shlex.join(run_args))
 
     if not dry_run:
         p = subprocess.run(run_args,
@@ -33,6 +33,9 @@ def run(run_args, *, verbose=False, dry_run=False):
         if p.returncode != 0:
             error(f'error: {repr(run_args[0])} failed '
                   f'with exit code {p.returncode}')
+
+def info(msg):
+    print(msg, flush=True)
 
 
 def error(msg, code=1):
@@ -105,11 +108,15 @@ def install(path):
     if path.exists():
         error(f'Installation path {path} exists. Exiting.')
 
+    path = path.absolute()
+
     # Copy slidefactory files
+    info(f'Copy {slidefactory_root} to {path}')
     shutil.copytree(slidefactory_root, path)
 
     # Update paths in local urls
     fpath = path / 'urls_local.yaml'
+    info(f'Update {fpath}')
     with open(fpath, 'r+') as f:
         s = f.read().replace(url_quote(str(slidefactory_root)),
                              url_quote(str(path.absolute())))
@@ -117,7 +124,9 @@ def install(path):
         f.write(s)
 
     # Copy singularity image
-    shutil.copy2(os.environ['SINGULARITY_CONTAINER'], path)
+    sif = os.environ['SINGULARITY_CONTAINER']
+    info(f'Copy {sif} to {path}')
+    shutil.copy2(sif, path)
 
 
 def main():
@@ -147,9 +156,18 @@ def main():
             help='do nothing, only show the full commands to be run')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
             help='be loud and noisy')
+    parser.add_argument('-q', '--quiet', action='store_true', default=False,
+            help='suppress all output except errors')
     parser.add_argument('--install', metavar='PATH', type=Path,
             help='install local slidefactory to %(metavar)s (ignores all other arguments)')
     args = parser.parse_args()
+
+    if args.quiet:
+        global info
+
+        def info(*args, **kwargs):
+            pass
+
 
     if args.install:
         install(args.install)
@@ -168,7 +186,7 @@ def main():
     if not slidefactory_root.is_dir():
         error(f'Slidefactory directory {slidefactory_root} does not exist.')
 
-    # choose theme url
+    # Choose theme url
     theme_dpath, is_custom_theme = find_theme(args.theme, theme_root)
     if (is_custom_theme
             or not in_container
@@ -177,36 +195,45 @@ def main():
     else:
         theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
 
-    # choose other urls
+    # Choose other urls
     if args.format in ['pdf', 'html-local', 'html-standalone']:
         urls_fpath = slidefactory_root / 'urls_local.yaml'
     else:
         urls_fpath = slidefactory_root / 'urls.yaml'
 
+    # Suffix
+    if args.format == 'pdf':
+        suffix = '.pdf'
+    else:
+        suffix = '.html'
+
+    # Extra pandoc args
     pandoc_args = []
     if args.format == 'html-standalone':
         pandoc_args += ['--embed-resources']
 
-    # convert files
+    # Convert files
     for filename in args.input:
         output = filename
         if args.output:
             output = Path(args.output + str(output))
 
+        outfilename = output.with_suffix(suffix)
+
+        info(f'Convert {filename} to {outfilename}')
+
         if args.format == 'pdf':
-            # use temporary html output for pdf
+            # Use temporary html output for pdf
             with tempfile.NamedTemporaryFile(dir=filename.parent,
                                              prefix=f'{filename.stem}-',
                                              suffix='.html') as tmpfile:
                 html = Path(tmpfile.name)
-                pdf = output.with_suffix('.pdf')
                 create_html(filename, html, args,
                             theme_dpath=theme_dpath, urls_fpath=urls_fpath,
                             theme_url=theme_url)
-                create_pdf(html, pdf, args)
+                create_pdf(html, outfilename, args)
         else:
-            html = output.with_suffix('.html')
-            create_html(filename, html, args,
+            create_html(filename, outfilename, args,
                         theme_dpath=theme_dpath, urls_fpath=urls_fpath,
                         theme_url=theme_url, pandoc_args=pandoc_args)
 
