@@ -1,6 +1,6 @@
 SIF=slidefactory.sif
 IMAGE=slidefactory
-TAG=0.2.0
+TAG=2.0.0
 
 
 build: Dockerfile convert.py
