@@ -46,7 +46,7 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     rm -f tmp.zip
 
 # Fonts
-RUN for FONT in 'Noto Sans' 'Noto Sans Mono' 'Inconsolata'; do \
+RUN for FONT in 'Noto Sans' 'Inconsolata'; do \
       FONT_URL=$(echo "$FONT" | tr ' ' +) && \
       FONT_DIR=$(echo "$FONT" | tr -d ' ') && \
       wget "https://fonts.google.com/download?family=$FONT_URL" -O tmp.zip && \
