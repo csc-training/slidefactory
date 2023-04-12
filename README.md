@@ -60,23 +60,23 @@ follow similar structure as the existing themes
 
 Install slidefactory files from the container to a local directory:
 ```bash
-./slidefactory.sif --install "$HOME/slidefactory"
+./slidefactory.sif --install ~/slidefactory
 ```
 and create an alias for using the local installation:
 ```bash
-alias local-slidefactory="singularity exec \"$HOME/slidefactory/slidefactory.sif\" \"$HOME/slidefactory/convert.py\""
+alias slidefactory="singularity exec ~/slidefactory/slidefactory.sif ~/slidefactory/convert.py"
 ```
 
 Then use the local slidefactory installation:
 ```bash
-local-slidefactory --format pdf slides.md
+slidefactory --format pdf slides.md
 ```
 
 Local installation enables creating a local HTML
 (doesn't require internet access but uses
 the installed local copy of web resources):
 ```bash
-local-slidefactory --format html-local slides.md
+slidefactory --format html-local slides.md
 ```
 
 
