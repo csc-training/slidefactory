@@ -60,11 +60,11 @@ follow similar structure as the existing themes
 
 Install slidefactory files from the container to a local directory:
 ```bash
-./slidefactory.sif --install $HOME/slidefactory
+./slidefactory.sif --install "$HOME/slidefactory"
 ```
 and create an alias for using the local installation:
 ```bash
-alias local-slidefactory="singularity exec ./slidefactory.sif $HOME/slidefactory/convert.py"
+alias local-slidefactory="singularity exec \"$PWD/slidefactory.sif\" \"$HOME/slidefactory/convert.py\""
 ```
 
 Then use the local slidefactory installation:
