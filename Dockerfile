@@ -51,7 +51,7 @@ RUN for FONT in 'Noto Sans' 'Noto Sans Mono' 'Inconsolata'; do \
       :; \
     done
 
-ADD css/fonts.css $SLIDEFACTORY_ROOT/fonts
+ADD fonts/ $SLIDEFACTORY_ROOT/fonts/
 
 RUN echo -e "\
 ---\n\
