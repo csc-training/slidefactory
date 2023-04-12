@@ -14,8 +14,6 @@ RUN find /slidefactory -name '.*' -delete
 
 FROM docker.io/alpine:3.17.3
 
-LABEL org.opencontainers.image.source=https://github.com/csc-training/slidefactory
-
 RUN apk update && \
     apk add --no-cache \
       ca-certificates \
