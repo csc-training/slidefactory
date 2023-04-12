@@ -123,7 +123,7 @@ def main():
     parser.add_argument('-t', '--theme', metavar='THEME', default='csc-2016',
             help=(f'presentation theme (default: %(default)s)'))
     parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
-            choices=['pdf', 'html', 'html-offline', 'html-offline-complete'],
+            choices=['pdf', 'html', 'html-local', 'html-standalone'],
             help='output format (default: %(default)s; available: %(choices)s)')
     parser.add_argument('-b', '--browser', default='chromium-browser',
             help='browser to use for converting PDFs (default: %(default)s)')
@@ -145,8 +145,8 @@ def main():
 
     in_container = slidefactory_root == Path(os.environ['SLIDEFACTORY_ROOT'])
 
-    if args.format == 'html-offline' and in_container:
-        error('Install and use local slidefactory in order to create offline htmls.')
+    if args.format == 'html-local' and in_container:
+        error('Install and use local slidefactory in order to create local offline htmls.')
 
     if not slidefactory_root.is_dir():
         error(f'Slidefactory directory {slidefactory_root} does not exist.')
@@ -155,19 +155,19 @@ def main():
     theme_dpath, is_custom_theme = find_theme(args.theme, slidefactory_root / 'theme')
     if (is_custom_theme
             or not in_container
-            or args.format in ['pdf', 'html-offline', 'html-offline-complete']):
+            or args.format in ['pdf', 'html-local', 'html-standalone']):
         theme_url = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'
     else:
         theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
 
     # choose other urls
-    if args.format in ['pdf', 'html-offline', 'html-offline-complete']:
+    if args.format in ['pdf', 'html-local', 'html-standalone']:
         urls_fpath = slidefactory_root / 'urls_local.yaml'
     else:
         urls_fpath = slidefactory_root / 'urls.yaml'
 
     pandoc_args = []
-    if args.format == 'html-offline-complete':
+    if args.format == 'html-standalone':
         pandoc_args += ['--embed-resources']
 
     # convert files
