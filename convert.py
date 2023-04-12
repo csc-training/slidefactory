@@ -154,7 +154,12 @@ def main():
     in_container = slidefactory_root == Path('/slidefactory')
 
     if args.format == 'html-local' and in_container:
-        error('Install and use local slidefactory in order to create local offline htmls.')
+        error('Install and use local slidefactory in order to create local offline htmls.'
+              '\n\nIn short (see README for details):\n\n'
+              './slidefactory.sif --install "$HOME/slidefactory"\n'
+              r'alias local-slidefactory="singularity exec \"$PWD/slidefactory.sif\" \"$HOME/slidefactory/convert.py\""' '\n'
+              f'local-slidefactory --format {args.format} slides.md\n'
+              )
 
     if not slidefactory_root.is_dir():
         error(f'Slidefactory directory {slidefactory_root} does not exist.')
