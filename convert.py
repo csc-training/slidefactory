@@ -151,7 +151,7 @@ def main():
         install(args.install)
         sys.exit(0)
 
-    in_container = slidefactory_root == Path(os.environ['SLIDEFACTORY_ROOT'])
+    in_container = slidefactory_root == Path('/slidefactory')
 
     if args.format == 'html-local' and in_container:
         error('Install and use local slidefactory in order to create local offline htmls.')
