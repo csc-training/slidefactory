@@ -1,3 +1,17 @@
+FROM docker.io/alpine:3.17.3 AS slidefactory-files
+
+ADD LICENSE /slidefactory/
+ADD convert.py /slidefactory/
+ADD urls.yaml /slidefactory/
+ADD urls_local.yaml /slidefactory/
+ADD fonts/ /slidefactory/fonts/
+ADD theme/ /slidefactory/theme/
+
+# Remove possible temporary files
+RUN find /slidefactory -name '*~' -delete
+RUN find /slidefactory -name '.*' -delete
+
+
 FROM docker.io/alpine:3.17.3
 
 LABEL org.opencontainers.image.source=https://github.com/csc-training/slidefactory
@@ -51,13 +65,7 @@ RUN for FONT in 'Noto Sans' 'Noto Sans Mono' 'Inconsolata'; do \
       :; \
     done
 
-ADD fonts/ $SLIDEFACTORY_ROOT/fonts/
-
-ADD urls.yaml $SLIDEFACTORY_ROOT/
-ADD urls_local.yaml $SLIDEFACTORY_ROOT/
-
-ADD theme/ $SLIDEFACTORY_ROOT/theme/
-ADD convert.py $SLIDEFACTORY_ROOT/
+COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
 RUN mkdir /work
 
