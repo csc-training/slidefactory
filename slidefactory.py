@@ -115,13 +115,14 @@ def install(path):
     shutil.copytree(slidefactory_root, path)
 
     # Update paths in local urls
-    fpath = path / 'urls_local.yaml'
-    info(f'Update {fpath}')
-    with open(fpath, 'r+') as f:
-        s = f.read().replace(url_quote(str(slidefactory_root)),
-                             url_quote(str(path.absolute())))
-        f.seek(0)
-        f.write(s)
+    for fname in ['urls_local.yaml', 'urls_standalone.yaml']:
+        fpath = path / fname
+        info(f'Update {fpath}')
+        with open(fpath, 'r+') as f:
+            s = f.read().replace(url_quote(str(slidefactory_root)),
+                                 url_quote(str(path.absolute())))
+            f.seek(0)
+            f.write(s)
 
     # Copy singularity image
     sif = Path(os.environ['SINGULARITY_CONTAINER'])
@@ -202,8 +203,10 @@ def main():
         theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
 
     # Choose other urls
-    if args.format in ['pdf', 'html-local', 'html-standalone']:
+    if args.format in ['pdf', 'html-local']:
         urls_fpath = slidefactory_root / 'urls_local.yaml'
+    elif args.format in ['html-standalone']:
+        urls_fpath = slidefactory_root / 'urls_standalone.yaml'
     else:
         urls_fpath = slidefactory_root / 'urls.yaml'
 
@@ -215,7 +218,7 @@ def main():
 
     # Extra pandoc args
     pandoc_args = []
-    if args.format == 'html-standalone':
+    if args.format in ['html-standalone']:
         pandoc_args += ['--embed-resources']
 
     # Convert files
