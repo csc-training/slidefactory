@@ -32,7 +32,9 @@ def run(run_args, *, verbose=False, dry_run=False):
                            capture_output=True)
         if p.returncode != 0:
             error(f'error: {repr(run_args[0])} failed '
-                  f'with exit code {p.returncode}')
+                   f'with exit code {p.returncode}:\n'
+                   f'{p.stderr.decode()}')
+
 
 def info(msg):
     print(msg, flush=True)
