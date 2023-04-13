@@ -124,9 +124,15 @@ def install(path):
         f.write(s)
 
     # Copy singularity image
-    sif = os.environ['SINGULARITY_CONTAINER']
-    info(f'Copy {sif} to {path}')
-    shutil.copy2(sif, path)
+    sif = Path(os.environ['SINGULARITY_CONTAINER'])
+    local_sif = path / sif.name
+    info(f'Copy {sif} to {local_sif}')
+    shutil.copy2(sif, local_sif)
+
+    info('\nTo activate the local installation, run:\n\n'
+         f'  alias slidefactory="singularity exec \'{local_sif}\' \'{path}/{Path(__file__).name}\'"' '\n'
+         '\nAfter that, use `slidefactory` command, for example:\n\n'
+         f'  slidefactory --format html-local slides.md\n')
 
 
 def main():
@@ -176,11 +182,11 @@ def main():
     in_container = slidefactory_root == Path('/slidefactory')
 
     if args.format == 'html-local' and in_container:
+        sif = Path(os.environ['SINGULARITY_CONTAINER'])
         error('Install and use local slidefactory in order to create local offline htmls.'
-              '\n\nIn short (see README for details):\n\n'
-              './slidefactory.sif --install ~/slidefactory\n'
-              'alias slidefactory="singularity exec ~/slidefactory/slidefactory.sif ~/slidefactory/convert.py"' '\n'
-              f'slidefactory --format {args.format} slides.md\n'
+              '\n\nIn short, run:\n\n'
+              f'  {sif} --install ~/slidefactory\n'
+              '\nand follow the instructions (see README for details).'
               )
 
     if not slidefactory_root.is_dir():
