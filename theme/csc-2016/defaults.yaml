@@ -11,7 +11,5 @@ variables:
     transition: none
     backgroundTransition: none
 highlight-style: pygments
-html-math-method:
-    method: mathjax
 ...
 ---

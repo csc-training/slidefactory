@@ -167,6 +167,8 @@ def main():
             help='be loud and noisy')
     parser.add_argument('-q', '--quiet', action='store_true', default=False,
             help='suppress all output except errors')
+    parser.add_argument('--no-math', action='store_true',
+            help='disable math rendering')
     parser.add_argument('--install', metavar='PATH', type=Path,
             help='install local slidefactory to %(metavar)s (ignores all other arguments)')
     args = parser.parse_args()
@@ -181,6 +183,8 @@ def main():
     if args.install:
         install(args.install)
         sys.exit(0)
+
+    include_math = not args.no_math
 
     in_container = slidefactory_root == Path('/slidefactory')
 
@@ -208,7 +212,10 @@ def main():
     if args.format in ['pdf', 'html-local']:
         urls_fpath = slidefactory_root / 'urls_local.yaml'
     elif args.format in ['html-standalone']:
-        urls_fpath = slidefactory_root / 'urls_standalone.yaml'
+        if include_math:
+            urls_fpath = slidefactory_root / 'urls_standalone.yaml'
+        else:
+            urls_fpath = slidefactory_root / 'urls_local.yaml'
     else:
         urls_fpath = slidefactory_root / 'urls.yaml'
 
@@ -220,6 +227,8 @@ def main():
 
     # Extra pandoc args
     pandoc_args = []
+    if include_math:
+        pandoc_args += ['--mathjax']
     if args.format in ['html-standalone']:
         pandoc_args += ['--embed-resources']
 
