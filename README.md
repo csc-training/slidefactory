@@ -83,6 +83,13 @@ the installed local copy of web resources):
 slidefactory --format html-local slides.md
 ```
 
+## Known issues
+
+* Standalone HTML: incorrect math font
+  * Use local HTML or PDF instead
+* Standalone and local HTML: Firefox displays incorrect fonts
+  * Use Chromium or Chrome instead
+
 
 ## Building and updating the container image
 
