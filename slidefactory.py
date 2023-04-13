@@ -2,8 +2,8 @@
 #---------------------------------------------------------------------------#
 # Function: Convert a presentation from Markdown (or reStructuredText) to   #
 #           reveal.js powered HTML5 using pandoc.                           #
-# Usage: python convert.py talk.md                                          #
-# Help:  python convert.py --help                                           #
+# Usage: python slidefactory.py talk.md                                     #
+# Help:  python slidefactory.py --help                                      #
 #---------------------------------------------------------------------------#
 import argparse
 import inspect

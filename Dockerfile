@@ -5,7 +5,7 @@ ADD fonts/ /slidefactory/fonts/
 ADD urls.yaml /slidefactory/
 ADD urls_local.yaml /slidefactory/
 ADD theme/ /slidefactory/theme/
-ADD convert.py /slidefactory/
+ADD slidefactory.py /slidefactory/
 
 # Remove possible temporary files
 RUN find /slidefactory -name '*~' -delete
@@ -67,5 +67,5 @@ RUN mkdir /work
 
 WORKDIR /work
 
-ENTRYPOINT ["/slidefactory/convert.py"]
+ENTRYPOINT ["/slidefactory/slidefactory.py"]
 CMD ["-h"]

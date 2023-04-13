@@ -3,7 +3,7 @@ IMAGE=slidefactory
 TAG=2.0.0
 
 
-build: Dockerfile convert.py
+build: Dockerfile slidefactory.py
 	podman build --format docker \
 		--label "org.opencontainers.image.source=https://github.com/csc-training/slidefactory" \
 		--label "org.opencontainers.image.description=slidefactory" \
