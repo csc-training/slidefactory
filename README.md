@@ -27,10 +27,14 @@ or to a regular HTML (requires an internet access to display):
 ```bash
 ./slidefactory.sif --format html slides.md
 ```
-or to a standalone HTML with images and other resources embedded within the file:
+or to a standalone HTML (images and other resources embedded within the file):
 ```bash
 ./slidefactory.sif --format html-standalone slides.md
 ```
+The standalone HTML files are rather large. For offline use,
+`--format html-local` with
+[a local slidefactory installation](#local-slidefactory-installation)
+can be more practical.
 
 Change the theme with `--theme`:
 ```bash
