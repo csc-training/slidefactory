@@ -595,11 +595,13 @@ body {
 }
 .reveal .slides .pdf-page > section h2:first-child,
 .reveal .slides .pdf-page > section h3:first-child,
+.reveal .slides .pdf-page > section h1:first-child + p,
 .reveal .slides .pdf-page > section h1:first-child + h2,
 .reveal .slides .pdf-page > section h1:first-child + h3,
 .reveal .column .pdf-page h2:first-child,
 .reveal .column .pdf-page h3:first-child {
   padding-top: 0;
+  margin-top: 0;
 }
 .reveal .slides .pdf-page > section:before {
   content: "";
@@ -610,6 +612,24 @@ body {
 .reveal .slides .pdf-page > section.title h1:first-child {
   padding-bottom: 1ex;
 }
+.reveal .slides .pdf-page > section.section h1:first-child {
+  padding-bottom: 1ex;
+}
 .reveal .slides .pdf-page > section.author h1:first-child {
   padding-bottom: 1.4em;
+}
+
+.reveal .slides .pdf-page > section > ul > li,
+.reveal .slides .pdf-page > section > div > ul > li,
+.reveal .slides .pdf-page > section > div > ol > li,
+.reveal .slides .pdf-page > section > ol > li {
+  margin-bottom: 1ex;
+}
+.reveal .slides .pdf-page > section > dl > dt,
+.reveal .slides .pdf-page > section > div > dl > dt {
+  margin-top: 1ex;
+}
+.reveal .slides .pdf-page > section > dl > dt:first-child,
+.reveal .slides .pdf-page > section > div > dl > dt:first-child {
+  margin-top: 0;
 }
