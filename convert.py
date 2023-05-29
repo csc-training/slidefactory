@@ -206,6 +206,8 @@ def run():
     parser.add_argument('--filter', action='append', default=filters,
             metavar='filter.py',
             help='pandoc filter script (multiple allowed)')
+    parser.add_argument('-f', '--format', default='markdown-native_divs',
+            help='source file format (default: %(default)s)')
     parser.add_argument('--reveal', help=argparse.SUPPRESS, default=None)
     parser.add_argument('--mathjax', help=argparse.SUPPRESS, default=None)
     parser.add_argument('--as-container', help=argparse.SUPPRESS,
@@ -293,6 +295,7 @@ def run():
             'style':   args.style,
             'input':   args.input,
             'output':  args.output,
+            'format':  args.format,
             'meta':    ' '.join('-M ' + x for x in meta),
             'vars':    ' '.join('-V ' + x for x in variables),
             'config':  ' '.join('-V ' + x for x in config),
@@ -341,7 +344,7 @@ def run():
         flags['output'] = html
 
         # construct the pandoc command
-        cmd = ('pandoc {input} -s -f markdown-native_divs -t revealjs --template={template} '
+        cmd = ('pandoc {input} -s -f {format} -t revealjs --template={template} '
                 + '{meta} {vars} {config} {contained} '
                 + '--mathjax={mathjax} --highlight-style={style} '
                 + '{filter} -o {output}').format(**flags)
