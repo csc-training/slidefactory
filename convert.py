@@ -208,6 +208,8 @@ def run():
             help='pandoc filter script (multiple allowed)')
     parser.add_argument('-f', '--format', default='markdown-native_divs',
             help='source file format (default: %(default)s)')
+    parser.add_argument('--arg', action='append', default=[],
+            help='extra pandoc argument (multiple allowed)')
     parser.add_argument('--reveal', help=argparse.SUPPRESS, default=None)
     parser.add_argument('--mathjax', help=argparse.SUPPRESS, default=None)
     parser.add_argument('--as-container', help=argparse.SUPPRESS,
@@ -300,6 +302,7 @@ def run():
             'vars':    ' '.join('-V ' + x for x in variables),
             'config':  ' '.join('-V ' + x for x in config),
             'filter':  ' '.join('--filter ' + x for x in args.filter),
+            'args':    ' '.join(args.arg),
             'mathjax': args.mathjax,
             'template': os.path.join(
                 path['themes'], args.theme, 'template.html'),
@@ -331,6 +334,8 @@ def run():
         print('  --mathjax={0}'.format(args.mathjax))
         if args.self_contained:
             print('  ' + contained)
+        for x in args.arg:
+            print('  ' + x)
 
     # convert files
     for filename in args.input:
@@ -345,7 +350,7 @@ def run():
 
         # construct the pandoc command
         cmd = ('pandoc {input} -s -f {format} -t revealjs --template={template} '
-                + '{meta} {vars} {config} {contained} '
+                + '{meta} {vars} {config} {contained} {args} '
                 + '--mathjax={mathjax} --highlight-style={style} '
                 + '{filter} -o {output}').format(**flags)
 
