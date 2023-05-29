@@ -325,8 +325,11 @@ body {
   border:        2px solid;
 }
 .reveal pre,
-.reveal code {
-  font-family: var(--csc-code-font-family);
+.reveal code,
+.reveal pre code,
+.reveal .pdf-page pre,
+.reveal .pdf-page code {
+  font-family: var(--csc-code-font-family) !important;
 }
 .reveal pre code {
   display:    block;
@@ -335,6 +338,7 @@ body {
   max-height: calc(0.735 * var(--ysize));
   word-wrap:  normal;
   white-space: pre;
+  font-family: var(--csc-code-font-family);
 }
 .reveal code {
   white-space: pre-wrap;
