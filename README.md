@@ -66,8 +66,8 @@ tested to work with slidefactory.
 Get the source code, build the singularity container and install
 slidefactory:
 ```
-git clone https://github.com/csc-training/slide-template
-cd slide-template
+git clone https://github.com/csc-training/slidefactory
+cd slidefactory
 make
 make install
 ```
