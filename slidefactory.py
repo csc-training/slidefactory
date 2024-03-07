@@ -150,7 +150,7 @@ def main():
     parser.add_argument('--output', metavar='prefix',
             help='prefix for output filenames (by default uses the '
             'basename of the input file, i.e. talk.md -> talk.html)')
-    parser.add_argument('-t', '--theme', metavar='THEME', default='csc-2016',
+    parser.add_argument('-t', '--theme', metavar='THEME', default='csc-plain',
             help=('presentation theme name or path (default: %(default)s, '
                   f'available: {", ".join(get_available_themes(theme_root))})'))
     parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
