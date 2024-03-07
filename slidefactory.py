@@ -94,11 +94,12 @@ def create_html(input_fpath, html_fpath, args, *,
 def create_pdf(html_fpath, pdf_fpath, args):
     run_args = [
         args.browser,
+        '--no-sandbox',
         '--headless',
         '--disable-gpu',
         '--disable-software-rasterizer',
         '--hide-scrollbars',
-        '--virtual-time-budget=10000000',
+        '--virtual-time-budget=2147483647',
         '--run-all-compositor-stages-before-draw',
         f'--print-to-pdf={pdf_fpath}',
         f'file://{html_fpath.absolute()}?print-pdf'
