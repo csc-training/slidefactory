@@ -555,7 +555,7 @@
 .reveal .title h1, .reveal .title p {
   margin-left: calc(0.291 * var(--xsize));
   text-align:  left;
-  color:       #ffffff;
+  color:       var(--csc-dark-blue);
 }
 .reveal .slides > section.title h1:first-child {
   padding-bottom: 1ex;
