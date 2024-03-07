@@ -12,6 +12,10 @@ ADD slidefactory.py /slidefactory/
 RUN find /slidefactory -name '*~' -delete
 RUN find /slidefactory -name '.*' -delete
 
+# Fix permission
+RUN chmod a+r -R /slidefactory && \
+    chmod a+x /slidefactory/slidefactory.py
+
 
 FROM docker.io/alpine:3.17.3
 
