@@ -251,7 +251,7 @@ def main():
                 html = Path(tmpfile.name)
                 create_html(filename, html, args,
                             theme_dpath=theme_dpath, urls_fpath=urls_fpath,
-                            theme_url=theme_url)
+                            theme_url=theme_url, pandoc_args=pandoc_args)
                 create_pdf(html, outfilename, args)
         else:
             create_html(filename, outfilename, args,
