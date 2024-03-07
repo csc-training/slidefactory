@@ -287,7 +287,13 @@
          id="path4-4-7" /></clipPath><clipPath
        id="clip3-4-6"><path
          d="m 0,395 h 360 v 10.12109 H 0 Z m 0,0"
-         id="path5-3-7" /></clipPath></defs><g
+         id="path5-3-7" /></clipPath></defs><rect
+     style="opacity:1;fill:#ffffff;stroke-width:0.2"
+     id="rect1"
+     width="528"
+     height="297"
+     x="0"
+     y="0" /><g
      id="g65"
      transform="translate(-1076,-0.13092066)"><g
        style="fill:#5c6870;fill-opacity:1"

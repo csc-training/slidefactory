@@ -19,7 +19,13 @@
          id="path4-4" /></clipPath><clipPath
        id="clip3-4"><path
          d="m 0,395 h 360 v 10.12109 H 0 Z m 0,0"
-         id="path5-3" /></clipPath></defs><g
+         id="path5-3" /></clipPath></defs><rect
+     style="opacity:1;fill:#ffffff;stroke-width:0.2"
+     id="rect1"
+     width="528"
+     height="297"
+     x="0"
+     y="0" /><g
      clip-path="url(#clip1-5)"
      clip-rule="nonzero"
      id="g8"
