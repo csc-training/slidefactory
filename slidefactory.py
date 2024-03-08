@@ -159,9 +159,9 @@ def main():
     parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
             choices=['pdf', 'html', 'html-local', 'html-standalone'],
             help='output format (default: %(default)s; available: %(choices)s)')
-    parser.add_argument('--filter', action='append', default=[],
+    parser.add_argument('--filters', action='append', default=[],
             metavar='filter.py',
-            help='pandoc filter script (multiple allowed)')
+            help='pandoc filter scripts (multiple allowed)')
     parser.add_argument('-n', '--dry-run', '--show-command',
             action='store_true', default=False,
             help='do nothing, only show the full commands to be run')
@@ -253,13 +253,15 @@ def main():
                 create_html(filename, html,
                             theme_dpath=theme_dpath, urls_fpath=urls_fpath,
                             theme_url=theme_url,
-                            filters=args.filter,
+                            filters=args.filters,
                             pandoc_args=pandoc_args)
                 create_pdf(html, outfilename)
         else:
             create_html(filename, outfilename,
                         theme_dpath=theme_dpath, urls_fpath=urls_fpath,
-                        theme_url=theme_url, pandoc_args=pandoc_args)
+                        theme_url=theme_url,
+                        filters=args.filters,
+                        pandoc_args=pandoc_args)
 
 
 if __name__ == '__main__':
