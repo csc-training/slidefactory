@@ -6,6 +6,7 @@
 # Help:  python slidefactory.py --help                                      #
 #---------------------------------------------------------------------------#
 import argparse
+import functools
 import inspect
 import os
 import shlex
@@ -20,7 +21,7 @@ from pathlib import Path
 slidefactory_root = Path(__file__).absolute().parent
 
 
-def run(run_args, *, verbose=False, dry_run=False):
+def run_template(run_args, *, verbose, dry_run):
     run_args = [str(a) for a in run_args]
 
     if verbose or dry_run:
@@ -36,8 +37,9 @@ def run(run_args, *, verbose=False, dry_run=False):
                    f'{p.stderr.decode()}')
 
 
-def info(msg):
-    print(msg, flush=True)
+def info_template(msg, *, quiet):
+    if not quiet:
+        print(msg, flush=True)
 
 
 def error(msg, code=1):
@@ -74,8 +76,9 @@ def find_theme(theme, theme_root):
     return p, is_custom
 
 
-def create_html(input_fpath, html_fpath, args, *,
+def create_html(input_fpath, html_fpath, *,
                 theme_dpath, urls_fpath, theme_url,
+                filters=[],
                 pandoc_args=[]):
     run_args = [
         'pandoc',
@@ -87,11 +90,11 @@ def create_html(input_fpath, html_fpath, args, *,
         input_fpath,
         ]
     run_args += pandoc_args
-    run_args += [f'--filter={f}' for f in args.filter]
-    run(run_args, verbose=args.verbose, dry_run=args.dry_run)
+    run_args += [f'--filter={f}' for f in filters]
+    run(run_args)
 
 
-def create_pdf(html_fpath, pdf_fpath, args):
+def create_pdf(html_fpath, pdf_fpath):
     run_args = [
         'chromium-browser',
         '--no-sandbox',
@@ -104,7 +107,7 @@ def create_pdf(html_fpath, pdf_fpath, args):
         f'--print-to-pdf={pdf_fpath}',
         f'file://{html_fpath.absolute()}?print-pdf'
         ]
-    run(run_args, verbose=args.verbose, dry_run=args.dry_run)
+    run(run_args)
 
 
 def install(path):
@@ -172,11 +175,11 @@ def main():
             help='install local slidefactory to %(metavar)s (ignores all other arguments)')
     args = parser.parse_args()
 
-    if args.quiet:
-        global info
+    global info
+    info = functools.partial(info_template, quiet=args.quiet)
 
-        def info(*args, **kwargs):
-            pass
+    global run
+    run = functools.partial(run_template, verbose=args.verbose, dry_run=args.dry_run)
 
 
     if args.install:
@@ -247,12 +250,14 @@ def main():
                                              prefix=f'{filename.stem}-',
                                              suffix='.html') as tmpfile:
                 html = Path(tmpfile.name)
-                create_html(filename, html, args,
+                create_html(filename, html,
                             theme_dpath=theme_dpath, urls_fpath=urls_fpath,
-                            theme_url=theme_url, pandoc_args=pandoc_args)
-                create_pdf(html, outfilename, args)
+                            theme_url=theme_url,
+                            filters=args.filter,
+                            pandoc_args=pandoc_args)
+                create_pdf(html, outfilename)
         else:
-            create_html(filename, outfilename, args,
+            create_html(filename, outfilename,
                         theme_dpath=theme_dpath, urls_fpath=urls_fpath,
                         theme_url=theme_url, pandoc_args=pandoc_args)
 
