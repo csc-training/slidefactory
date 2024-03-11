@@ -224,6 +224,10 @@ def main():
     # Suffix
     if args.format == 'pdf':
         suffix = '.pdf'
+    elif args.format == 'html-local':
+        suffix = '.local.html'
+    elif args.format == 'html-standalone':
+        suffix = '.standalone.html'
     else:
         suffix = '.html'
 
