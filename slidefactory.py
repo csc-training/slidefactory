@@ -240,28 +240,29 @@ def main():
         if args.output:
             output = Path(args.output + str(output))
 
-        outfilename = output.with_suffix(suffix)
+        out_fpath = output.with_suffix(suffix)
 
-        info(f'Convert {filename} to {outfilename}')
+        info(f'Convert {filename} to {out_fpath}')
 
-        if args.format == 'pdf':
-            # Use temporary html output for pdf
-            with tempfile.NamedTemporaryFile(dir=filename.parent,
-                                             prefix=f'{filename.stem}-',
-                                             suffix='.html') as tmpfile:
-                html = Path(tmpfile.name)
-                create_html(filename, html,
-                            theme_dpath=theme_dpath, urls_fpath=urls_fpath,
-                            theme_url=theme_url,
-                            filters=args.filters,
-                            pandoc_args=pandoc_args)
-                create_pdf(html, outfilename)
-        else:
-            create_html(filename, outfilename,
-                        theme_dpath=theme_dpath, urls_fpath=urls_fpath,
+        # Use temporary html output for pdf
+        with tempfile.NamedTemporaryFile(
+                 dir=filename.parent,
+                 prefix=f'{filename.stem}-',
+                 suffix='.html') \
+             if args.format == 'pdf' \
+             else open(out_fpath) \
+             as outfile:
+
+            html_fpath = Path(outfile.name)
+            create_html(filename, html_fpath,
+                        theme_dpath=theme_dpath,
+                        urls_fpath=urls_fpath,
                         theme_url=theme_url,
                         filters=args.filters,
                         pandoc_args=pandoc_args)
+
+            if args.format == 'pdf':
+                create_pdf(html_fpath, out_fpath)
 
 
 if __name__ == '__main__':
