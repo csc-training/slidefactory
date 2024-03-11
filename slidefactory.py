@@ -236,11 +236,11 @@ def main():
 
     # Convert files
     for filename in args.input:
-        output = filename
-        if args.output:
-            output = Path(args.output + str(output))
+        out_fpath = Path(filename)
+        out_fpath = out_fpath.with_suffix(suffix)
 
-        out_fpath = output.with_suffix(suffix)
+        if args.output:
+            out_fpath = out_fpath.with_name(args.output)
 
         info(f'Convert {filename} to {out_fpath}')
 
@@ -250,7 +250,7 @@ def main():
                  prefix=f'{filename.stem}-',
                  suffix='.html') \
              if args.format == 'pdf' \
-             else open(out_fpath) \
+             else open(out_fpath, 'w') \
              as outfile:
 
             html_fpath = Path(outfile.name)
