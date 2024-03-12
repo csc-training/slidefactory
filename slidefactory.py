@@ -77,20 +77,24 @@ def find_theme(theme, theme_root):
 
 
 def create_html(input_fpath, html_fpath, *,
-                theme_dpath, urls_fpath, theme_url,
+                defaults_fpath,
+                template_fpath,
+                pandoc_vars,
                 filters=[],
                 pandoc_args=[]):
     run_args = [
         'pandoc',
-        f'--defaults={theme_dpath / "defaults.yaml"}',
-        f'--template={theme_dpath / "template.html"}',
-        f'--metadata-file={urls_fpath}',
-        f'--metadata=theme-url:{theme_url}',
+        f'--defaults={defaults_fpath}',
+        f'--template={template_fpath}',
+        ]
+    for key, value in pandoc_vars.items():
+        run_args += [f'--variable={key}:{value}']
+    run_args += pandoc_args
+    run_args += [f'--filter={f}' for f in filters]
+    run_args += [
         f'--output={html_fpath}',
         input_fpath,
         ]
-    run_args += pandoc_args
-    run_args += [f'--filter={f}' for f in filters]
     run(run_args)
 
 
@@ -120,16 +124,6 @@ def install(path):
     info(f'Copy {slidefactory_root} to {path}')
     shutil.copytree(slidefactory_root, path)
 
-    # Update paths in local urls
-    for fname in ['urls_local.yaml', 'urls_standalone.yaml']:
-        fpath = path / fname
-        info(f'Update {fpath}')
-        with open(fpath, 'r+') as f:
-            s = f.read().replace(url_quote(str(slidefactory_root)),
-                                 url_quote(str(path.absolute())))
-            f.seek(0)
-            f.write(s)
-
     # Copy singularity image
     sif = Path(os.environ['SINGULARITY_CONTAINER'])
     local_sif = path / sif.name
@@ -144,6 +138,15 @@ def install(path):
 
 def main():
     theme_root = slidefactory_root / 'theme'
+
+    resources = {
+            'defaults_fpath': None,
+            'template_fpath': None,
+            'theme_url': None,
+            'revealjs_url': None,
+            'mathjax_url': None,
+            'fonts_url': None,
+        }
 
     parser = argparse.ArgumentParser(description="""Convert a presentation
     from Markdown (or reStructuredText) to reveal.js powered HTML5 using
@@ -173,6 +176,9 @@ def main():
             help='disable math rendering')
     parser.add_argument('--install', metavar='PATH', type=Path,
             help='install local slidefactory to %(metavar)s (ignores all other arguments)')
+    for key in resources:
+        parser.add_argument(f'--{key}',
+                help=f'override {key}')
     args = parser.parse_args()
 
     global info
@@ -206,20 +212,47 @@ def main():
     if (is_custom_theme
             or not in_container
             or args.format in ['pdf', 'html-local', 'html-standalone']):
-        theme_url = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'
+        resources['theme_url'] = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'
     else:
-        theme_url = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
+        resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
+
+    resources['defaults_fpath'] = theme_dpath / "defaults.yaml"
+    resources['template_fpath'] = theme_dpath / "template.html"
 
     # Choose other urls
-    if args.format in ['pdf', 'html-local']:
-        urls_fpath = slidefactory_root / 'urls_local.yaml'
-    elif args.format in ['html-standalone']:
-        if include_math:
-            urls_fpath = slidefactory_root / 'urls_standalone.yaml'
-        else:
-            urls_fpath = slidefactory_root / 'urls_local.yaml'
+    if args.format in ['pdf', 'html-local', 'html-standalone']:
+        root = f'file://{url_quote(str(slidefactory_root))}'
+        resources['revealjs_url'] = f'{root}/reveal.js-4.4.0'
+        resources['mathjax_url'] = f'{root}/MathJax-3.2.2/es5/tex-chtml-full.js'
+        resources['fonts_url'] = f'{root}/fonts/fonts.css'
     else:
-        urls_fpath = slidefactory_root / 'urls.yaml'
+        resources['revealjs_url'] = 'https://cdn.jsdelivr.net/npm/reveal.js@4.4.0'
+        resources['mathjax_url'] = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js'
+        resources['fonts_url'] = 'https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i|Inconsolata:400,700&subset=greek,latin-ext'
+
+    # Update urls from args
+    for key in resources:
+        new_value = getattr(args, key)
+        if new_value is not None:
+            resources[key] = new_value
+
+    info("Using following resources (override with the given argument):")
+    for key, val in resources.items():
+        info(f"  --{key:16} {val}")
+
+    pandoc_vars = {
+        'theme-url': resources['theme_url'],
+        'revealjs-url': resources['revealjs_url'],
+        'mathjaxurl': resources['mathjax_url'],
+        'css': resources['fonts_url'],
+        }
+
+    if args.format in ['html-standalone'] and include_math:
+        url = resources['mathjax_url']
+        pandoc_vars.update({
+            'mathjaxurl': '',
+            'header-includes': f'<script src="{url}"></script>',
+            })
 
     # Suffix
     if args.format == 'pdf':
@@ -259,11 +292,12 @@ def main():
 
             html_fpath = Path(outfile.name)
             create_html(filename, html_fpath,
-                        theme_dpath=theme_dpath,
-                        urls_fpath=urls_fpath,
-                        theme_url=theme_url,
+                        defaults_fpath=resources['defaults_fpath'],
+                        template_fpath=resources['template_fpath'],
+                        pandoc_vars=pandoc_vars,
+                        pandoc_args=pandoc_args,
                         filters=args.filters,
-                        pandoc_args=pandoc_args)
+                        )
 
             if args.format == 'pdf':
                 create_pdf(html_fpath, out_fpath)

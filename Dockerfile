@@ -2,9 +2,6 @@ FROM docker.io/alpine:3.17.3 AS slidefactory-files
 
 ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
-ADD urls.yaml /slidefactory/
-ADD urls_local.yaml /slidefactory/
-ADD urls_standalone.yaml /slidefactory/
 ADD theme/ /slidefactory/theme/
 ADD slidefactory.py /slidefactory/
 

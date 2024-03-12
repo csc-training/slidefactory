@@ -1,6 +1,0 @@
----
-revealjs-url: file:///slidefactory/reveal.js-4.4.0
-mathjaxurl: ""
-css: file:///slidefactory/fonts/fonts.css
-header-includes: <script src="file:///slidefactory/MathJax-3.2.2/es5/tex-chtml-full.js"></script>
----
