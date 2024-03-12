@@ -228,7 +228,7 @@ def main():
     if is_custom_theme or not in_container or use_local_resources:
         resources['theme_url'] = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'  # noqa: E501
     else:
-        resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'  # noqa: E501
+        resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.0.0-beta.2/theme/{args.theme}/csc.css'  # noqa: E501
 
     resources['defaults_fpath'] = theme_dpath / "defaults.yaml"
     resources['template_fpath'] = theme_dpath / "template.html"
