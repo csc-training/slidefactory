@@ -93,7 +93,7 @@ def create_html(input_fpath, html_fpath, args, *,
 
 def create_pdf(html_fpath, pdf_fpath, args):
     run_args = [
-        args.browser,
+        'chromium-browser',
         '--no-sandbox',
         '--headless',
         '--disable-gpu',
@@ -156,8 +156,6 @@ def main():
     parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
             choices=['pdf', 'html', 'html-local', 'html-standalone'],
             help='output format (default: %(default)s; available: %(choices)s)')
-    parser.add_argument('-b', '--browser', default='chromium-browser',
-            help='browser to use for converting PDFs (default: %(default)s)')
     parser.add_argument('--filter', action='append', default=[],
             metavar='filter.py',
             help='pandoc filter script (multiple allowed)')
