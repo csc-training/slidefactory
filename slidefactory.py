@@ -1,10 +1,10 @@
 #!/usr/bin/python
-#---------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 # Function: Convert a presentation from Markdown (or reStructuredText) to   #
 #           reveal.js powered HTML5 using pandoc.                           #
 # Usage: python slidefactory.py talk.md                                     #
 # Help:  python slidefactory.py --help                                      #
-#---------------------------------------------------------------------------#
+# ------------------------------------------------------------------------- #
 import argparse
 import functools
 import inspect
@@ -33,8 +33,8 @@ def run_template(run_args, *, verbose, dry_run):
                            capture_output=True)
         if p.returncode != 0:
             error(f'error: {repr(run_args[0])} failed '
-                   f'with exit code {p.returncode}:\n'
-                   f'{p.stderr.decode()}')
+                  f'with exit code {p.returncode}:\n'
+                  f'{p.stderr.decode()}')
 
 
 def info_template(msg, *, quiet):
@@ -52,7 +52,8 @@ def error(msg, code=1):
 
 
 def get_available_themes(theme_root):
-    available_themes = sorted([str(x.name) for x in theme_root.iterdir() if x.is_dir()])
+    available_themes = sorted([str(x.name) for x in theme_root.iterdir()
+                               if x.is_dir()])
     return available_themes
 
 
@@ -126,11 +127,14 @@ def install(path):
 
     py_fpath = path / Path(__file__).name
 
-    info(f'\nTo use the local installation, run \'{py_fpath}\' with the container.\n'
+    info(f'\nTo use the local installation, run '
+         '\'{py_fpath}\' with the container.\n'
          f'In singularity:\n'
-         f'    singularity exec slidefactory_VERSION.sif \'{py_fpath}\' --format html-local slides.md' '\n'
+         f'    singularity exec slidefactory_VERSION.sif \'{py_fpath}\' --format html-local slides.md'  # noqa: E501
+         '\n'
          f'In docker:\n'
-         f'    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" --entrypoint \'{py_fpath}\' ghcr.io/csc-training/slidefactory:VERSION --format html-local slides.md\n'
+         f'    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" --entrypoint \'{py_fpath}\' ghcr.io/csc-training/slidefactory:VERSION --format html-local slides.md'  # noqa: E501
+         '\n'
          )
 
 
@@ -146,56 +150,69 @@ def main():
             'fonts_url': None,
         }
 
-    parser = argparse.ArgumentParser(description="""Convert a presentation
-    from Markdown (or reStructuredText) to reveal.js powered HTML5 using
-    pandoc.""")
-    parser.add_argument('input', metavar='input.md', nargs='*', type=Path,
-            help='filename for presentation source (e.g. in Markdown)')
-    parser.add_argument('--output', metavar='prefix',
-            help='prefix for output filenames (by default uses the '
-            'basename of the input file, i.e. talk.md -> talk.html)')
-    parser.add_argument('-t', '--theme', metavar='THEME', default='csc-plain',
-            help=('presentation theme name or path (default: %(default)s, '
-                  f'available: {", ".join(get_available_themes(theme_root))})'))
-    parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
-            choices=['pdf', 'html', 'html-local', 'html-embedded'],
-            help='output format (default: %(default)s; available: %(choices)s)')
-    parser.add_argument('--filters', action='append', default=[],
-            metavar='filter.py',
-            help='pandoc filter scripts (multiple allowed)')
-    parser.add_argument('-n', '--dry-run', '--show-command',
-            action='store_true', default=False,
-            help='do nothing, only show the full commands to be run')
-    parser.add_argument('-v', '--verbose', action='store_true', default=False,
-            help='be loud and noisy')
-    parser.add_argument('-q', '--quiet', action='store_true', default=False,
-            help='suppress all output except errors')
-    parser.add_argument('--no-math', action='store_true',
-            help='disable math rendering')
-    parser.add_argument('--install', metavar='PATH', type=Path,
-            help='install local slidefactory to %(metavar)s (ignores all other arguments)')
+    parser = argparse.ArgumentParser(
+        description="Convert a presentation from Markdown to "
+                    "a reveal.js-powered HTML5 using pandoc."
+                    )
+    parser.add_argument(
+        'input', metavar='input.md', nargs='*', type=Path,
+        help='filename for presentation source (e.g. in Markdown)')
+    parser.add_argument(
+        '--output', metavar='prefix',
+        help=('prefix for output filenames (by default uses the '
+              'basename of the input file, i.e. talk.md -> talk.html)'))
+    parser.add_argument(
+        '-t', '--theme', metavar='THEME', default='csc-plain',
+        help=('presentation theme name or path (default: %(default)s, '
+              f'available: {", ".join(get_available_themes(theme_root))})'))
+    parser.add_argument(
+        '-f', '--format', metavar='FORMAT', default='pdf',
+        choices=['pdf', 'html', 'html-local', 'html-embedded'],
+        help='output format (default: %(default)s; available: %(choices)s)')
+    parser.add_argument(
+        '--filters', action='append', default=[],
+        metavar='filter.py',
+        help='pandoc filter scripts (multiple allowed)')
+    parser.add_argument(
+        '-n', '--dry-run', '--show-command',
+        action='store_true', default=False,
+        help='do nothing, only show the full commands to be run')
+    parser.add_argument(
+        '-v', '--verbose', action='store_true', default=False,
+        help='be loud and noisy')
+    parser.add_argument(
+        '-q', '--quiet', action='store_true', default=False,
+        help='suppress all output except errors')
+    parser.add_argument(
+        '--no-math', action='store_true',
+        help='disable math rendering')
+    parser.add_argument(
+        '--install', metavar='PATH', type=Path,
+        help=('install local slidefactory to %(metavar)s '
+              '(ignores all other arguments)'))
     for key in resources:
-        parser.add_argument(f'--{key}',
-                help=f'override {key}')
+        parser.add_argument(f'--{key}', help=f'override {key}')
     args = parser.parse_args()
 
     global info
     info = functools.partial(info_template, quiet=args.quiet)
 
     global run
-    run = functools.partial(run_template, verbose=args.verbose, dry_run=args.dry_run)
-
+    run = functools.partial(run_template, verbose=args.verbose,
+                            dry_run=args.dry_run)
 
     if args.install:
         install(args.install)
         sys.exit(0)
 
     include_math = not args.no_math
+    use_local_resources = args.format in ['pdf', 'html-local', 'html-embedded']
 
     in_container = slidefactory_root == Path('/slidefactory')
 
     if args.format == 'html-local' and in_container:
-        error('Install and use local slidefactory in order to create local offline htmls.\n\n'
+        error('Install and use local slidefactory in order to '
+              'create local offline htmls.\n\n'
               'In short, run slidefactory container with `--install PATH` '
               'and follow the instructions (see README for details).'
               )
@@ -205,26 +222,24 @@ def main():
 
     # Choose theme url
     theme_dpath, is_custom_theme = find_theme(args.theme, theme_root)
-    if (is_custom_theme
-            or not in_container
-            or args.format in ['pdf', 'html-local', 'html-embedded']):
-        resources['theme_url'] = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'
+    if is_custom_theme or not in_container or use_local_resources:
+        resources['theme_url'] = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'  # noqa: E501
     else:
-        resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
+        resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'  # noqa: E501
 
     resources['defaults_fpath'] = theme_dpath / "defaults.yaml"
     resources['template_fpath'] = theme_dpath / "template.html"
 
     # Choose other urls
-    if args.format in ['pdf', 'html-local', 'html-embedded']:
+    if use_local_resources:
         root = f'file://{url_quote(str(slidefactory_root))}'
         resources['revealjs_url'] = f'{root}/reveal.js-4.4.0'
-        resources['mathjax_url'] = f'{root}/MathJax-3.2.2/es5/tex-chtml-full.js'
+        resources['mathjax_url'] = f'{root}/MathJax-3.2.2/es5/tex-chtml-full.js'  # noqa: E501
         resources['fonts_url'] = f'{root}/fonts/fonts.css'
     else:
-        resources['revealjs_url'] = 'https://cdn.jsdelivr.net/npm/reveal.js@4.4.0'
-        resources['mathjax_url'] = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js'
-        resources['fonts_url'] = 'https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i|Inconsolata:400,700&subset=greek,latin-ext'
+        resources['revealjs_url'] = 'https://cdn.jsdelivr.net/npm/reveal.js@4.4.0'  # noqa: E501
+        resources['mathjax_url'] = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js'  # noqa: E501
+        resources['fonts_url'] = 'https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i|Inconsolata:400,700&subset=greek,latin-ext'  # noqa: E501
 
     # Update urls from args
     for key in resources:
@@ -232,9 +247,10 @@ def main():
         if new_value is not None:
             resources[key] = new_value
 
-    info("Using following resources (override with the given argument):")
-    for key, val in resources.items():
-        info(f"  --{key:16} {val}")
+    if args.verbose:
+        info("Using following resources (override with the given argument):")
+        for key, val in resources.items():
+            info(f"  --{key:16} {val}")
 
     pandoc_vars = {
         'theme-url': resources['theme_url'],

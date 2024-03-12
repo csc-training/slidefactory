@@ -1,6 +1,6 @@
 IMAGE_ROOT?=ghcr.io/csc-training
 IMAGE=slidefactory
-IMAGE_VERSION=0.3.0-beta.14
+IMAGE_VERSION=3.0.0-beta.1
 
 
 build: Dockerfile slidefactory.py
