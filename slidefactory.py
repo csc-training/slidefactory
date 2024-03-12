@@ -124,16 +124,14 @@ def install(path):
     info(f'Copy {slidefactory_root} to {path}')
     shutil.copytree(slidefactory_root, path)
 
-    # Copy singularity image
-    sif = Path(os.environ['SINGULARITY_CONTAINER'])
-    local_sif = path / sif.name
-    info(f'Copy {sif} to {local_sif}')
-    shutil.copy2(sif, local_sif)
+    py_fpath = path / Path(__file__).name
 
-    info('\nTo activate the local installation, run:\n\n'
-         f'  alias slidefactory="singularity exec \'{local_sif}\' \'{path}/{Path(__file__).name}\'"' '\n'
-         '\nAfter that, use `slidefactory` command, for example:\n\n'
-         f'  slidefactory --format html-local slides.md\n')
+    info(f'\nTo use the local installation, run \'{py_fpath}\' with the container.\n'
+         f'In singularity:\n'
+         f'    singularity exec slidefactory_VERSION.sif \'{py_fpath}\' --format html-local slides.md' '\n'
+         f'In docker:\n'
+         f'    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" --entrypoint \'{py_fpath}\' ghcr.io/csc-training/slidefactory:VERSION --format html-local slides.md\n'
+         )
 
 
 def main():
@@ -197,11 +195,9 @@ def main():
     in_container = slidefactory_root == Path('/slidefactory')
 
     if args.format == 'html-local' and in_container:
-        sif = Path(os.environ['SINGULARITY_CONTAINER'])
-        error('Install and use local slidefactory in order to create local offline htmls.'
-              '\n\nIn short, run:\n\n'
-              f'  {sif} --install ~/slidefactory\n'
-              '\nand follow the instructions (see README for details).'
+        error('Install and use local slidefactory in order to create local offline htmls.\n\n'
+              'In short, run slidefactory container with `--install PATH` '
+              'and follow the instructions (see README for details).'
               )
 
     if not slidefactory_root.is_dir():
