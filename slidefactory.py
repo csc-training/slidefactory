@@ -190,8 +190,10 @@ def main():
         '--install', metavar='PATH', type=Path,
         help=('install local slidefactory to %(metavar)s '
               '(ignores all other arguments)'))
+    group = parser.add_argument_group(
+        'advanced options for overriding paths and urls')
     for key in resources:
-        parser.add_argument(f'--{key}', help=f'override {key}')
+        group.add_argument(f'--{key}', help=f'override {key}')
     args = parser.parse_args()
 
     global info
