@@ -15,36 +15,36 @@ it also contains a syntax guide and an example slide set.
 ## Usage
 
 Fetch the slidefactory container image:
-```bash
-singularity pull slidefactory.sif docker://ghcr.io/csc-training/slidefactory:2.0.0
-```
+
+    singularity pull slidefactory.sif docker://ghcr.io/csc-training/slidefactory:2.0.0
+
 
 Convert the markdown slides to a PDF (default):
-```bash
-./slidefactory.sif --format pdf slides.md
-```
+
+    ./slidefactory.sif --format pdf slides.md
+
 or to a regular HTML (requires an internet access to display):
-```bash
-./slidefactory.sif --format html slides.md
-```
+
+    ./slidefactory.sif --format html slides.md
+
 or to a standalone HTML (images and other resources embedded within the file):
-```bash
-./slidefactory.sif --format html-standalone slides.md
-```
-The standalone HTML files are rather large. For offline use,
-`--format html-local` with
+
+    ./slidefactory.sif --format html-standalone slides.md
+
+The standalone HTML files are rather large.
+For offline use, `--format html-local` with
 [a local slidefactory installation](#local-slidefactory-installation)
 can be more practical.
 
 Change the theme with `--theme`:
-```bash
-./slidefactory.sif --theme csc-2016 slides.md
-```
+
+    ./slidefactory.sif --theme csc-2016 slides.md
+
 
 Use help for available themes and all other options:
-```bash
-./slidefactory.sif --help
-```
+
+    ./slidefactory.sif --help
+
 See also [Advanced usage](#advanced-usage).
 
 
@@ -56,32 +56,31 @@ See also [Advanced usage](#advanced-usage).
 It's possible to use theme from any path as long as the contents
 follow similar structure as the existing themes
 (see for example [csc-2016](theme/csc-2016)):
-```bash
-./slidefactory.sif --theme path/to/my/theme slides.md
-```
+
+    ./slidefactory.sif --theme path/to/my/theme slides.md
+
 
 ### Local slidefactory installation
 
 Install slidefactory files from the container to a local directory:
-```bash
-./slidefactory.sif --install ~/slidefactory
-```
+
+    ./slidefactory.sif --install ~/slidefactory
+
 and create an alias for using the local installation:
-```bash
-alias slidefactory="singularity exec ~/slidefactory/slidefactory.sif ~/slidefactory/slidefactory.py"
-```
+
+    alias slidefactory="singularity exec ~/slidefactory/slidefactory.sif ~/slidefactory/slidefactory.py"
+
 
 Then use the local slidefactory installation:
-```bash
-slidefactory --format pdf slides.md
-```
+
+    slidefactory --format pdf slides.md
 
 Local installation enables creating a local HTML
 (doesn't require internet access but uses
 the installed local copy of web resources):
-```bash
-slidefactory --format html-local slides.md
-```
+
+    slidefactory --format html-local slides.md
+
 
 ## Known issues
 
