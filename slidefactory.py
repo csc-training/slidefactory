@@ -158,7 +158,7 @@ def main():
             help=('presentation theme name or path (default: %(default)s, '
                   f'available: {", ".join(get_available_themes(theme_root))})'))
     parser.add_argument('-f', '--format', metavar='FORMAT', default='pdf',
-            choices=['pdf', 'html', 'html-local', 'html-standalone'],
+            choices=['pdf', 'html', 'html-local', 'html-embedded'],
             help='output format (default: %(default)s; available: %(choices)s)')
     parser.add_argument('--filters', action='append', default=[],
             metavar='filter.py',
@@ -207,7 +207,7 @@ def main():
     theme_dpath, is_custom_theme = find_theme(args.theme, theme_root)
     if (is_custom_theme
             or not in_container
-            or args.format in ['pdf', 'html-local', 'html-standalone']):
+            or args.format in ['pdf', 'html-local', 'html-embedded']):
         resources['theme_url'] = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'
     else:
         resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory/theme/{args.theme}/csc.css'
@@ -216,7 +216,7 @@ def main():
     resources['template_fpath'] = theme_dpath / "template.html"
 
     # Choose other urls
-    if args.format in ['pdf', 'html-local', 'html-standalone']:
+    if args.format in ['pdf', 'html-local', 'html-embedded']:
         root = f'file://{url_quote(str(slidefactory_root))}'
         resources['revealjs_url'] = f'{root}/reveal.js-4.4.0'
         resources['mathjax_url'] = f'{root}/MathJax-3.2.2/es5/tex-chtml-full.js'
@@ -243,7 +243,7 @@ def main():
         'css': resources['fonts_url'],
         }
 
-    if args.format in ['html-standalone'] and include_math:
+    if args.format in ['html-embedded'] and include_math:
         url = resources['mathjax_url']
         pandoc_vars.update({
             'mathjaxurl': '',
@@ -255,8 +255,8 @@ def main():
         suffix = '.pdf'
     elif args.format == 'html-local':
         suffix = '.local.html'
-    elif args.format == 'html-standalone':
-        suffix = '.standalone.html'
+    elif args.format == 'html-embedded':
+        suffix = '.embedded.html'
     else:
         suffix = '.html'
 
@@ -264,7 +264,7 @@ def main():
     pandoc_args = []
     if include_math:
         pandoc_args += ['--mathjax']
-    if args.format in ['html-standalone']:
+    if args.format in ['html-embedded']:
         pandoc_args += ['--embed-resources']
 
     # Convert files
