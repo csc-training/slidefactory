@@ -6,7 +6,7 @@ This repository contains the recipe to build a new *slidefactory* container
 image and the files needed by the tool to generate slides in CSC style.
 
 If you are looking for an example of how to write slides using slidefactory,
-please have a look at the empty
+please have a look at the
 [slidefactory template](https://github.com/csc-training/slidefactory-template)
 that can be used as a basis for new courses. Besides some convenience tooling,
 it also contains a syntax guide and an example slide set.
@@ -14,79 +14,70 @@ it also contains a syntax guide and an example slide set.
 
 ## Usage
 
+The container can be run via singularity / apptainer or docker / podman.
+
+### Singularity / apptainer
+
 Fetch the slidefactory container image:
 
-    singularity pull slidefactory.sif docker://ghcr.io/csc-training/slidefactory:2.0.0
-
+    singularity pull docker://ghcr.io/csc-training/slidefactory:VERSION
 
 Convert the markdown slides to a PDF (default):
 
-    ./slidefactory.sif --format pdf slides.md
+    ./slidefactory_VERSION.sif --format pdf slides.md
 
-or to a regular HTML (requires an internet access to display):
+Convert slides to a regular HTML (an internet access required to display):
 
-    ./slidefactory.sif --format html slides.md
+    ./slidefactory_VERSION.sif --format html slides.md
 
-or to a standalone HTML (images and other resources embedded within the file):
+Convert slides to a local HTML ([a local version of resources](#local-slidefactory-installation) used - no internet access required):
 
-    ./slidefactory.sif --format html-standalone slides.md
+    ./slidefactory_VERSION.sif --format html-local slides.md
 
-The standalone HTML files are rather large.
-For offline use, `--format html-local` with
-[a local slidefactory installation](#local-slidefactory-installation)
-can be more practical.
+Convert slides to an embedded HTML (images and other resources embedded within the file):
+
+    ./slidefactory_VERSION.sif --format html-embedded slides.md
+
+The embedded HTML files are rather large and [buggy](#known-issues) so
+the pdf or the local HTML format is recommended for offline use.
+The local HTML requires [a local slidefactory installation](#local-slidefactory-installation).
 
 Change the theme with `--theme`:
 
-    ./slidefactory.sif --theme csc-2016 slides.md
+    ./slidefactory_VERSION.sif --theme .../path/to/any/theme slides.md
+
+Use help for all other options:
+
+    ./slidefactory_VERSION.sif --help
+
+#### Local slidefactory installation
+
+Copy slidefactory files from the container to a local directory:
+
+    ./slidefactory_VERSION.sif --install my_slidefactory
+
+and follow the instructions.
 
 
-Use help for available themes and all other options:
+### Docker / podman
 
-    ./slidefactory.sif --help
+Fetch the slidefactory container image:
 
-See also [Advanced usage](#advanced-usage).
+    docker pull ghcr.io/csc-training/slidefactory:VERSION
 
+Convert the markdown slides to a PDF (default):
 
-## Advanced usage
+    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" ghcr.io/csc-training/slidefactory:VERSION --format pdf slides.md
 
-
-### Custom themes
-
-It's possible to use theme from any path as long as the contents
-follow similar structure as the existing themes
-(see for example [csc-2016](theme/csc-2016)):
-
-    ./slidefactory.sif --theme path/to/my/theme slides.md
-
-
-### Local slidefactory installation
-
-Install slidefactory files from the container to a local directory:
-
-    ./slidefactory.sif --install ~/slidefactory
-
-and create an alias for using the local installation:
-
-    alias slidefactory="singularity exec ~/slidefactory/slidefactory.sif ~/slidefactory/slidefactory.py"
-
-
-Then use the local slidefactory installation:
-
-    slidefactory --format pdf slides.md
-
-Local installation enables creating a local HTML
-(doesn't require internet access but uses
-the installed local copy of web resources):
-
-    slidefactory --format html-local slides.md
+All the options work the same way as for singularity
+but using the above docker command instead.
 
 
 ## Known issues
 
-* Standalone HTML: incorrect math font
+* Embedded HTML: incorrect math font
   * Use local HTML or PDF instead
-* Standalone and local HTML: Firefox displays incorrect fonts
+* Embedded and local HTML: Firefox displays incorrect fonts
   * Use Chromium or Chrome instead
 
 
