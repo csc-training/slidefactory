@@ -95,23 +95,26 @@ slidefactory --format html-local slides.md
 
 The container recipe is encoded in `Dockerfile` and `Makefile`.
 
-Set image path for building and pushing:
-```bash
-export IMAGE_ROOT=ghcr.io/csc-training
-```
+If you don't have docker or podman, install using
 
-Login using GitHub personal access token:
-```bash
-podman login ${IMAGE_ROOT%%/*}
-```
+    sudo apt install podman-docker
 
-Build and push the image:
-```bash
-make
-make push
-```
+If using podman, define
 
-For testing, convert the local image to singularity:
-```bash
-make singularity
-```
+    export BUILDAH_FORMAT=docker
+
+Build the image
+
+    make build
+
+Login using GitHub Personal Access Token in order to be able to push:
+
+    docker login ghcr.io
+
+Push the image
+
+    make push
+
+For testing, you can also convert the local image to singularity:
+
+    make singularity

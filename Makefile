@@ -1,23 +1,23 @@
-SIF=slidefactory.sif
+IMAGE_ROOT?=ghcr.io/csc-training
 IMAGE=slidefactory
-TAG=2.0.0
+IMAGE_VERSION=0.3.0-beta.1
 
 
 build: Dockerfile slidefactory.py
-	podman build --format docker \
+	docker build \
 		--label "org.opencontainers.image.source=https://github.com/csc-training/slidefactory" \
 		--label "org.opencontainers.image.description=slidefactory" \
-		-t ${IMAGE_ROOT}/${IMAGE}:${TAG} \
+		-t ${IMAGE_ROOT}/${IMAGE}:${IMAGE_VERSION} \
 		.
 
 push:
-	podman push ${IMAGE_ROOT}/${IMAGE}:${TAG}
+	docker push ${IMAGE_ROOT}/${IMAGE}:${IMAGE_VERSION}
 
 singularity:
-	rm -f $(SIF) $(SIF:.sif=.tar)
-	podman save ${IMAGE_ROOT}/${IMAGE}:${TAG} -o $(SIF:.sif=.tar)
-	singularity build $(SIF) docker-archive://$(SIF:.sif=.tar)
-	rm -f $(SIF:.sif=.tar)
+	rm -f $(IMAGE).sif $(IMAGE).tar
+	docker save $(IMAGE_ROOT)/$(IMAGE):$(IMAGE_VERSION) -o $(IMAGE).tar
+	singularity build $(IMAGE).sif docker-archive://$(IMAGE).tar
+	rm -f $(IMAGE).tar
 
 clean:
-	rm $(SIF)
+	rm -f $(IMAGE).sif $(IMAGE).tar
