@@ -24,6 +24,7 @@ RUN apk update && \
       font-freefont \
       python3 \
       py3-pandocfilters \
+      tar \
       && \
     rm -rf /var/cache/apk/*
 
