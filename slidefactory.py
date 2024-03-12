@@ -125,16 +125,17 @@ def install(path):
     info(f'Copy {slidefactory_root} to {path}')
     shutil.copytree(slidefactory_root, path)
 
-    py_fpath = path / Path(__file__).name
+    py_fpath = shlex.quote(str(path / Path(__file__).name))
 
     info(f'\nTo use the local installation, run '
-         '\'{py_fpath}\' with the container.\n'
+         f'{py_fpath} with the container.\n'
          f'In singularity:\n'
-         f'    singularity exec slidefactory_VERSION.sif \'{py_fpath}\' --format html-local slides.md'  # noqa: E501
+         f'    singularity exec slidefactory_VERSION.sif {py_fpath} --format html-local slides.md'  # noqa: E501
          '\n'
          f'In docker:\n'
-         f'    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" --entrypoint \'{py_fpath}\' ghcr.io/csc-training/slidefactory:VERSION --format html-local slides.md'  # noqa: E501
+         f'    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" --entrypoint {py_fpath} ghcr.io/csc-training/slidefactory:VERSION --format html-local slides.md'  # noqa: E501
          '\n'
+         f'Hint: make an alias of this command.\n'
          )
 
 
