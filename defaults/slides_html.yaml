@@ -1,0 +1,13 @@
+html-math-method:
+  method: mathjax
+  url: mathjax/MathJax.js
+
+standalone: true
+
+# See https://github.com/csc-training/slidefactory/blob/6fb4b76a08f502cf9387eb9554986169be463f12/convert.py#L282
+# for metadata in the python script
+# Can metadata be set in this defaults file?
+# see --metadata-file, maybe set the thingies there?
+# So user would give -M theme=csc-2016 (or however it works) as metadata variable, which would then be used with the metadata file to set the desired metadata
+# But the question remains, can this file use metadata or no?
+template: ${.}/themes/$theme$/template.html
