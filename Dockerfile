@@ -8,8 +8,6 @@ RUN <<EOF
 # Install from alpine cache
 apk --no-cache add \
         git \
-        font-noto \
-        font-inconsolata-nerd \
         python3 \
         py3-pandocfilters
 
@@ -29,6 +27,8 @@ mv slidefactory/theme themes
 
 # Get filters
 mv slidefactory/filter filters
+
+# Get fonts
 EOF
 
 RUN <<EOF
@@ -40,11 +40,11 @@ data-dir: /data
 to: revealjs
 from: markdown
 metadata:
-  revealjs-url: /app/reveal.js/
-  revealjs-css-url: /app/reveal.js/
+  revealjs-url: /app/reveal.js
   theme: csc-2016
   themepath: /app/themes/csc-2016
 standalone: true
+self-contained: true
 template: /app/themes/csc-2016/template.html
 highlight-style: pygments
 filters:
