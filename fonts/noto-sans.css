@@ -1,0 +1,39 @@
+/* noto-sans-regular - greek_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/app/fonts/noto-sans-v36-greek_latin-ext-regular.woff2') format('woff2'),
+       url('/app/fonts/noto-sans-v36-greek_latin-ext-regular.ttf') format('truetype');
+}
+
+/* noto-sans-italic - greek_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Noto Sans';
+  font-style: italic;
+  font-weight: 400;
+  src: url('/app/fonts/noto-sans-v36-greek_latin-ext-italic.woff2') format('woff2'),
+       url('/app/fonts/noto-sans-v36-greek_latin-ext-italic.ttf') format('truetype');
+}
+
+/* noto-sans-700 - greek_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Noto Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/app/fonts/noto-sans-v36-greek_latin-ext-700.woff2') format('woff2'),
+       url('/app/fonts/noto-sans-v36-greek_latin-ext-700.ttf') format('truetype');
+}
+
+/* noto-sans-700italic - greek_latin-ext */
+@font-face {
+  font-display: swap;
+  font-family: 'Noto Sans';
+  font-style: italic;
+  font-weight: 700;
+  src: url('/app/fonts/noto-sans-v36-greek_latin-ext-700italic.woff2') format('woff2'),
+       url('/app/fonts/noto-sans-v36-greek_latin-ext-700italic.ttf') format('truetype');
+}

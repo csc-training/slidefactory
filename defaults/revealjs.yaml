@@ -1,0 +1,21 @@
+data-dir: /data
+to: revealjs
+from: markdown
+metadata:
+  revealjs-url: /app/reveal.js
+  theme: csc-2016
+  themepath: /app/themes/csc-2016
+standalone: true
+self-contained: true
+template: /app/themes/csc-2016/template.html
+highlight-style: pygments
+filters:
+  - type: json
+    path: /app/filters/background-image.py
+  - type: json
+    path: /app/filters/contain-slide.py
+  - type: json
+    path: /app/filters/url-encode.py
+html-math-method:
+  method: mathjax
+  url: /app/mathjax/MathJax.js
