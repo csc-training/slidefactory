@@ -96,11 +96,10 @@ $body$
       // Full list of configuration options available at:
       // https://github.com/hakimel/reveal.js#configuration
       Reveal.initialize({
-//$if(controls)$
+$if(controls)$
         // Display controls in the bottom right corner
-        //controls: $controls$,
-        controls: false,
-//$endif$
+        controls: $controls$,
+$endif$
 $if(progress)$
         // Display a presentation progress bar
         progress: $progress$,
