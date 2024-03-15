@@ -9,6 +9,10 @@ metadata:
   themepath: /app/themes/csc-2016
 
 # Variables to revealjs
+# N.B. Give true/false as 1/0.
+# See https://pandoc.org/MANUAL.html#variables-for-html-slides
+# "All reveal.js configuration options are available as variables."
+# "To turn off boolean flags that default to true in reveal.js, use 0."
 variables:
   width: 1920
   height: 1080
@@ -29,6 +33,8 @@ filters:
     path: /app/filters/contain-slide.py
   - type: json
     path: /app/filters/url-encode.py
+  - type: json
+    path: /app/filters/pandoc-emphasize-code
 html-math-method:
   method: mathjax
   url: /app/mathjax/MathJax.js
