@@ -1,17 +1,30 @@
 data-dir: /data
 to: revealjs
 from: markdown
+
+# Metadata variables used e.g. in template.html
 metadata:
   revealjs-url: /app/reveal.js
   theme: csc-2016
   themepath: /app/themes/csc-2016
+
+# Variables to revealjs
+variables:
+  width: 1920
+  height: 1080
+  history: 1
+  center: 0
+  controls: 0
+  transition: 'none'
+  backgroundTransition: 'none'
+
 standalone: true
-self-contained: true
+embed-resources: true
 template: /app/themes/csc-2016/template.html
 highlight-style: pygments
 filters:
-  - type: json
-    path: /app/filters/background-image.py
+#  - type: json
+#    path: /app/filters/background-image.py
   - type: json
     path: /app/filters/contain-slide.py
   - type: json
