@@ -34,9 +34,7 @@ git clone -b pandocker https://github.com/csc-training/slidefactory.git
 mv slidefactory/theme themes
 
 echo "Get pandoc filters:"
-echo "- CSC filters from github" 
-mv slidefactory/filter filters
-
+mkdir filters
 echo "- pandoc-emphasize-code"
 cabal update
 cabal install pandoc-emphasize-code
@@ -61,5 +59,7 @@ EOF
 
 COPY ./fonts/* /app/fonts/
 COPY ./defaults/* /app/defaults/
+COPY ./filter/* /app/filters/
+
 WORKDIR /data
 ENTRYPOINT ["/usr/local/bin/pandoc", "--defaults=/app/defaults/revealjs.yaml", "--verbose"]
