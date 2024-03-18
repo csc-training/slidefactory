@@ -27,17 +27,16 @@ def run_template(run_args, *, dry_run):
 
     if dry_run:
         info(shlex.join(run_args))
-    else:
-        verbose_info(shlex.join(run_args))
+        return
 
-    if not dry_run:
-        p = subprocess.run(run_args,
-                           check=False, shell=False,
-                           capture_output=True)
-        if p.returncode != 0:
-            error(f'error: {repr(run_args[0])} failed '
-                  f'with exit code {p.returncode}:\n'
-                  f'{p.stderr.decode()}')
+    verbose_info(shlex.join(run_args))
+    p = subprocess.run(run_args,
+                       check=False, shell=False,
+                       capture_output=True)
+    if p.returncode != 0:
+        error(f'error: {repr(run_args[0])} failed '
+              f'with exit code {p.returncode}:\n'
+              f'{p.stderr.decode()}')
 
 
 def info_template(msg, *, quiet):
