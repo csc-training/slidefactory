@@ -1,6 +1,6 @@
 IMAGE_ROOT?=ghcr.io/csc-training
 IMAGE=slidefactory
-IMAGE_VERSION=3.0.0-beta.3
+IMAGE_VERSION?=$(shell grep -m1 -oP '(?<=VERSION = ").+(?=")' slidefactory.py)
 
 
 build: Dockerfile slidefactory.py

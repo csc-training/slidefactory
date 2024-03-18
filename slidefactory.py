@@ -18,6 +18,7 @@ from urllib.parse import quote as url_quote
 from pathlib import Path
 
 
+VERSION = "3.0.0-beta.4"
 slidefactory_root = Path(__file__).absolute().parent
 
 
@@ -125,7 +126,15 @@ def install(path):
     info(f'Copy {slidefactory_root} to {path}')
     shutil.copytree(slidefactory_root, path)
 
+    # Edit version string
     py_fpath = shlex.quote(str(path / Path(__file__).name))
+    with open(py_fpath, 'r') as f:
+        lines = f.readlines()
+    with open(py_fpath, 'w') as f:
+        for line in lines:
+            if line.startswith('VERSION'):
+                line = line[:-2] + '-local"\n'
+            f.write(line)
 
     info(f'\nTo use the local installation, run '
          f'{py_fpath} with the container.\n'
@@ -203,6 +212,8 @@ def main():
     global run
     run = functools.partial(run_template, verbose=args.verbose,
                             dry_run=args.dry_run)
+
+    info(f'Slidefactory {VERSION}')
 
     if args.install:
         install(args.install)
