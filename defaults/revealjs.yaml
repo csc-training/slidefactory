@@ -27,8 +27,8 @@ embed-resources: true
 template: /app/themes/csc-2016/template.html
 highlight-style: pygments
 filters:
-#  - type: json
-#    path: /app/filters/background-image.py
+  - type: json
+    path: /app/filters/background-image.py
   - type: json
     path: /app/filters/contain-slide.py
   - type: json
