@@ -8,6 +8,8 @@ metadata:
   theme: csc-2016
   themepath: /app/themes/csc-2016
 
+template: /app/themes/csc-2016/template.html
+
 # Variables to revealjs
 # N.B. Give true/false as 1/0.
 # See https://pandoc.org/MANUAL.html#variables-for-html-slides
@@ -24,7 +26,6 @@ variables:
 
 standalone: true
 embed-resources: true
-template: /app/themes/csc-2016/template.html
 highlight-style: pygments
 filters:
   - type: json
