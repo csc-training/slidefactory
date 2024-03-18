@@ -2,6 +2,7 @@
 from pandocfilters import toJSONFilter, Header, attributes
 
 def background(key, value, format, meta):
+    print(key, value, format, meta)
     # language
     try:
         if meta['lang']['t'] == 'MetaInlines':
@@ -16,10 +17,12 @@ def background(key, value, format, meta):
     except:
         path = 'theme'
     template = u'{0}/img/%s.png'.format(path)
+
     # set background image for title slide
     if 'title_bg' not in meta:
         filename = template % 'title-{0}'.format(lang)
         meta['title_bg'] = {'t': 'MetaString', 'c': filename}
+
     # markdown: special class name triggers the setting of a data background
     #           image unless already present
     if key == 'Header' and value[0] == 1:
@@ -46,7 +49,6 @@ def background(key, value, format, meta):
                             [u'data-background-image', template % key])
                     break
         return Header(header[0], header[1], header[2])
-
 
 if __name__ == '__main__':
     toJSONFilter(background)
