@@ -2,7 +2,6 @@
 from pandocfilters import toJSONFilter, Header, attributes
 
 def background(key, value, format, meta):
-    print(key, value, format, meta)
     # language
     try:
         if meta['lang']['t'] == 'MetaInlines':
