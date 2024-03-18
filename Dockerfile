@@ -59,7 +59,7 @@ EOF
 
 COPY ./fonts/* /app/fonts/
 COPY ./defaults/* /app/defaults/
-COPY ./filter/* /app/filters/
+COPY ./filters/* /app/filters/
 
 WORKDIR /data
 ENTRYPOINT ["/usr/local/bin/pandoc", "--defaults=/app/defaults/revealjs.yaml", "--verbose"]
