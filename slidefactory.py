@@ -15,12 +15,21 @@ import shutil
 import sys
 import subprocess
 import tempfile
+from collections import namedtuple
+from contextlib import contextmanager
 from urllib.parse import quote as url_quote
 from pathlib import Path
 
 
 VERSION = "3.0.0-beta.4"
 slidefactory_root = Path(__file__).absolute().parent
+
+
+@contextmanager
+def named_ctx(name):
+    """Context manager that returns an object
+       with object.name being the given name."""
+    yield namedtuple('Named', ['name'])(name)
 
 
 class HTMLParser(html.parser.HTMLParser):
@@ -97,7 +106,8 @@ def create_html(input_fpath, html_fpath, *,
                 template_fpath,
                 pandoc_vars,
                 filters=[],
-                pandoc_args=[]):
+                pandoc_args=[],
+                ):
     run_args = [
         'pandoc',
         f'--defaults={defaults_fpath}',
@@ -113,6 +123,8 @@ def create_html(input_fpath, html_fpath, *,
         ]
     run(run_args)
 
+
+def copy_html_externals(input_fpath, html_fpath):
     # Find external file paths
     parser = HTMLParser()
     with open(html_fpath, 'r') as f:
@@ -351,7 +363,7 @@ def main():
                  prefix=f'{in_fpath.stem}-',
                  suffix='.html') \
              if args.format == 'pdf' \
-             else open(out_fpath, 'w') \
+             else named_ctx(out_fpath) \
              as outfile:
 
             html_fpath = Path(outfile.name)
@@ -362,6 +374,9 @@ def main():
                         pandoc_args=pandoc_args,
                         filters=args.filters,
                         )
+
+            if not args.dry_run:
+                copy_html_externals(in_fpath, html_fpath)
 
             if args.format == 'pdf':
                 create_pdf(html_fpath, out_fpath)
