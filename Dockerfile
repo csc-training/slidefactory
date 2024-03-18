@@ -1,5 +1,7 @@
 FROM docker.io/alpine:3.17.3 AS slidefactory-files
 
+ARG VERSION
+
 ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
 ADD theme/ /slidefactory/theme/
@@ -12,6 +14,11 @@ RUN find /slidefactory -name '.*' -delete
 # Fix permission
 RUN chmod a+r -R /slidefactory && \
     chmod a+x /slidefactory/slidefactory.py
+
+# Add checksums
+RUN cd /slidefactory && \
+    find . -type f -print0 | xargs -0 sha256sum > /tmp/sha256sums_$VERSION && \
+    mv /tmp/sha256sums_$VERSION /slidefactory/
 
 
 FROM docker.io/alpine:3.17.3

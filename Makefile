@@ -7,6 +7,7 @@ build: Dockerfile slidefactory.py
 	docker build \
 		--label "org.opencontainers.image.source=https://github.com/csc-training/slidefactory" \
 		--label "org.opencontainers.image.description=slidefactory" \
+		--build-arg VERSION=${IMAGE_VERSION} \
 		-t ${IMAGE_ROOT}/${IMAGE}:${IMAGE_VERSION} \
 		.
 

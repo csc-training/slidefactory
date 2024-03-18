@@ -7,6 +7,7 @@
 # ------------------------------------------------------------------------- #
 import argparse
 import functools
+import hashlib
 import html.parser
 import inspect
 import os
@@ -23,6 +24,27 @@ from pathlib import Path
 
 VERSION = "3.0.0-beta.5"
 slidefactory_root = Path(__file__).absolute().parent
+
+# Modify version string if this file has been edited
+with open(__file__, 'rb') as f:
+    CHECKSUM = hashlib.sha256(f.read()).hexdigest()
+
+
+def __read_checksum_reference():
+    checksum_fpath = slidefactory_root / f'sha256sums_{VERSION}'
+    if not checksum_fpath.exists():
+        return None
+    with open(checksum_fpath, 'r') as f:
+        for line in f:
+            chk, fpath = line.strip().split('  ', 1)
+            if fpath == f'./{Path(__file__).name}':
+                return chk
+    return None
+
+
+REF_CHECKSUM = __read_checksum_reference()
+if CHECKSUM != REF_CHECKSUM:
+    VERSION += '-edited'
 
 
 @contextmanager
@@ -173,15 +195,7 @@ def install(path):
     info(f'Copy {slidefactory_root} to {path}')
     shutil.copytree(slidefactory_root, path)
 
-    # Edit version string
     py_fpath = shlex.quote(str(path / Path(__file__).name))
-    with open(py_fpath, 'r') as f:
-        lines = f.readlines()
-    with open(py_fpath, 'w') as f:
-        for line in lines:
-            if line.startswith('VERSION'):
-                line = line[:-2] + '-local"\n'
-            f.write(line)
 
     info(f'\nTo use the local installation, run '
          f'{py_fpath} with the container.\n'
@@ -263,6 +277,8 @@ def main():
     run = functools.partial(run_template, dry_run=args.dry_run)
 
     info(f'Slidefactory {VERSION}')
+    verbose_info(f'  checksum:  {CHECKSUM}')
+    verbose_info(f'  reference: {REF_CHECKSUM}')
 
     if args.install:
         install(args.install)
