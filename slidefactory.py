@@ -7,6 +7,7 @@
 # ------------------------------------------------------------------------- #
 import argparse
 import functools
+import html.parser
 import inspect
 import os
 import shlex
@@ -20,6 +21,18 @@ from pathlib import Path
 
 VERSION = "3.0.0-beta.4"
 slidefactory_root = Path(__file__).absolute().parent
+
+
+class HTMLParser(html.parser.HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.sources = set()
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'img':
+            for key, value in attrs:
+                if key == 'data-src':
+                    self.sources.add(value)
 
 
 def run_template(run_args, *, dry_run):
@@ -100,6 +113,27 @@ def create_html(input_fpath, html_fpath, *,
         ]
     run(run_args)
 
+    # Find external file paths
+    parser = HTMLParser()
+    with open(html_fpath, 'r') as f:
+        parser.feed(f.read())
+    externals = parser.sources
+
+    # Check that files exist
+    for fname in externals:
+        fpath = input_fpath.parent / fname
+        if not fpath.exists():
+            error(f'Linked file missing: {fpath}')
+
+    # Copy files to output path
+    if input_fpath.parent.resolve() != html_fpath.parent.resolve():
+        for fname in externals:
+            ext_fpath = input_fpath.parent / fname
+            tgt_fpath = html_fpath.parent / fname
+            verbose_info(f'cp {ext_fpath} {tgt_fpath}')
+            tgt_fpath.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(ext_fpath, tgt_fpath)
+
 
 def create_pdf(html_fpath, pdf_fpath):
     run_args = [
@@ -169,9 +203,9 @@ def main():
         'input', metavar='input.md', nargs='*', type=Path,
         help='filename for presentation source (e.g. in Markdown)')
     parser.add_argument(
-        '--output', metavar='prefix',
-        help=('prefix for output filenames (by default uses the '
-              'basename of the input file, i.e. talk.md -> talk.html)'))
+        '-o', '--output', metavar='DIR', type=Path,
+        help=('output directory (by default uses '
+              'the same directory as the input files)'))
     parser.add_argument(
         '-t', '--theme', metavar='THEME', default='csc-plain',
         help=('presentation theme name or path (default: %(default)s, '
@@ -301,26 +335,27 @@ def main():
         pandoc_args += ['--embed-resources']
 
     # Convert files
-    for filename in args.input:
-        out_fpath = Path(filename)
-        out_fpath = out_fpath.with_suffix(suffix)
-
+    for in_fpath in args.input:
         if args.output:
-            out_fpath = out_fpath.with_name(args.output)
+            out_fpath = args.output / in_fpath.with_suffix(suffix).name
+            if not args.dry_run:
+                out_fpath.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            out_fpath = in_fpath.with_suffix(suffix)
 
-        info(f'Convert {filename} to {out_fpath}')
+        info(f'Convert {in_fpath} to {out_fpath}')
 
         # Use temporary html output for pdf
         with tempfile.NamedTemporaryFile(
-                 dir=filename.parent,
-                 prefix=f'{filename.stem}-',
+                 dir=in_fpath.parent,
+                 prefix=f'{in_fpath.stem}-',
                  suffix='.html') \
              if args.format == 'pdf' \
              else open(out_fpath, 'w') \
              as outfile:
 
             html_fpath = Path(outfile.name)
-            create_html(filename, html_fpath,
+            create_html(in_fpath, html_fpath,
                         defaults_fpath=resources['defaults_fpath'],
                         template_fpath=resources['template_fpath'],
                         pandoc_vars=pandoc_vars,
