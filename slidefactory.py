@@ -21,7 +21,7 @@ from urllib.parse import quote as url_quote
 from pathlib import Path
 
 
-VERSION = "3.0.0-beta.4"
+VERSION = "3.0.0-beta.5"
 slidefactory_root = Path(__file__).absolute().parent
 
 
@@ -186,10 +186,10 @@ def install(path):
     info(f'\nTo use the local installation, run '
          f'{py_fpath} with the container.\n'
          f'In singularity:\n'
-         f'    singularity exec slidefactory_VERSION.sif {py_fpath} --format html-local slides.md'  # noqa: E501
+         f'    singularity exec slidefactory_VERSION.sif python3 {py_fpath} --format html-local slides.md'  # noqa: E501
          '\n'
          f'In docker:\n'
-         f'    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" --entrypoint {py_fpath} ghcr.io/csc-training/slidefactory:VERSION --format html-local slides.md'  # noqa: E501
+         f'    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" --entrypoint python3 ghcr.io/csc-training/slidefactory:VERSION {py_fpath} --format html-local slides.md'  # noqa: E501
          '\n'
          f'Hint: make an alias of this command.\n'
          )
