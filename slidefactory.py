@@ -22,11 +22,13 @@ VERSION = "3.0.0-beta.4"
 slidefactory_root = Path(__file__).absolute().parent
 
 
-def run_template(run_args, *, verbose, dry_run):
+def run_template(run_args, *, dry_run):
     run_args = [str(a) for a in run_args]
 
-    if verbose or dry_run:
+    if dry_run:
         info(shlex.join(run_args))
+    else:
+        verbose_info(shlex.join(run_args))
 
     if not dry_run:
         p = subprocess.run(run_args,
@@ -209,9 +211,11 @@ def main():
     global info
     info = functools.partial(info_template, quiet=args.quiet)
 
+    global verbose_info
+    verbose_info = functools.partial(info_template, quiet=not args.verbose)
+
     global run
-    run = functools.partial(run_template, verbose=args.verbose,
-                            dry_run=args.dry_run)
+    run = functools.partial(run_template, dry_run=args.dry_run)
 
     info(f'Slidefactory {VERSION}')
 
