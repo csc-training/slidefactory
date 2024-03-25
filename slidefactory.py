@@ -18,7 +18,7 @@ import subprocess
 import tempfile
 from collections import namedtuple
 from contextlib import contextmanager
-from urllib.parse import quote as url_quote, urlparse
+from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
@@ -303,7 +303,7 @@ def main():
     # Choose theme url
     theme_dpath, is_custom_theme = find_theme(args.theme, theme_root)
     if is_custom_theme or not in_container or use_local_resources:
-        resources['theme_url'] = f'file://{url_quote(str(theme_dpath.absolute()))}/csc.css'  # noqa: E501
+        resources['theme_url'] = f'file://{urlquote(str(theme_dpath.absolute()))}/csc.css'  # noqa: E501
     else:
         resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.0.0-beta.2/theme/{args.theme}/csc.css'  # noqa: E501
 
@@ -312,7 +312,7 @@ def main():
 
     # Choose other urls
     if use_local_resources:
-        root = f'file://{url_quote(str(slidefactory_root))}'
+        root = f'file://{urlquote(str(slidefactory_root))}'
         resources['revealjs_url'] = f'{root}/reveal.js-4.4.0'
         resources['mathjax_url'] = f'{root}/MathJax-3.2.2/es5/tex-chtml-full.js'  # noqa: E501
         resources['fonts_url'] = f'{root}/fonts/fonts.css'
