@@ -18,11 +18,11 @@ import subprocess
 import tempfile
 from collections import namedtuple
 from contextlib import contextmanager
-from urllib.parse import quote as url_quote
+from urllib.parse import quote as url_quote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.0.0-beta.5"
+VERSION = "3.0.0-beta.6"
 slidefactory_root = Path(__file__).absolute().parent
 
 # Modify version string if this file has been edited
@@ -63,7 +63,8 @@ class HTMLParser(html.parser.HTMLParser):
         if tag == 'img':
             for key, value in attrs:
                 if key == 'data-src':
-                    self.sources.add(value)
+                    if urlparse(value).scheme == '':
+                        self.sources.add(value)
 
 
 def run_template(run_args, *, dry_run):
