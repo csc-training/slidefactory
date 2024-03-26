@@ -322,7 +322,7 @@ def main():
     else:
         resources['revealjs_url'] = 'https://cdn.jsdelivr.net/npm/reveal.js@4.4.0'  # noqa: E501
         resources['mathjax_url'] = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js'  # noqa: E501
-        resources['fonts_url'] = 'https://fonts.googleapis.com/css?family=Noto+Sans:400,400i,700,700i|Inconsolata:400,700&subset=greek,latin-ext'  # noqa: E501
+        resources['fonts_url'] = 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,100,400;0,100,700;1,100,400;1,100,700&family=Inconsolata:wght@400;700'  # noqa: E501
 
     # Update urls from args
     for key in resources:
