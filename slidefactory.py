@@ -22,7 +22,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.0.0-beta.6"
+VERSION = "3.0.0-beta.7"
 slidefactory_root = Path(__file__).absolute().parent
 
 # Modify version string if this file has been edited
@@ -262,6 +262,10 @@ def main():
         '--install', metavar='PATH', type=Path,
         help=('install local slidefactory to %(metavar)s '
               '(ignores all other arguments)'))
+    parser.add_argument(
+            '--pandoc-args', metavar='pargs',
+            nargs='?', type=str, default='', const='',
+            help='Additional arguments passed to pandoc')
     group = parser.add_argument_group(
         'advanced options for overriding paths and urls')
     for key in resources:
@@ -357,7 +361,7 @@ def main():
         suffix = '.html'
 
     # Extra pandoc args
-    pandoc_args = []
+    pandoc_args = args.pandoc_args.split()
     if include_math:
         pandoc_args += ['--mathjax']
     if args.format in ['html-embedded']:
