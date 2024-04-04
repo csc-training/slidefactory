@@ -78,6 +78,9 @@ def run_template(run_args, *, dry_run):
     p = subprocess.run(run_args,
                        check=False, shell=False,
                        capture_output=True)
+
+    print(p.stdout.decode())
+
     if p.returncode != 0:
         error(f'error: {repr(run_args[0])} failed '
               f'with exit code {p.returncode}:\n'
@@ -262,15 +265,11 @@ def main():
         '--install', metavar='PATH', type=Path,
         help=('install local slidefactory to %(metavar)s '
               '(ignores all other arguments)'))
-    parser.add_argument(
-            '--pandoc-args', metavar='pargs',
-            nargs='?', type=str, default='', const='',
-            help='Additional arguments passed to pandoc')
     group = parser.add_argument_group(
         'advanced options for overriding paths and urls')
     for key in resources:
         group.add_argument(f'--{key}', help=f'override {key}')
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
 
     global info
     info = functools.partial(info_template, quiet=args.quiet)
@@ -361,7 +360,7 @@ def main():
         suffix = '.html'
 
     # Extra pandoc args
-    pandoc_args = args.pandoc_args.split()
+    pandoc_args = unknown_args
     if include_math:
         pandoc_args += ['--mathjax']
     if args.format in ['html-embedded']:
