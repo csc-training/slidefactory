@@ -32,6 +32,7 @@ RUN apk update && \
       python3 \
       py3-pandocfilters \
       tar \
+      zip \
       && \
     rm -rf /var/cache/apk/*
 
