@@ -607,15 +607,3 @@
   max-height: unset;
   border: 0;
 }
-
-/*********************************************
- * PDF printing
- *********************************************/
-.reveal .slides .pdf-page > section h2:first-child,
-.reveal .slides .pdf-page > section h3:first-child,
-.reveal .slides .pdf-page > section h1:first-child + h2,
-.reveal .slides .pdf-page > section h1:first-child + h3,
-.reveal .column .pdf-page h2:first-child,
-.reveal .column .pdf-page h3:first-child {
-  padding-top: 0;
-}
