@@ -22,7 +22,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.0.0-beta.7"
+VERSION = "3.0.0-beta.8"
 slidefactory_root = Path(__file__).absolute().parent
 
 # Modify version string if this file has been edited
@@ -308,7 +308,7 @@ def main():
     if is_custom_theme or not in_container or use_local_resources:
         resources['theme_url'] = f'file://{urlquote(str(theme_dpath.absolute()))}/csc.css'  # noqa: E501
     else:
-        resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.0.0-beta.2/theme/{args.theme}/csc.css'  # noqa: E501
+        resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.0.0-beta.8/theme/{args.theme}/csc.css'  # noqa: E501
 
     resources['defaults_fpath'] = theme_dpath / "defaults.yaml"
     resources['template_fpath'] = theme_dpath / "template.html"
