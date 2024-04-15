@@ -79,7 +79,7 @@ def run_template(run_args, *, dry_run):
                        check=False, shell=False,
                        capture_output=True)
 
-    print(p.stdout.decode())
+    verbose_info(p.stdout.decode())
 
     if p.returncode != 0:
         error(f'error: {repr(run_args[0])} failed '
