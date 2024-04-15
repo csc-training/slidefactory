@@ -53,24 +53,19 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     rm -f tmp.zip
 
 # Fonts
-RUN for FONT in 'Noto Sans' 'Inconsolata'; do \
-      FONT_URL=$(echo "$FONT" | tr ' ' +) && \
-      FONT_DIR=$(echo "$FONT" | tr -d ' ') && \
-      wget "https://fonts.google.com/download?family=$FONT_URL" -O tmp.zip && \
-      mkdir -p /slidefactory/fonts/$FONT_DIR && \
-      if unzip -l tmp.zip | grep -q 'static'; then \
-        unzip tmp.zip "static/$FONT_DIR/*" -d /slidefactory/fonts/ && \
-        mv /slidefactory/fonts/static/$FONT_DIR /slidefactory/fonts/ && \
-        rmdir /slidefactory/fonts/static && \
-        unzip tmp.zip 'OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
-        :; \
-      else \
-        unzip tmp.zip -d /slidefactory/fonts/$FONT_DIR && \
-        :; \
-      fi && \
-      rm -f tmp.zip && \
-      :; \
-    done
+RUn FONT_DIR=NotoSans && \
+    mkdir -p /slidefactory/fonts/$FONT_DIR && \
+    wget https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.013/NotoSans-v2.013.zip -O tmp.zip && \
+    unzip -j tmp.zip 'NotoSans/googlefonts/ttf/*' -d /slidefactory/fonts/$FONT_DIR && \
+    unzip -j tmp.zip 'OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
+    rm tmp.zip
+
+RUn FONT_DIR=Inconsolata && \
+    mkdir -p /slidefactory/fonts/$FONT_DIR && \
+    wget https://github.com/googlefonts/Inconsolata/archive/refs/tags/v3.000.zip -O tmp.zip && \
+    unzip -j tmp.zip 'Inconsolata-3.000/fonts/ttf/Inconsolata-*' -x '*Condensed*' '*Expanded*' -d /slidefactory/fonts/$FONT_DIR && \
+    unzip -j tmp.zip 'Inconsolata-3.000/OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
+    rm tmp.zip
 
 COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
