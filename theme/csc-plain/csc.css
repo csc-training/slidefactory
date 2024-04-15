@@ -47,8 +47,8 @@
 
 .slide-background {
   background: url("img/normal.svg");
-  background-repeat: no-repeat;
-  background-position: center;
+  background-repeat: repeat-y;
+  background-position: bottom;
   background-size: contain;
 }
 
