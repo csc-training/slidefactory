@@ -22,7 +22,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.0.0-beta.8"
+VERSION = "3.0.0-beta.9"
 slidefactory_root = Path(__file__).absolute().parent
 
 # Modify version string if this file has been edited
