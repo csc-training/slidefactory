@@ -240,20 +240,12 @@
 .reveal ul ul {
   list-style-type: circle;
 }
-.reveal .slides > section > ul > li,
-.reveal .slides > section > div > ul > li,
-.reveal .slides > section > div > ol > li,
-.reveal .slides > section > ol > li {
+.reveal li {
+  margin-left:  1em;
+  margin-right: 0;
   margin-bottom: 1ex;
 }
-.reveal .slides > section > dl > dt,
-.reveal .slides > section > div > dl > dt {
-  margin-top: 1ex;
-}
-.reveal .slides > section > dl > dt:first-child,
-.reveal .slides > section > div > dl > dt:first-child {
-  margin-top: 0;
-}
+
 .reveal ul ul,
 .reveal ul ol,
 .reveal ol ol,
@@ -263,21 +255,23 @@
   display: block;
   margin-left: 0.5em;
 }
-.reveal li {
-  margin-left:  1em;
-  margin-right: 0;
-  margin-bottom: 0;
-}
 .reveal li li {
   font-size: 0.9em;
+  margin-bottom: 0;
 }
 .reveal li p {
   margin-left: 0;
 }
+
 /* description list */
 .reveal dt {
+  margin-top: 1ex;
   font-family: var(--csc-code-font-family);
   font-weight: bold;
+}
+.reveal dt:first-child,
+.reveal dl dl dt {
+  margin-top: 0;
 }
 .reveal dd {
   margin-left: 1em;
