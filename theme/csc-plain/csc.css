@@ -46,26 +46,26 @@
 }
 
 .slide-background {
-  background: url("img/normal.svg");
-  background-repeat: repeat-y;
+  background-image:    url("img/normal.svg");
+  background-repeat:   repeat-y;
   background-position: bottom;
-  background-size: contain;
+  background-size:     contain;
 }
 
 .slide-background.title {
-  background-image: url("img/title.svg");
+  background-image:    url("img/title.svg");
 }
 
 :lang(fi) .slide-background.title {
-  background-image: url("img/title.svg");
+  background-image:    url("img/title.svg");
 }
 
 .slide-background.section {
-  background-image: url("img/normal.svg");
+  background-image:    url("img/normal.svg");
 }
 
 .slide-background.author {
-  background-image: url("img/author.svg");
+  background-image:    url("img/author.svg");
 }
 
 .reveal {
