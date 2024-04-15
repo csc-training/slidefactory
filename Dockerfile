@@ -27,6 +27,7 @@ RUN apk update && \
     apk add --no-cache \
       ca-certificates \
       chromium \
+      git \
       pandoc \
       font-freefont \
       python3 \
