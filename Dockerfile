@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.17.3 AS slidefactory-files
+FROM docker.io/alpine:3.17 AS slidefactory-files
 
 ARG VERSION
 
@@ -21,7 +21,7 @@ RUN cd /slidefactory && \
     mv /tmp/sha256sums_$VERSION /slidefactory/
 
 
-FROM docker.io/alpine:3.17.3
+FROM docker.io/alpine:3.17
 
 RUN apk update && \
     apk add --no-cache \
