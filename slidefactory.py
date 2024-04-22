@@ -23,7 +23,8 @@ from pathlib import Path
 
 
 VERSION = "3.0.0-beta.11"
-slidefactory_root = Path(__file__).absolute().parent
+SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
+IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
 # Modify version string if this file has been edited
 with open(__file__, 'rb') as f:
@@ -31,7 +32,7 @@ with open(__file__, 'rb') as f:
 
 
 def __read_checksum_reference():
-    checksum_fpath = slidefactory_root / f'sha256sums_{VERSION}'
+    checksum_fpath = SLIDEFACTORY_ROOT / f'sha256sums_{VERSION}'
     if not checksum_fpath.exists():
         return None
     with open(checksum_fpath, 'r') as f:
@@ -47,7 +48,7 @@ if CHECKSUM != REF_CHECKSUM:
     VERSION += '-edited'
 
 
-resources = (
+URL_KEYS = (
     'defaults_fpath',
     'template_fpath',
     'theme_url',
@@ -55,6 +56,43 @@ resources = (
     'mathjax_url',
     'fonts_url',
     )
+
+Theme = namedtuple('Theme', ['name', 'dpath', 'is_custom'])
+
+
+def get_default_url(key: str, format: str, theme: Theme):
+    assert key in URL_KEYS
+    use_local_resources = format in ['pdf', 'html-local', 'html-embedded']
+    root_url = f'file://{urlquote(str(SLIDEFACTORY_ROOT))}'
+    if key == 'theme_url':
+        if theme.is_custom or not IN_CONTAINER or use_local_resources:
+            return f'file://{urlquote(str(theme.dpath.absolute()))}/csc.css'  # noqa: E501
+        else:
+            return f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.0.0-beta.10/theme/{theme.name}/csc.css'  # noqa: E501
+
+    elif key == 'defaults_fpath':
+        return theme.dpath / "defaults.yaml"
+
+    elif key == 'template_fpath':
+        return theme.dpath / "template.html"
+
+    elif key == 'revealjs_url':
+        if use_local_resources:
+            return f'{root_url}/reveal.js-4.4.0'
+        else:
+            return 'https://cdn.jsdelivr.net/npm/reveal.js@4.4.0'  # noqa: E501
+
+    elif key == 'mathjax_url':
+        if use_local_resources:
+            return f'{root_url}/MathJax-3.2.2/es5/tex-chtml-full.js'  # noqa: E501
+        else:
+            return 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js'  # noqa: E501
+
+    elif key == 'fonts_url':
+        if use_local_resources:
+            return f'{root_url}/fonts/fonts.css'
+        else:
+            return 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,100,400;0,100,700;1,100,400;1,100,700&family=Inconsolata:wght@400;700'  # noqa: E501
 
 
 @contextmanager
@@ -117,24 +155,24 @@ def get_available_themes(theme_root):
     return available_themes
 
 
-def find_theme(theme, theme_root):
+def find_theme(name, theme_root):
     is_custom = False
-    if os.sep in str(theme):
+    if os.sep in str(name):
         is_custom = True
-        p = Path(theme)
+        p = Path(name)
         if not p.is_dir():
             error(f'Nonexistent theme directory {p.absolute()}')
     else:
-        p = theme_root / theme
+        p = theme_root / name
         if not p.is_dir():
             available_themes = get_available_themes(theme_root)
-            error(f'Invalid theme {theme}.'
+            error(f'Invalid theme {name}.'
                   f' Available themes: {", ".join(available_themes)}.')
     for fname in ['defaults.yaml', 'template.html', 'csc.css']:
         if not (p / fname).is_file():
             error(f'File {fname} missing from the theme directory'
                   f' {p.absolute()}')
-    return p, is_custom
+    return Theme(name, p, is_custom)
 
 
 def create_html(input_fpath, html_fpath, *,
@@ -250,7 +288,7 @@ def main():
         help='additional arguments passed to pandoc')
     group = parser_convert.add_argument_group(
         'advanced options for overriding paths and urls')
-    for key in resources:
+    for key in URL_KEYS:
         group.add_argument(f'--{key}', help=f'override {key}')
 
     parser_install = subparsers.add_parser(
@@ -279,73 +317,39 @@ def main():
     args.main(args)
 
 
+
 def main_convert(args):
-    resources = {
-            'defaults_fpath': None,
-            'template_fpath': None,
-            'theme_url': None,
-            'revealjs_url': None,
-            'mathjax_url': None,
-            'fonts_url': None,
-        }
-
-    theme_root = slidefactory_root / 'theme'
-    include_math = not args.no_math
-    use_local_resources = args.format in ['pdf', 'html-local', 'html-embedded']
-
-    in_container = slidefactory_root == Path('/slidefactory')
-
-    if args.format == 'html-local' and in_container:
+    if args.format == 'html-local' and IN_CONTAINER:
         error('Install and use local slidefactory in order to '
               'create local offline htmls.\n\n'
               'In short, run slidefactory container with `--install PATH` '
               'and follow the instructions (see README for details).'
               )
 
-    if not slidefactory_root.is_dir():
-        error(f'Slidefactory directory {slidefactory_root} does not exist.')
+    theme = find_theme(args.theme, SLIDEFACTORY_ROOT / 'theme')
+    include_math = not args.no_math
 
-    # Choose theme url
-    theme_dpath, is_custom_theme = find_theme(args.theme, theme_root)
-    if is_custom_theme or not in_container or use_local_resources:
-        resources['theme_url'] = f'file://{urlquote(str(theme_dpath.absolute()))}/csc.css'  # noqa: E501
-    else:
-        resources['theme_url'] = f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.0.0-beta.10/theme/{args.theme}/csc.css'  # noqa: E501
-
-    resources['defaults_fpath'] = theme_dpath / "defaults.yaml"
-    resources['template_fpath'] = theme_dpath / "template.html"
-
-    # Choose other urls
-    if use_local_resources:
-        root = f'file://{urlquote(str(slidefactory_root))}'
-        resources['revealjs_url'] = f'{root}/reveal.js-4.4.0'
-        resources['mathjax_url'] = f'{root}/MathJax-3.2.2/es5/tex-chtml-full.js'  # noqa: E501
-        resources['fonts_url'] = f'{root}/fonts/fonts.css'
-    else:
-        resources['revealjs_url'] = 'https://cdn.jsdelivr.net/npm/reveal.js@4.4.0'  # noqa: E501
-        resources['mathjax_url'] = 'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml-full.js'  # noqa: E501
-        resources['fonts_url'] = 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,100,400;0,100,700;1,100,400;1,100,700&family=Inconsolata:wght@400;700'  # noqa: E501
-
-    # Update urls from args
-    for key in resources:
-        new_value = getattr(args, key)
-        if new_value is not None:
-            resources[key] = new_value
+    # Set resource url defaults if not set
+    for key in URL_KEYS:
+        if getattr(args, key) is None:
+            default = get_default_url(key, args.format, theme)
+            setattr(args, key, default)
 
     if args.verbose:
         info("Using following resources (override with the given argument):")
-        for key, val in resources.items():
+        for key in URL_KEYS:
+            val = getattr(args, key)
             info(f"  --{key:16} {val}")
 
     pandoc_vars = {
-        'theme-url': resources['theme_url'],
-        'revealjs-url': resources['revealjs_url'],
-        'mathjaxurl': resources['mathjax_url'],
-        'css': resources['fonts_url'],
+        'theme-url': args.theme_url,
+        'revealjs-url': args.revealjs_url,
+        'mathjaxurl': args.mathjax_url,
+        'css': args.fonts_url,
         }
 
     if args.format in ['html-embedded'] and include_math:
-        url = resources['mathjax_url']
+        url = args.mathjax_url
         pandoc_vars.update({
             'mathjaxurl': '',
             'header-includes': f'<script src="{url}"></script>',
@@ -390,8 +394,8 @@ def main_convert(args):
 
             html_fpath = Path(outfile.name)
             create_html(in_fpath, html_fpath,
-                        defaults_fpath=resources['defaults_fpath'],
-                        template_fpath=resources['template_fpath'],
+                        defaults_fpath=args.defaults_fpath,
+                        template_fpath=args.template_fpath,
                         pandoc_vars=pandoc_vars,
                         pandoc_args=pandoc_args,
                         filters=args.filters,
@@ -412,8 +416,8 @@ def main_install(args):
     path = path.absolute()
 
     # Copy slidefactory files
-    info(f'Copy {slidefactory_root} to {path}')
-    shutil.copytree(slidefactory_root, path)
+    info(f'Copy {SLIDEFACTORY_ROOT} to {path}')
+    shutil.copytree(SLIDEFACTORY_ROOT, path)
 
     py_fpath = shlex.quote(str(path / Path(__file__).name))
 
