@@ -155,14 +155,16 @@ def get_available_themes(theme_root):
     return available_themes
 
 
-def find_theme(name, theme_root):
+def find_theme(name):
     is_custom = False
     if os.sep in str(name):
         is_custom = True
         p = Path(name)
+        name = p.name
         if not p.is_dir():
             error(f'Nonexistent theme directory {p.absolute()}')
     else:
+        theme_root = SLIDEFACTORY_ROOT / 'theme'
         p = theme_root / name
         if not p.is_dir():
             available_themes = get_available_themes(theme_root)
@@ -238,62 +240,71 @@ def create_pdf(html_fpath, pdf_fpath):
 
 
 def main():
-    parser_common = argparse.ArgumentParser(add_help=False)
-    parser_common.add_argument(
+    # Common args
+    pparser_common = argparse.ArgumentParser(add_help=False)
+    pparser_common.add_argument(
         '-n', '--dry-run', '--show-command',
         action='store_true', default=False,
         help='do nothing, only show the full commands to be run')
-    parser_common.add_argument(
+    pparser_common.add_argument(
         '-v', '--verbose', action='store_true', default=False,
         help='be loud and noisy')
-    parser_common.add_argument(
+    pparser_common.add_argument(
         '-q', '--quiet', action='store_true', default=False,
         help='suppress all output except errors')
 
+    # Common conversion args
+    pparser_conversion = argparse.ArgumentParser(add_help=False)
+    pparser_conversion.add_argument(
+        '-t', '--theme', metavar='THEME', type=find_theme,
+        default='csc-plain',
+        help='presentation theme name or path (default: %(default)s)')
+    pparser_conversion.add_argument(
+        '--filters', action='append', default=[],
+        metavar='filter.py',
+        help='pandoc filter scripts (multiple allowed)')
+    pparser_conversion.add_argument(
+        '--no-math', action='store_true',
+        help='disable math rendering')
+    pparser_conversion.add_argument(
+        '--pandoc-args', nargs='?',
+        default='', const='',
+        help='additional arguments passed to pandoc')
+
+
+    # Main argparser
     parser = argparse.ArgumentParser(
         description="Convert a presentation from Markdown to "
                     "a reveal.js-powered HTML5 using pandoc."
                     )
     subparsers = parser.add_subparsers(help='sub-command', required=True)
 
+    # Main argparser - convert sub-command
     parser_convert = subparsers.add_parser(
         'convert',
-        parents=[parser_common],
+        parents=[pparser_common, pparser_conversion],
         help='convert slides')
     parser_convert.set_defaults(main=main_convert)
     parser_convert.add_argument(
         'input', metavar='input.md', nargs='*', type=Path,
-        help='filename for presentation source (e.g. in Markdown)')
+        help='presentation file(s)')
     parser_convert.add_argument(
         '-o', '--output', metavar='DIR', type=Path,
         help=('output directory (by default uses '
               'the same directory as the input files)'))
     parser_convert.add_argument(
-        '-t', '--theme', metavar='THEME', default='csc-plain',
-        help='presentation theme name or path (default: %(default)s)')
-    parser_convert.add_argument(
         '-f', '--format', metavar='FORMAT', default='pdf',
         choices=['pdf', 'html', 'html-local', 'html-embedded'],
         help='output format (default: %(default)s; available: %(choices)s)')
-    parser_convert.add_argument(
-        '--filters', action='append', default=[],
-        metavar='filter.py',
-        help='pandoc filter scripts (multiple allowed)')
-    parser_convert.add_argument(
-        '--no-math', action='store_true',
-        help='disable math rendering')
-    parser_convert.add_argument(
-        '--pandoc-args', nargs='?',
-        default='', const='',
-        help='additional arguments passed to pandoc')
     group = parser_convert.add_argument_group(
         'advanced options for overriding paths and urls')
     for key in URL_KEYS:
         group.add_argument(f'--{key}', help=f'override {key}')
 
+    # Main argparser - install sub-command
     parser_install = subparsers.add_parser(
         'install',
-        parents=[parser_common],
+        parents=[pparser_common],
         help='install local slidefactory')
     parser_install.set_defaults(main=main_install)
     parser_install.add_argument(
@@ -326,13 +337,12 @@ def main_convert(args):
               'and follow the instructions (see README for details).'
               )
 
-    theme = find_theme(args.theme, SLIDEFACTORY_ROOT / 'theme')
     include_math = not args.no_math
 
     # Set resource url defaults if not set
     for key in URL_KEYS:
-        if getattr(args, key) is None:
-            default = get_default_url(key, args.format, theme)
+        if getattr(args, key, None) is None:
+            default = get_default_url(key, args.format, args.theme)
             setattr(args, key, default)
 
     if args.verbose:
