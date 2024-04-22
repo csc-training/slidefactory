@@ -71,9 +71,15 @@ RUn FONT_DIR=Inconsolata && \
 
 COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
+# Create executable
+RUN echo -e '#!/bin/sh\n\
+exec python3 /slidefactory/slidefactory.py "$@"\n\
+' > /usr/bin/slidefactory && \
+    chmod a+x /usr/bin/slidefactory
+
 RUN mkdir /work
 
 WORKDIR /work
 
-ENTRYPOINT ["/slidefactory/slidefactory.py"]
+ENTRYPOINT ["slidefactory"]
 CMD ["-h"]
