@@ -6,23 +6,26 @@
 # Help:  python slidefactory.py --help                                      #
 # ------------------------------------------------------------------------- #
 import argparse
+import copy
 import functools
 import hashlib
 import html.parser
 import inspect
 import os
+import re
 import shlex
 import shutil
 import sys
 import subprocess
 import tempfile
+import yaml
 from collections import namedtuple
 from contextlib import contextmanager
 from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.0.0-beta.11"
+VERSION = "3.1.0-beta.1"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
@@ -239,6 +242,117 @@ def create_pdf(html_fpath, pdf_fpath):
     run(run_args)
 
 
+def create_index_page(fpath, title, info_content, html_content, pdf_content):
+    info(f'Create {fpath}')
+    with fpath.open("w") as fd:
+        fd.write(f"""
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>{title}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@2.1.6/dist/styles/css/theme.css" />
+</head>
+<body>
+<c-main>
+  <c-toolbar>
+    <c-csc-logo></c-csc-logo>
+    {title}
+  </c-toolbar>
+
+  <c-page>
+
+    <c-card>
+      <c-card-title>About</c-card-title>
+      <c-card-content>
+        <div>
+{info_content}
+        </div>
+      </c-card-content>
+    </c-card>
+
+    <br>
+
+    <c-card>
+      <c-card-title>Slides (HTML)</c-card-title>
+      <c-card-content>
+{html_content}
+      </c-card-content>
+    </c-card>
+
+    <br>
+
+    <c-card>
+      <c-card-title>Slides (PDF)</c-card-title>
+      <c-card-content>
+{pdf_content}
+      </c-card-content>
+    </c-card>
+
+  </c-page>
+</c-main>
+<script src="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@2.1.6/dist/csc-ui/csc-ui.esm.js" type="module"></script>
+</body>
+</html>
+""".strip("\n"))  # noqa: E501
+
+
+def build_content(fpath, args):
+    info(f'Process {fpath}')
+    with fpath.open() as fd:
+        metadata = yaml.safe_load(fd.read())
+
+    title = metadata["title"]
+    content = ""
+
+    if "modules" in metadata:
+        content += '<c-accordion value="none">\n'
+        for module in metadata["modules"]:
+            mod_fpath = fpath.parent / module / fpath.name
+            mod_title, mod_content = build_content(mod_fpath, args)
+            content += f'<c-accordion-item heading="{mod_title}" value="{module}">\n'  # noqa: E501
+            content += mod_content
+            content += '</c-accordion-item>\n'
+        content += '</c-accordion>\n'
+    else:
+        assert "slidesdir" in metadata
+        slides_dpath = fpath.parent / metadata["slidesdir"]
+        for i, md_fpath in enumerate(sorted(slides_dpath.glob("*.md"))):
+            meta = read_slides_metadata(md_fpath)
+            target_name = md_fpath.with_suffix(".html").name
+            target_fpath = 'html' / fpath.parent / target_name
+            slides_title = re.sub(r'<.*?>', '', meta["title"])
+            content += f'<p><c-link href="{target_fpath}" target="_blank">{i+1}. {slides_title}</c-link></p>\n'  # noqa: E501
+
+            # Convert slides
+            formats = ['html']
+            if args.with_pdf:
+                formats += ['pdf']
+            for fmt in formats:
+                args_slides = copy.copy(args)
+                args_slides.input = [md_fpath]
+                args_slides.output = args.output / fmt / fpath.parent
+                args_slides.format = fmt
+                if fmt == 'html':
+                    args_slides.theme_url = f'../theme/{args.theme.name}/csc.css'  # noqa: E501
+                main_convert(args_slides)
+
+    return title, content
+
+
+def read_slides_metadata(fpath):
+    with fpath.open() as fd:
+        line = fd.readline()
+        if line.strip() != "---":
+            raise RuntimeError(f"{fpath} missing metadata")
+        data = ""
+        for line in fd:
+            if line.strip() == "---":
+                break
+            data += line
+        return yaml.safe_load(data)
+
+
 def main():
     # Common args
     pparser_common = argparse.ArgumentParser(add_help=False)
@@ -271,7 +385,6 @@ def main():
         default='', const='',
         help='additional arguments passed to pandoc')
 
-
     # Main argparser
     parser = argparse.ArgumentParser(
         description="Convert a presentation from Markdown to "
@@ -300,6 +413,26 @@ def main():
         'advanced options for overriding paths and urls')
     for key in URL_KEYS:
         group.add_argument(f'--{key}', help=f'override {key}')
+
+    # Main argparser - pages sub-command
+    parser_pages = subparsers.add_parser(
+        'pages',
+        parents=[pparser_common, pparser_conversion],
+        help='build pages and convert slides')
+    parser_pages.set_defaults(main=main_pages)
+    parser_pages.add_argument(
+        'input', metavar='about.yml', type=Path,
+        help='metadata file')
+    parser_pages.add_argument(
+        'output', metavar='DIR', type=Path,
+        help='output directory')
+    parser_pages.add_argument(
+        '--info_content',
+        default='This page is generated with slidefactory.',
+        help='information shown on the page')
+    parser_pages.add_argument(
+        '--with-pdf', action='store_true',
+        help='include pdf')
 
     # Main argparser - install sub-command
     parser_install = subparsers.add_parser(
@@ -418,6 +551,42 @@ def main_convert(args):
 
             if args.format == 'pdf':
                 create_pdf(html_fpath, out_fpath)
+
+
+def main_pages(args):
+    if args.output.exists():
+        error(f'Output path {args.output} exists. Exiting.')
+
+    title, html_content = build_content(args.input, args)
+
+    if args.with_pdf:
+        pdf_content = re.sub(r'href="html/(.*?).html"',
+                             r'href="pdf/\1.pdf"',
+                             html_content)
+        pdf_content += '</c-card-content>\n'
+        pdf_content += '<c-card-content>\n'
+
+        zip_fpath = args.output / 'slides.zip'
+        info(f'Create {zip_fpath}')
+        shutil.make_archive(zip_fpath.with_suffix(''),
+                            'zip',
+                            args.output / 'pdf')
+        pdf_content += f'<c-link href="{zip_fpath.name}">Download a zip file containing all slides.</c-link>\n'  # noqa: E501
+    else:
+        pdf_content = "Not generated."
+
+    page_theme_dpath = args.output / 'html' / 'theme' / args.theme.name
+    info(f'Copy theme to {page_theme_dpath}')
+    shutil.copytree(args.theme.dpath, page_theme_dpath)
+
+    # Convert links to html
+    info_content = re.sub(r'\[(.*?)\]\((.*?)\)',
+                          r'<c-link href="\2">\1</c-link>',
+                          args.info_content)
+
+    index_fpath = args.output / 'index.html'
+    create_index_page(index_fpath, title,
+                      info_content, html_content, pdf_content)
 
 
 def main_install(args):
