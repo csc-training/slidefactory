@@ -327,6 +327,8 @@ def main():
     verbose_info(f'  reference: {REF_CHECKSUM}')
     args.main(args)
 
+    if args.dry_run:
+        info("This was DRY RUN. No changes made.")
 
 
 def main_convert(args):
@@ -427,7 +429,8 @@ def main_install(args):
 
     # Copy slidefactory files
     info(f'Copy {SLIDEFACTORY_ROOT} to {path}')
-    shutil.copytree(SLIDEFACTORY_ROOT, path)
+    if not args.dry_run:
+        shutil.copytree(SLIDEFACTORY_ROOT, path)
 
     py_fpath = shlex.quote(str(path / Path(__file__).name))
 
