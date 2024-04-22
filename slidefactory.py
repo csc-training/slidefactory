@@ -297,7 +297,7 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
 """.strip("\n"))  # noqa: E501
 
 
-def build_content(fpath, page_theme_fpath, args):
+def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
     info(f'Process {fpath}')
     with fpath.open() as fd:
         metadata = yaml.safe_load(fd.read())
@@ -310,7 +310,8 @@ def build_content(fpath, page_theme_fpath, args):
         for module in metadata["modules"]:
             mod_fpath = fpath.parent / module / fpath.name
             mod_title, mod_content = \
-                build_content(mod_fpath, page_theme_fpath, args)
+                build_content(mod_fpath, page_theme_fpath, args,
+                              line_fmt='<p>{}</p>')
             content += f'<c-accordion-item heading="{mod_title}" value="{module}">\n'  # noqa: E501
             content += mod_content
             content += '</c-accordion-item>\n'
@@ -323,7 +324,8 @@ def build_content(fpath, page_theme_fpath, args):
             html_name = md_fpath.with_suffix(".html").name
             html_fpath = 'html' / fpath.parent / html_name
             slides_title = re.sub(r'<.*?>', '', meta["title"])
-            content += f'<p><c-link href="{html_fpath}" target="_blank">{i+1}. {slides_title}</c-link></p>\n'  # noqa: E501
+            content += line_fmt.format(f'<c-link href="{html_fpath}" target="_blank">{i+1}. {slides_title}</c-link>')  # noqa: E501
+            content += '\n'
 
             # Convert slides
             formats = ['html']
