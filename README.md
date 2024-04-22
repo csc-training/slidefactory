@@ -24,19 +24,19 @@ Fetch the slidefactory container image:
 
 Convert the markdown slides to a PDF (default):
 
-    ./slidefactory_VERSION.sif --format pdf slides.md
+    ./slidefactory_VERSION.sif slides --format pdf slides.md
 
 Convert slides to a regular HTML (an internet access required to display):
 
-    ./slidefactory_VERSION.sif --format html slides.md
+    ./slidefactory_VERSION.sif slides --format html slides.md
 
 Convert slides to a local HTML ([a local version of resources](#local-slidefactory-installation) used - no internet access required):
 
-    ./slidefactory_VERSION.sif --format html-local slides.md
+    ./slidefactory_VERSION.sif slides --format html-local slides.md
 
 Convert slides to an embedded HTML (images and other resources embedded within the file):
 
-    ./slidefactory_VERSION.sif --format html-embedded slides.md
+    ./slidefactory_VERSION.sif slides --format html-embedded slides.md
 
 The embedded HTML files are rather large and [buggy](#known-issues) so
 the pdf or the local HTML format is recommended for offline use.
@@ -44,17 +44,25 @@ The local HTML requires [a local slidefactory installation](#local-slidefactory-
 
 Change the theme with `--theme`:
 
-    ./slidefactory_VERSION.sif --theme .../path/to/any/theme slides.md
+    ./slidefactory_VERSION.sif slides --theme .../path/to/any/theme slides.md
 
 Use help for all other options:
 
-    ./slidefactory_VERSION.sif --help
+    ./slidefactory_VERSION.sif slides --help
+
+
+#### Build pages for a project
+
+Use pages sub-command to create an index page and convert all slides:
+
+    ./slidefactory_VERSION.sif pages about.yml build
+
 
 #### Local slidefactory installation
 
 Copy slidefactory files from the container to a local directory:
 
-    ./slidefactory_VERSION.sif --install my_slidefactory
+    ./slidefactory_VERSION.sif install my_slidefactory
 
 and follow the instructions.
 
@@ -67,7 +75,7 @@ Fetch the slidefactory container image:
 
 Convert the markdown slides to a PDF (default):
 
-    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" ghcr.io/csc-training/slidefactory:VERSION --format pdf slides.md
+    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" ghcr.io/csc-training/slidefactory:VERSION slides --format pdf slides.md
 
 All the options work the same way as for singularity
 but using the above docker command instead.

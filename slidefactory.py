@@ -606,10 +606,10 @@ def main_install(args):
     info(f'\nTo use the local installation, run '
          f'{py_fpath} with the container.\n'
          f'In singularity:\n'
-         f'    singularity exec slidefactory_VERSION.sif python3 {py_fpath} --format html-local slides.md'  # noqa: E501
+         f'    singularity exec slidefactory_VERSION.sif python3 {py_fpath} slides --format html-local slides.md'  # noqa: E501
          '\n'
          f'In docker:\n'
-         f'    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" --entrypoint python3 ghcr.io/csc-training/slidefactory:VERSION {py_fpath} --format html-local slides.md'  # noqa: E501
+         f'    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" --entrypoint python3 ghcr.io/csc-training/slidefactory:VERSION {py_fpath} slides --format html-local slides.md'  # noqa: E501
          '\n'
          f'Hint: make an alias of this command.\n'
          )
