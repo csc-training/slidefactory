@@ -32,6 +32,7 @@ RUN apk update && \
       font-freefont \
       python3 \
       py3-pandocfilters \
+      py3-yaml \
       tar \
       zip \
       && \
