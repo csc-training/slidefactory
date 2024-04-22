@@ -335,7 +335,7 @@ def build_content(fpath, args):
                 args_slides.format = fmt
                 if fmt == 'html':
                     args_slides.theme_url = f'../theme/{args.theme.name}/csc.css'  # noqa: E501
-                main_convert(args_slides)
+                main_slides(args_slides)
 
     return title, content
 
@@ -392,24 +392,24 @@ def main():
                     )
     subparsers = parser.add_subparsers(help='sub-command', required=True)
 
-    # Main argparser - convert sub-command
-    parser_convert = subparsers.add_parser(
-        'convert',
+    # Main argparser - slides sub-command
+    parser_slides = subparsers.add_parser(
+        'slides',
         parents=[pparser_common, pparser_conversion],
         help='convert slides')
-    parser_convert.set_defaults(main=main_convert)
-    parser_convert.add_argument(
+    parser_slides.set_defaults(main=main_slides)
+    parser_slides.add_argument(
         'input', metavar='input.md', nargs='*', type=Path,
         help='presentation file(s)')
-    parser_convert.add_argument(
+    parser_slides.add_argument(
         '-o', '--output', metavar='DIR', type=Path,
         help=('output directory (by default uses '
               'the same directory as the input files)'))
-    parser_convert.add_argument(
+    parser_slides.add_argument(
         '-f', '--format', metavar='FORMAT', default='pdf',
         choices=['pdf', 'html', 'html-local', 'html-embedded'],
         help='output format (default: %(default)s; available: %(choices)s)')
-    group = parser_convert.add_argument_group(
+    group = parser_slides.add_argument_group(
         'advanced options for overriding paths and urls')
     for key in URL_KEYS:
         group.add_argument(f'--{key}', help=f'override {key}')
@@ -464,7 +464,7 @@ def main():
         info("This was DRY RUN. No changes made.")
 
 
-def main_convert(args):
+def main_slides(args):
     if args.format == 'html-local' and IN_CONTAINER:
         error('Install and use local slidefactory in order to '
               'create local offline htmls.\n\n'
