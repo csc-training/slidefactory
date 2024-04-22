@@ -67,7 +67,7 @@ Fetch the slidefactory container image:
 
 Convert the markdown slides to a PDF (default):
 
-    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" ghcr.io/csc-training/slidefactory:VERSION --format pdf slides.md
+    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" ghcr.io/csc-training/slidefactory:VERSION --format pdf slides.md
 
 All the options work the same way as for singularity
 but using the above docker command instead.

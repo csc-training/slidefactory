@@ -22,7 +22,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.0.0-beta.10"
+VERSION = "3.0.0-beta.11"
 slidefactory_root = Path(__file__).absolute().parent
 
 # Modify version string if this file has been edited
@@ -207,7 +207,7 @@ def install(path):
          f'    singularity exec slidefactory_VERSION.sif python3 {py_fpath} --format html-local slides.md'  # noqa: E501
          '\n'
          f'In docker:\n'
-         f'    docker run -it --rm -v "$(pwd)":"$(pwd)":Z -w "$(pwd)" --entrypoint python3 ghcr.io/csc-training/slidefactory:VERSION {py_fpath} --format html-local slides.md'  # noqa: E501
+         f'    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" --entrypoint python3 ghcr.io/csc-training/slidefactory:VERSION {py_fpath} --format html-local slides.md'  # noqa: E501
          '\n'
          f'Hint: make an alias of this command.\n'
          )
