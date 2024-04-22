@@ -47,6 +47,16 @@ if CHECKSUM != REF_CHECKSUM:
     VERSION += '-edited'
 
 
+resources = (
+    'defaults_fpath',
+    'template_fpath',
+    'theme_url',
+    'revealjs_url',
+    'mathjax_url',
+    'fonts_url',
+    )
+
+
 @contextmanager
 def named_ctx(name):
     """Context manager that returns an object
@@ -189,87 +199,70 @@ def create_pdf(html_fpath, pdf_fpath):
     run(run_args)
 
 
-def install(path):
-    if path.exists():
-        error(f'Installation path {path} exists. Exiting.')
-
-    path = path.absolute()
-
-    # Copy slidefactory files
-    info(f'Copy {slidefactory_root} to {path}')
-    shutil.copytree(slidefactory_root, path)
-
-    py_fpath = shlex.quote(str(path / Path(__file__).name))
-
-    info(f'\nTo use the local installation, run '
-         f'{py_fpath} with the container.\n'
-         f'In singularity:\n'
-         f'    singularity exec slidefactory_VERSION.sif python3 {py_fpath} --format html-local slides.md'  # noqa: E501
-         '\n'
-         f'In docker:\n'
-         f'    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" --entrypoint python3 ghcr.io/csc-training/slidefactory:VERSION {py_fpath} --format html-local slides.md'  # noqa: E501
-         '\n'
-         f'Hint: make an alias of this command.\n'
-         )
-
-
 def main():
-    theme_root = slidefactory_root / 'theme'
-
-    resources = {
-            'defaults_fpath': None,
-            'template_fpath': None,
-            'theme_url': None,
-            'revealjs_url': None,
-            'mathjax_url': None,
-            'fonts_url': None,
-        }
+    parser_common = argparse.ArgumentParser(add_help=False)
+    parser_common.add_argument(
+        '-n', '--dry-run', '--show-command',
+        action='store_true', default=False,
+        help='do nothing, only show the full commands to be run')
+    parser_common.add_argument(
+        '-v', '--verbose', action='store_true', default=False,
+        help='be loud and noisy')
+    parser_common.add_argument(
+        '-q', '--quiet', action='store_true', default=False,
+        help='suppress all output except errors')
 
     parser = argparse.ArgumentParser(
         description="Convert a presentation from Markdown to "
                     "a reveal.js-powered HTML5 using pandoc."
                     )
-    parser.add_argument(
+    subparsers = parser.add_subparsers(help='sub-command', required=True)
+
+    parser_convert = subparsers.add_parser(
+        'convert',
+        parents=[parser_common],
+        help='convert slides')
+    parser_convert.set_defaults(main=main_convert)
+    parser_convert.add_argument(
         'input', metavar='input.md', nargs='*', type=Path,
         help='filename for presentation source (e.g. in Markdown)')
-    parser.add_argument(
+    parser_convert.add_argument(
         '-o', '--output', metavar='DIR', type=Path,
         help=('output directory (by default uses '
               'the same directory as the input files)'))
-    parser.add_argument(
+    parser_convert.add_argument(
         '-t', '--theme', metavar='THEME', default='csc-plain',
-        help=('presentation theme name or path (default: %(default)s, '
-              f'available: {", ".join(get_available_themes(theme_root))})'))
-    parser.add_argument(
+        help='presentation theme name or path (default: %(default)s)')
+    parser_convert.add_argument(
         '-f', '--format', metavar='FORMAT', default='pdf',
         choices=['pdf', 'html', 'html-local', 'html-embedded'],
         help='output format (default: %(default)s; available: %(choices)s)')
-    parser.add_argument(
+    parser_convert.add_argument(
         '--filters', action='append', default=[],
         metavar='filter.py',
         help='pandoc filter scripts (multiple allowed)')
-    parser.add_argument(
-        '-n', '--dry-run', '--show-command',
-        action='store_true', default=False,
-        help='do nothing, only show the full commands to be run')
-    parser.add_argument(
-        '-v', '--verbose', action='store_true', default=False,
-        help='be loud and noisy')
-    parser.add_argument(
-        '-q', '--quiet', action='store_true', default=False,
-        help='suppress all output except errors')
-    parser.add_argument(
+    parser_convert.add_argument(
         '--no-math', action='store_true',
         help='disable math rendering')
-    parser.add_argument(
-        '--install', metavar='PATH', type=Path,
-        help=('install local slidefactory to %(metavar)s '
-              '(ignores all other arguments)'))
-    group = parser.add_argument_group(
+    parser_convert.add_argument(
+        '--pandoc-args', nargs='?',
+        default='', const='',
+        help='additional arguments passed to pandoc')
+    group = parser_convert.add_argument_group(
         'advanced options for overriding paths and urls')
     for key in resources:
         group.add_argument(f'--{key}', help=f'override {key}')
-    args, unknown_args = parser.parse_known_args()
+
+    parser_install = subparsers.add_parser(
+        'install',
+        parents=[parser_common],
+        help='install local slidefactory')
+    parser_install.set_defaults(main=main_install)
+    parser_install.add_argument(
+        'path', metavar='path', type=Path,
+        help='install path')
+
+    args = parser.parse_args()
 
     global info
     info = functools.partial(info_template, quiet=args.quiet)
@@ -283,11 +276,20 @@ def main():
     info(f'Slidefactory {VERSION}')
     verbose_info(f'  checksum:  {CHECKSUM}')
     verbose_info(f'  reference: {REF_CHECKSUM}')
+    args.main(args)
 
-    if args.install:
-        install(args.install)
-        sys.exit(0)
 
+def main_convert(args):
+    resources = {
+            'defaults_fpath': None,
+            'template_fpath': None,
+            'theme_url': None,
+            'revealjs_url': None,
+            'mathjax_url': None,
+            'fonts_url': None,
+        }
+
+    theme_root = slidefactory_root / 'theme'
     include_math = not args.no_math
     use_local_resources = args.format in ['pdf', 'html-local', 'html-embedded']
 
@@ -360,7 +362,7 @@ def main():
         suffix = '.html'
 
     # Extra pandoc args
-    pandoc_args = unknown_args
+    pandoc_args = args.pandoc_args.split()
     if include_math:
         pandoc_args += ['--mathjax']
     if args.format in ['html-embedded']:
@@ -400,6 +402,31 @@ def main():
 
             if args.format == 'pdf':
                 create_pdf(html_fpath, out_fpath)
+
+
+def main_install(args):
+    path = args.path
+    if path.exists():
+        error(f'Installation path {path} exists. Exiting.')
+
+    path = path.absolute()
+
+    # Copy slidefactory files
+    info(f'Copy {slidefactory_root} to {path}')
+    shutil.copytree(slidefactory_root, path)
+
+    py_fpath = shlex.quote(str(path / Path(__file__).name))
+
+    info(f'\nTo use the local installation, run '
+         f'{py_fpath} with the container.\n'
+         f'In singularity:\n'
+         f'    singularity exec slidefactory_VERSION.sif python3 {py_fpath} --format html-local slides.md'  # noqa: E501
+         '\n'
+         f'In docker:\n'
+         f'    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" --entrypoint python3 ghcr.io/csc-training/slidefactory:VERSION {py_fpath} --format html-local slides.md'  # noqa: E501
+         '\n'
+         f'Hint: make an alias of this command.\n'
+         )
 
 
 if __name__ == '__main__':
