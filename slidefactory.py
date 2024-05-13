@@ -25,7 +25,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.1.0-beta.2"
+VERSION = "3.1.0-beta.3"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
@@ -319,12 +319,14 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
     else:
         assert "slidesdir" in metadata
         slides_dpath = fpath.parent / metadata["slidesdir"]
-        for i, md_fpath in enumerate(sorted(slides_dpath.glob("*.md"))):
+        for md_fpath in sorted(slides_dpath.glob("*.md")):
             meta = read_slides_metadata(md_fpath)
             html_name = md_fpath.with_suffix(".html").name
             html_fpath = 'html' / fpath.parent / html_name
             slides_title = re.sub(r'<.*?>', '', meta["title"])
-            content += line_fmt.format(f'<c-link href="{html_fpath}" target="_blank">{i+1}. {slides_title}</c-link>')  # noqa: E501
+            m = re.search(r'^\d+', html_name)
+            prefix = '' if m is None else f'{int(m.group())}.'
+            content += line_fmt.format(f'<c-link href="{html_fpath}" target="_blank">{prefix} {slides_title}</c-link>')  # noqa: E501
             content += '\n'
 
             # Convert slides
