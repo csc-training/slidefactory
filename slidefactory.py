@@ -25,7 +25,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.1.0-beta.3"
+VERSION = "3.1.0-beta.4"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
@@ -71,7 +71,7 @@ def get_default_url(key: str, format: str, theme: Theme):
         if theme.is_custom or not IN_CONTAINER or use_local_resources:
             return f'file://{urlquote(str(theme.dpath.absolute()))}/csc.css'  # noqa: E501
         else:
-            return f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.0.0-beta.10/theme/{theme.name}/csc.css'  # noqa: E501
+            return f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.1.0-beta.4/theme/{theme.name}/csc.css'  # noqa: E501
 
     elif key == 'defaults_fpath':
         return theme.dpath / "defaults.yaml"
