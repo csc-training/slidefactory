@@ -293,6 +293,11 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
   </c-page>
 </c-main>
 <script src="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@{csc_ui_version}/dist/csc-ui/csc-ui.esm.js" type="module"></script>
+<script>
+  const accordion = document.querySelector("c-accordion");
+  accordion.value = [];
+  accordion.multiple = true;
+</script>
 </body>
 </html>
 """.strip("\n"))  # noqa: E501
@@ -307,7 +312,7 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
     content = ""
 
     if "modules" in metadata:
-        content += '<c-accordion :value="[]" multiple>\n'
+        content += '<c-accordion>\n'
         for module in metadata["modules"]:
             mod_fpath = fpath.parent / module / fpath.name
             mod_title, mod_content = \
