@@ -25,7 +25,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.1.0-beta.4"
+VERSION = "3.1.0-beta.5"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
@@ -306,7 +306,7 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
     content = ""
 
     if "modules" in metadata:
-        content += '<c-accordion value="none">\n'
+        content += '<c-accordion :value="[]" multiple>\n'
         for module in metadata["modules"]:
             mod_fpath = fpath.parent / module / fpath.name
             mod_title, mod_content = \
