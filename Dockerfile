@@ -11,9 +11,11 @@ ADD slidefactory.py /slidefactory/
 RUN find /slidefactory -name '*~' -delete
 RUN find /slidefactory -name '.*' -delete
 
-# Fix permission
-RUN chmod a+r -R /slidefactory && \
-    chmod a+x /slidefactory/slidefactory.py
+# Fix permissions
+RUN chmod 755 /slidefactory && \
+    find /slidefactory -type d -exec chmod 755 {} \; && \
+    find /slidefactory -type f -exec chmod 644 {} \; && \
+    chmod 755 /slidefactory/slidefactory.py
 
 # Add checksums
 RUN cd /slidefactory && \
