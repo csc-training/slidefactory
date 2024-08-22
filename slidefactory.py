@@ -245,13 +245,14 @@ def create_pdf(html_fpath, pdf_fpath):
 def create_index_page(fpath, title, info_content, html_content, pdf_content):
     info(f'Create {fpath}')
     with fpath.open("w") as fd:
+        csc_ui_version = '2.1.11'
         fd.write(f"""
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
   <title>{title}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@2.1.6/dist/styles/css/theme.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@{csc_ui_version}/dist/styles/css/theme.css" />
 </head>
 <body>
 <c-main>
@@ -291,7 +292,7 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
 
   </c-page>
 </c-main>
-<script src="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@2.1.6/dist/csc-ui/csc-ui.esm.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@{csc_ui_version}/dist/csc-ui/csc-ui.esm.js" type="module"></script>
 </body>
 </html>
 """.strip("\n"))  # noqa: E501
