@@ -293,10 +293,14 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
   </c-page>
 </c-main>
 <script src="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@{csc_ui_version}/dist/csc-ui/csc-ui.esm.js" type="module"></script>
+""".strip("\n"))  # noqa: E501
+        fd.write("""
 <script>
-  const accordion = document.querySelector("c-accordion");
-  accordion.value = [];
-  accordion.multiple = true;
+  const accordions = document.querySelectorAll("c-accordion");
+  accordions.forEach((accordion) => {
+    accordion.value = [];
+    accordion.multiple = true;
+  });
 </script>
 </body>
 </html>
