@@ -57,14 +57,14 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     rm -f tmp.zip
 
 # Fonts
-RUn FONT_DIR=NotoSans && \
+RUN FONT_DIR=NotoSans && \
     mkdir -p /slidefactory/fonts/$FONT_DIR && \
     wget https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.013/NotoSans-v2.013.zip -O tmp.zip && \
     unzip -j tmp.zip 'NotoSans/googlefonts/ttf/*' -d /slidefactory/fonts/$FONT_DIR && \
     unzip -j tmp.zip 'OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
     rm tmp.zip
 
-RUn FONT_DIR=Inconsolata && \
+RUN FONT_DIR=Inconsolata && \
     mkdir -p /slidefactory/fonts/$FONT_DIR && \
     wget https://github.com/googlefonts/Inconsolata/archive/refs/tags/v3.000.zip -O tmp.zip && \
     unzip -j tmp.zip 'Inconsolata-3.000/fonts/ttf/Inconsolata-*' -x '*Condensed*' '*Expanded*' -d /slidefactory/fonts/$FONT_DIR && \
