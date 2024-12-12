@@ -581,7 +581,7 @@
   margin-top:  calc(0.58 * var(--ysize))                  !important;
   margin-left: calc(0.24 * var(--xsize))                  !important;
 }
-.reveal section.slide.author * {
+.reveal section.slide.author {
   text-align:    left;
   font-size:     0.5em;
 }
@@ -590,7 +590,6 @@
   padding-bottom: 1.4em;
 }
 .reveal section.slide.author h1 {
-  font-size:   0.6em;
   font-weight: bold;
 }
 .reveal section.slide.author img {
