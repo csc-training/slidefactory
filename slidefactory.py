@@ -25,7 +25,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.1.0-beta.6"
+VERSION = "3.1.0-beta.7"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
@@ -360,13 +360,16 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
 def read_slides_metadata(fpath):
     with fpath.open() as fd:
         line = fd.readline()
-        if line.strip() != "---":
-            raise RuntimeError(f"{fpath} missing metadata")
+        for line in fd:
+            if line.strip() == "---":
+                break
         data = ""
         for line in fd:
             if line.strip() == "---":
                 break
             data += line
+        if data == "":
+            raise RuntimeError(f"{fpath} missing metadata")
         return yaml.safe_load(data)
 
 
