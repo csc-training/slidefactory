@@ -149,6 +149,7 @@
 .reveal section.slide h1:first-child + p,
 .reveal section.slide h1:first-child + h2,
 .reveal section.slide h1:first-child + h3,
+.reveal .column p:first-child,
 .reveal .column h2:first-child,
 .reveal .column h3:first-child {
   padding-top: 0;
