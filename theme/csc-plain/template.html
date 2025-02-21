@@ -40,6 +40,11 @@ $endif$
 $for(header-includes)$
   $header-includes$
 $endfor$
+  <script>
+      if (( /high-contrast/gi ).test( window.location.search )) {
+        document.documentElement.classList.add( 'high-contrast' )
+      }
+  </script>
   <style type="text/css">
     html.print-pdf .reveal .slides .pdf-page:last-child {
       page-break-after: avoid;
