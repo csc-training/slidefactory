@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # ------------------------------------------------------------------------- #
 # Function: Convert a presentation from Markdown (or reStructuredText) to   #
 #           reveal.js powered HTML5 using pandoc.                           #
