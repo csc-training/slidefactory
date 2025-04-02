@@ -234,7 +234,7 @@ def create_pdf(html_fpath, pdf_fpath):
         '--disable-gpu',
         '--disable-software-rasterizer',
         '--hide-scrollbars',
-        '--virtual-time-budget=2147483647',
+        '--virtual-time-budget=214748364',
         '--run-all-compositor-stages-before-draw',
         f'--print-to-pdf={pdf_fpath}',
         f'file://{html_fpath.absolute()}?print-pdf'
