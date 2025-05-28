@@ -1,4 +1,4 @@
-FROM docker.io/alpine:3.17 AS slidefactory-files
+FROM docker.io/debian:bookworm-slim AS slidefactory-files
 
 ARG VERSION
 
@@ -23,22 +23,26 @@ RUN cd /slidefactory && \
     mv /tmp/sha256sums_$VERSION /slidefactory/
 
 
-FROM docker.io/alpine:3.17
+FROM docker.io/debian:bookworm-slim
 
-RUN apk update && \
-    apk add --no-cache \
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -qy && \
+    apt-get install -qy --no-install-recommends \
       ca-certificates \
       chromium \
       git \
       pandoc \
-      font-freefont \
+      fonts-freefont-otf \
+      fonts-liberation \
       python3 \
-      py3-pandocfilters \
-      py3-yaml \
+      python3-pandocfilters \
+      python3-yaml \
       tar \
-      zip \
+      wget \
+      zip unzip \
       && \
-    rm -rf /var/cache/apk/*
+    apt-get clean
 
 # Reveal.js
 RUN wget https://github.com/hakimel/reveal.js/archive/refs/tags/4.4.0.zip -O tmp.zip && \
@@ -74,7 +78,7 @@ RUN FONT_DIR=Inconsolata && \
 COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
 # Create executable
-RUN echo -e '#!/bin/sh\n\
+RUN echo '#!/bin/sh\n\
 exec python3 /slidefactory/slidefactory.py "$@"\n\
 ' > /usr/bin/slidefactory && \
     chmod a+x /usr/bin/slidefactory
