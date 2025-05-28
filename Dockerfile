@@ -32,7 +32,6 @@ RUN apt-get update -qy && \
       ca-certificates \
       chromium \
       git \
-      pandoc \
       fonts-freefont-otf \
       fonts-liberation \
       python3 \
@@ -43,6 +42,11 @@ RUN apt-get update -qy && \
       zip unzip \
       && \
     apt-get clean
+
+# Install pandoc
+RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O tmp.deb && \
+    dpkg -i tmp.deb && \
+    rm -f tmp.deb
 
 # Reveal.js
 RUN wget https://github.com/hakimel/reveal.js/archive/refs/tags/4.4.0.zip -O tmp.zip && \
