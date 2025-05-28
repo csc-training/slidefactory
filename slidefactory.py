@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # ------------------------------------------------------------------------- #
 # Function: Convert a presentation from Markdown (or reStructuredText) to   #
 #           reveal.js powered HTML5 using pandoc.                           #
@@ -25,7 +25,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.2.0-beta.1"
+VERSION = "3.2.0-beta.2"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
