@@ -228,7 +228,7 @@ def copy_html_externals(input_fpath, html_fpath):
 
 def create_pdf(html_fpath, pdf_fpath):
     run_args = [
-        'chromium-browser',
+        'chromium',
         '--no-sandbox',
         '--headless',
         '--disable-gpu',
