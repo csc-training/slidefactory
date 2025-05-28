@@ -23,6 +23,7 @@
   --csc-dark-blue: #002f5f;
   --csc-blue:      #0082bb;
   --csc-highlight: #ffc0b0;
+  --c-primary-900: #002930;
 }
 /* Screen geometry + base size for text */
 :root {
@@ -74,7 +75,7 @@
 .reveal {
   font-family: var(--csc-font-family);
   font-size:   var(--fontsize);
-  color:       var(--csc-grey);
+  color:       var(--c-primary-900);
   font-weight: normal;
 }
 .reveal .slides {
@@ -439,7 +440,7 @@
 }
 .reveal .table-none table strong em,
 .reveal .table-none table b em {
-  color: var(--csc-grey);
+  color: var(--c-primary-900);
   font-style: italic;
   font-weight: bold;
 }
