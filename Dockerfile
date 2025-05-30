@@ -1,4 +1,4 @@
-FROM docker.io/debian:bookworm-slim AS slidefactory-files
+FROM docker.io/debian:bookworm AS slidefactory-files
 
 ARG VERSION
 
@@ -23,7 +23,7 @@ RUN cd /slidefactory && \
     mv /tmp/sha256sums_$VERSION /slidefactory/
 
 
-FROM docker.io/debian:bookworm-slim
+FROM docker.io/debian:bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
 
