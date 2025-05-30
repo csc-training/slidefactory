@@ -1,0 +1,15 @@
+---
+standalone: true
+from: markdown-native_divs
+to: revealjs
+variables:
+    width: 1920
+    height: 1080
+    history: true
+    center: false
+    controls: false
+    transition: none
+    backgroundTransition: none
+highlight-style: pygments
+...
+---

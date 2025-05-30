@@ -6,7 +6,7 @@ This repository contains the recipe to build a new *slidefactory* container
 image and the files needed by the tool to generate slides in CSC style.
 
 If you are looking for an example of how to write slides using slidefactory,
-please have a look at the empty
+please have a look at the
 [slidefactory template](https://github.com/csc-training/slidefactory-template)
 that can be used as a basis for new courses. Besides some convenience tooling,
 it also contains a syntax guide and an example slide set.
@@ -14,112 +14,105 @@ it also contains a syntax guide and an example slide set.
 
 ## Usage
 
-Convert slides from Markdown to HTML:
-```bash
-slidefactory.sif example.md
-```
+The container can be run via singularity / apptainer or docker / podman.
 
-or the same if not using the singularity container:
-```bash
-python3 $SLIDEFACTORY/convert.py example.md
-```
+### Singularity / apptainer
 
-To see more detailed information when running, such as configuration options
-and the exact pandoc command, you can add `--verbose` to the commands above.
+Fetch the slidefactory container image:
 
-Use `--help` to see descriptions of all the available arguments.
+    singularity pull docker://ghcr.io/csc-training/slidefactory:VERSION
 
+Convert the markdown slides to a PDF (default):
 
-### option: `--pdf`
+    ./slidefactory_VERSION.sif slides --format pdf slides.md
 
-To generate also a PDF version of the slides, add `--pdf` to the command
-above, e.g.:
+Convert slides to a regular HTML (an internet access required to display):
 
-```bash
-slidefactory.sif --pdf example.md
-```
+    ./slidefactory_VERSION.sif slides --format html slides.md
 
+Convert slides to a local HTML ([a local version of resources](#local-slidefactory-installation) used - no internet access required):
 
-### option: `--self-contained`
+    ./slidefactory_VERSION.sif slides --format html-local slides.md
 
-One can also use the option `--self-contained` to embed images and other
-assets into the HTML file with the aim to produce a file that is as
-"self-contained" as possible.
+Convert slides to an embedded HTML (images and other resources embedded within the file):
 
-```bash
-slidefactory.sif --self-contained example.md
-```
+    ./slidefactory_VERSION.sif slides --format html-embedded slides.md
 
-Beware that **files produces in this way can become very large** and that not
-everything will be contained in the HTML file, so e.g. math formulas will
-require internet connection to work.
+The embedded HTML files are rather large and [buggy](#known-issues) so
+the pdf or the local HTML format is recommended for offline use.
+The local HTML requires [a local slidefactory installation](#local-slidefactory-installation).
+
+Change the theme with `--theme`:
+
+    ./slidefactory_VERSION.sif slides --theme .../path/to/any/theme slides.md
+
+Use help for all other options:
+
+    ./slidefactory_VERSION.sif slides --help
 
 
-## Install
+#### Build pages for a project
 
-Slidefactory consists of two parts: 1) a **git repo** containing files
-defining the slide layout (aka themes), pandoc filters, and a convenience
-script (`convert.py`) to ease the use of pandoc, and 2) a
-**singularity container** with a self-contained software environment that is
-tested to work with slidefactory.
+Use pages sub-command to create an index page and convert all slides:
 
-Get the source code, build the singularity container and install
-slidefactory:
-```
-git clone https://github.com/csc-training/slidefactory
-cd slidefactory
-make
-make install
-```
-
-As prompted by the installer, please add the environment variable
-`SLIDEFACTORY` to your `.bashrc` (or similar) and make sure that the directory
-containing the container image is in the `PATH`.
-
-If needed, please see [INSTALL.md](INSTALL.md) for more detailed installation
-instructions (and alternative installation options).
+    ./slidefactory_VERSION.sif pages about.yml build
 
 
-### Uninstall
+#### Local slidefactory installation
 
-To uninstall slidefactory, you can say `slidefactory.sif --uninstall` (or
-without the container `python3 $SLIDEFACTORY/setup/uninstall.py`). If one is
-in the directory containing the source code, `make uninstall` will also work.
+Copy slidefactory files from the container to a local directory:
 
+    ./slidefactory_VERSION.sif install my_slidefactory
 
-## Update
-
-The installed git repo can be updated (to get new themes etc.) with:
-```
-slidefactory.sif --update
-```
-
-or without the singularity container:
-```
-python3 $SLIDEFACTORY/setup/update.py
-```
-
-or just simply by using git:
-```
-cd $SLIDEFACTORY
-git pull
-cd -
-```
-
-If you want to update the git repo included inside the container (used only if
-no local installation is found), then you can add `--container` flag to the
-command above. This will unpack the container, update it, and rebuild the
-image.
-
-If the container image definition has changed, you need to re-install
-slidefactory to get a new version of the image.
+and follow the instructions.
 
 
-## Example: template for new courses
+### Docker / podman
 
-Examples and more information on how to write slides using slidefactory are
-available in the
-[slidefactory template](https://github.com/csc-training/slidefactory-template)
-repository. The repository contains an empty template for slidefactory slides
-that can be used as a basis for new courses. Please read the `README.md`
-included in the repository for more details.
+Fetch the slidefactory container image:
+
+    docker pull ghcr.io/csc-training/slidefactory:VERSION
+
+Convert the markdown slides to a PDF (default):
+
+    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" ghcr.io/csc-training/slidefactory:VERSION slides --format pdf slides.md
+
+All the options work the same way as for singularity
+but using the above docker command instead.
+
+
+## Known issues
+
+* Embedded HTML: incorrect math font
+  * Use local HTML or PDF instead
+* Embedded and local HTML: Firefox displays incorrect fonts
+  * Use Chromium or Chrome instead
+
+
+## Building and updating the container image
+
+The container recipe is encoded in `Dockerfile` and `Makefile`.
+
+If you don't have docker or podman, install using
+
+    sudo apt install podman-docker
+
+If using podman, define
+
+    export BUILDAH_FORMAT=docker
+
+Build the image
+
+    make build
+
+Login using GitHub Personal Access Token in order to be able to push:
+
+    docker login ghcr.io
+
+Push the image
+
+    make push
+
+For testing, you can also convert the local image to singularity:
+
+    make singularity
