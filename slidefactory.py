@@ -25,7 +25,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.3.0"
+VERSION = "3.3.1"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
