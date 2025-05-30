@@ -27,10 +27,10 @@ FROM docker.io/debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# General packages
 RUN apt-get update -qy && \
     apt-get install -qy --no-install-recommends \
       ca-certificates \
-      chromium \
       git \
       fonts-freefont-otf \
       fonts-liberation \
@@ -43,10 +43,31 @@ RUN apt-get update -qy && \
       && \
     apt-get clean
 
-# Install pandoc
-RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O tmp.deb && \
-    dpkg -i tmp.deb && \
-    rm -f tmp.deb
+# Dependencies of chromium
+RUN apt-get update -qy && \
+    apt-get install -qy --no-install-recommends \
+      chromium \
+      && \
+    apt-get remove -qy \
+      chromium \
+      chromium-common \
+      && \
+    apt-get clean
+
+# Fonts
+RUN FONT_DIR=NotoSans && \
+    mkdir -p /slidefactory/fonts/$FONT_DIR && \
+    wget https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.013/NotoSans-v2.013.zip -O tmp.zip && \
+    unzip -j tmp.zip 'NotoSans/googlefonts/ttf/*' -d /slidefactory/fonts/$FONT_DIR && \
+    unzip -j tmp.zip 'OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
+    rm tmp.zip
+
+RUN FONT_DIR=Inconsolata && \
+    mkdir -p /slidefactory/fonts/$FONT_DIR && \
+    wget https://github.com/googlefonts/Inconsolata/archive/refs/tags/v3.000.zip -O tmp.zip && \
+    unzip -j tmp.zip 'Inconsolata-3.000/fonts/ttf/Inconsolata-*' -x '*Condensed*' '*Expanded*' -d /slidefactory/fonts/$FONT_DIR && \
+    unzip -j tmp.zip 'Inconsolata-3.000/OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
+    rm tmp.zip
 
 # Reveal.js
 RUN wget https://github.com/hakimel/reveal.js/archive/refs/tags/4.4.0.zip -O tmp.zip && \
@@ -64,20 +85,17 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     unzip tmp.zip 'MathJax-3.2.2/es5/adaptors/*' -d /slidefactory && \
     rm -f tmp.zip
 
-# Fonts
-RUN FONT_DIR=NotoSans && \
-    mkdir -p /slidefactory/fonts/$FONT_DIR && \
-    wget https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.013/NotoSans-v2.013.zip -O tmp.zip && \
-    unzip -j tmp.zip 'NotoSans/googlefonts/ttf/*' -d /slidefactory/fonts/$FONT_DIR && \
-    unzip -j tmp.zip 'OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
-    rm tmp.zip
+# Pandoc
+RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O tmp.deb && \
+    dpkg -i tmp.deb && \
+    rm -f tmp.deb
 
-RUN FONT_DIR=Inconsolata && \
-    mkdir -p /slidefactory/fonts/$FONT_DIR && \
-    wget https://github.com/googlefonts/Inconsolata/archive/refs/tags/v3.000.zip -O tmp.zip && \
-    unzip -j tmp.zip 'Inconsolata-3.000/fonts/ttf/Inconsolata-*' -x '*Condensed*' '*Expanded*' -d /slidefactory/fonts/$FONT_DIR && \
-    unzip -j tmp.zip 'Inconsolata-3.000/OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
-    rm tmp.zip
+# Chromium
+RUN apt-get update -qy && \
+    apt-get install -qy --no-install-recommends \
+      chromium \
+      && \
+    apt-get clean
 
 COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
