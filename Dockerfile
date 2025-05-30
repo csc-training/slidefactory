@@ -97,6 +97,14 @@ RUN apt-get update -qy && \
       && \
     apt-get clean
 
+# Fix pandoc filters calling python;
+# Move this higher up when updating earlier blobs
+RUN apt-get update -qy && \
+    apt-get install -qy --no-install-recommends \
+      python-is-python3 \
+      && \
+    apt-get clean
+
 COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
 # Create executable
