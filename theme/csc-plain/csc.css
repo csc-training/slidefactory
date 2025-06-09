@@ -82,7 +82,7 @@
 html.print-pdf .reveal .slide-number {
   font-family: var(--csc-font-family);
   font-size:   30px;
-  color:       var(--c-primary-900);
+  color:       #025c96;
   font-weight: normal;
   right:       10px;
   bottom:      30px;
