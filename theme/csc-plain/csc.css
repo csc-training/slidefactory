@@ -78,6 +78,16 @@
   color:       var(--c-primary-900);
   font-weight: normal;
 }
+.reveal .slide-number,
+html.print-pdf .reveal .slide-number {
+  font-family: var(--csc-font-family);
+  font-size:   30px;
+  color:       #025c96;
+  font-weight: normal;
+  right:       10px;
+  bottom:      30px;
+  background-color: transparent;
+}
 .reveal .slides {
   text-align:  left;
   line-height: 1.4;
