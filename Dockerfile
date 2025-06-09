@@ -105,6 +105,14 @@ RUN apt-get update -qy && \
       && \
     apt-get clean
 
+# Install ghostscript;
+# Move this higher up when updating earlier blobs
+RUN apt-get update -qy && \
+    apt-get install -qy --no-install-recommends \
+      ghostscript\
+      && \
+    apt-get clean
+
 COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
 # Create executable
