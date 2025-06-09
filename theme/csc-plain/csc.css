@@ -344,6 +344,7 @@ html.print-pdf .reveal .slide-number {
 .reveal code.sourceCode,
 .reveal code.sourceCode > span {
   font-family: var(--csc-code-font-family);
+  color:       var(--c-primary-900);
 }
 .reveal pre code {
   display:    block;
