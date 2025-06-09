@@ -25,7 +25,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.3.1"
+VERSION = "3.4.0"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
@@ -96,13 +96,6 @@ def get_default_url(key: str, format: str, theme: Theme):
             return f'{root_url}/fonts/fonts.css'
         else:
             return 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,100,400;0,100,700;1,100,400;1,100,700&family=Inconsolata:wght@400;700'  # noqa: E501
-
-
-@contextmanager
-def named_ctx(name):
-    """Context manager that returns an object
-       with object.name being the given name."""
-    yield namedtuple('Named', ['name'])(name)
 
 
 class HTMLParser(html.parser.HTMLParser):
@@ -186,6 +179,7 @@ def create_html(input_fpath, html_fpath, *,
                 pandoc_vars,
                 filters=[],
                 pandoc_args=[],
+                dry_run=False,
                 ):
     run_args = [
         'pandoc',
@@ -201,6 +195,9 @@ def create_html(input_fpath, html_fpath, *,
         input_fpath,
         ]
     run(run_args)
+
+    if not dry_run:
+        copy_html_externals(input_fpath, html_fpath)
 
 
 def copy_html_externals(input_fpath, html_fpath):
@@ -226,20 +223,73 @@ def copy_html_externals(input_fpath, html_fpath):
             shutil.copy2(ext_fpath, tgt_fpath)
 
 
-def create_pdf(html_fpath, pdf_fpath):
-    run_args = [
-        'chromium',
-        '--no-sandbox',
-        '--headless',
-        '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--hide-scrollbars',
-        '--virtual-time-budget=2147483647',
-        '--run-all-compositor-stages-before-draw',
-        f'--print-to-pdf={pdf_fpath}',
-        f'file://{html_fpath.absolute()}?print-pdf'
-        ]
-    run(run_args)
+def create_pdf(html_fpath, pdf_fpath, *,
+               meta={},
+               dry_run=False,
+               ):
+    with tempfile.NamedTemporaryFile(
+             dir=pdf_fpath.parent,
+             prefix=f'{pdf_fpath.stem}-',
+             suffix='.pdf') \
+         as tmpfile:
+        tmp_pdf_fpath = Path(tmpfile.name)
+        run_args = [
+            'chromium',
+            '--no-sandbox',
+            '--headless',
+            '--disable-gpu',
+            '--disable-software-rasterizer',
+            '--hide-scrollbars',
+            '--virtual-time-budget=2147483647',
+            '--run-all-compositor-stages-before-draw',
+            f'--print-to-pdf={tmp_pdf_fpath}',
+            f'file://{html_fpath.absolute()}?print-pdf'
+            ]
+        run(run_args)
+
+        with tempfile.NamedTemporaryFile(
+                 dir=pdf_fpath.parent,
+                 prefix=f'{pdf_fpath.stem}-',
+                 suffix='.txt') \
+             as tmpfile:
+            pdfmark_fpath = Path(tmpfile.name)
+
+            pdfmark = '[ '
+            for key in ["Title", "Author", "Subject"]:
+                value = meta.get(key.lower())
+                if value is not None:
+                    pdfmark += f'/{key} ({value}) '
+            pdfmark += f'/Creator (Slidefactory {VERSION}) /DOCINFO pdfmark'
+
+            verbose_info(f'write {pdfmark_fpath}')
+            verbose_info(f'{pdfmark}\n')
+            if not dry_run:
+                with open(pdfmark_fpath, 'w') as f:
+                    f.write(pdfmark)
+
+            run_args = [
+                'gs',
+                '-q',
+                '-dNOPAUSE',
+                '-dBATCH',
+                '-dSAFER',
+                '-sDEVICE=pdfwrite',
+                '-dCompatibilityLevel=1.4',
+                '-dPDFSETTINGS=/printer',
+                '-dDownsampleColorImages=true',
+                '-dColorImageResolution=300',
+                '-dDownsampleGrayImages=true',
+                '-dGrayImageResolution=300',
+                '-dDownsampleMonoImages=true',
+                '-dMonoImageResolution=300',
+                '-dColorConversionStrategy=/LeaveColorUnchanged',
+                '-dPreserveAnnots=true',
+                '-dDetectDuplicateImages=true',
+                f'-sOutputFile={pdf_fpath}',
+                f'{tmp_pdf_fpath}',
+                f'{pdfmark_fpath}',
+                ]
+            run(run_args)
 
 
 def create_index_page(fpath, title, info_content, html_content, pdf_content):
@@ -549,30 +599,33 @@ def main_slides(args):
             out_fpath = in_fpath.with_suffix(suffix)
 
         info(f'Convert {in_fpath} to {out_fpath}')
+        html_kwargs = dict(
+            defaults_fpath=args.defaults_fpath,
+            template_fpath=args.template_fpath,
+            pandoc_vars=pandoc_vars,
+            pandoc_args=pandoc_args,
+            filters=args.filters,
+            dry_run=args.dry_run,
+        )
 
-        # Use temporary html output for pdf
-        with tempfile.NamedTemporaryFile(
-                 dir=in_fpath.parent,
-                 prefix=f'{in_fpath.stem}-',
-                 suffix='.html') \
-             if args.format == 'pdf' \
-             else named_ctx(out_fpath) \
-             as outfile:
+        if args.format == 'pdf':
+            # Use temporary html output for pdf
+            with tempfile.NamedTemporaryFile(
+                     dir=in_fpath.parent,
+                     prefix=f'{in_fpath.stem}-',
+                     suffix='.html',
+                 ) as tmpfile:
+                html_fpath = Path(tmpfile.name)
+                create_html(in_fpath, html_fpath, **html_kwargs)
+                meta = read_slides_metadata(in_fpath)
 
-            html_fpath = Path(outfile.name)
-            create_html(in_fpath, html_fpath,
-                        defaults_fpath=args.defaults_fpath,
-                        template_fpath=args.template_fpath,
-                        pandoc_vars=pandoc_vars,
-                        pandoc_args=pandoc_args,
-                        filters=args.filters,
-                        )
+                # Use event name as subject if no separate subject defined
+                if 'subject' not in meta and 'event' in meta:
+                    meta['subject'] = meta['event']
 
-            if not args.dry_run:
-                copy_html_externals(in_fpath, html_fpath)
-
-            if args.format == 'pdf':
-                create_pdf(html_fpath, out_fpath)
+                create_pdf(html_fpath, out_fpath, meta=meta, dry_run=args.dry_run)
+        else:
+            create_html(in_fpath, out_fpath, **html_kwargs)
 
 
 def main_pages(args):
