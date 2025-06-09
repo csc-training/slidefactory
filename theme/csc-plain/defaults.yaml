@@ -10,6 +10,7 @@ variables:
     controls: false
     transition: none
     backgroundTransition: none
+    slideNumber: true
 highlight-style: pygments
 ...
 ---

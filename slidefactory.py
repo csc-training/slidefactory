@@ -71,7 +71,7 @@ def get_default_url(key: str, format: str, theme: Theme):
         if theme.is_custom or not IN_CONTAINER or use_local_resources:
             return f'file://{urlquote(str(theme.dpath.absolute()))}/csc.css'  # noqa: E501
         else:
-            return f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.3.0/theme/{theme.name}/csc.css'  # noqa: E501
+            return f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.4.0/theme/{theme.name}/csc.css'  # noqa: E501
 
     elif key == 'defaults_fpath':
         return theme.dpath / "defaults.yaml"
