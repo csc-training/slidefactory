@@ -113,6 +113,19 @@ RUN apt-get update -qy && \
       && \
     apt-get clean
 
+# Install extra fonts;
+# Move this higher up when updating earlier blobs
+RUN apt-get update -qy && \
+    apt-get install -qy --no-install-recommends \
+      fonts-croscore \
+      fonts-crosextra-carlito \
+      fonts-crosextra-caladea \
+      fonts-dejavu \
+      fonts-noto-core \
+      fonts-noto-mono \
+      && \
+    apt-get clean
+
 COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
 # Create executable
