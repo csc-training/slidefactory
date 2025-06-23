@@ -25,7 +25,7 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.4.0"
+VERSION = "3.4.1"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
@@ -383,7 +383,7 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
             meta = read_slides_metadata(md_fpath)
             html_name = md_fpath.with_suffix(".html").name
             html_fpath = 'html' / fpath.parent / html_name
-            slides_title = re.sub(r'<.*?>', '', meta["title"])
+            slides_title = meta["title"]
             m = re.search(r'^\d+', html_name)
             prefix = '' if m is None else f'{int(m.group())}.'
             content += line_fmt.format(f'<c-link href="{html_fpath}" target="_blank">{prefix} {slides_title}</c-link>')  # noqa: E501
@@ -420,7 +420,14 @@ def read_slides_metadata(fpath):
         if data == "":
             raise RuntimeError(f"{fpath} missing metadata")
         try:
-            return yaml.safe_load(data)
+            data = yaml.safe_load(data)
+            for key, val in data.items():
+                # Clean value
+                val = re.sub(r'<.*?>', ' ', val)
+                while '  ' in val:
+                    val = val.replace('  ', ' ')
+                data[key] = val
+            return data
         except yaml.parser.ParserError as exc:
             raise RuntimeError(f"{fpath} yaml parsing failed") from exc
 
