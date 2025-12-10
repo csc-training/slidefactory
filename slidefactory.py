@@ -592,6 +592,7 @@ def main_slides(args):
 
     # Extra pandoc args
     pandoc_args = args.pandoc_args.split()
+    pandoc_args += ['--strip-comments']  # avoid empty slide due to license header
     if include_math:
         pandoc_args += ['--mathjax']
     if args.format in ['html-embedded']:
