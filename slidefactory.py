@@ -343,18 +343,29 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
   </c-page>
 </c-main>
 <script src="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@{csc_ui_version}/dist/csc-ui/csc-ui.esm.js" type="module"></script>
-""".strip("\n"))  # noqa: E501
+""".lstrip("\n"))  # noqa: E501
         fd.write("""
 <script>
-  const accordions = document.querySelectorAll("c-accordion");
-  accordions.forEach((accordion) => {
-    accordion.value = [];
-    accordion.multiple = true;
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check ?open=... param
+    const url = new URL(location.href);
+    const val = url.searchParams.get('open');
+
+    // Initialize accordions
+    const accordions = document.querySelectorAll('c-accordion');
+    accordions.forEach((accordion) => {
+      accordion.value = val ? [val] : [];
+      accordion.multiple = true;
+    });
+
+    // Clean ?open=... from url
+    url.searchParams.delete('open');
+    history.replaceState(null, '', url.toString());
   });
 </script>
 </body>
 </html>
-""".strip("\n"))  # noqa: E501
+""".rstrip("\n"))  # noqa: E501
 
 
 def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
