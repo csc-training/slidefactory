@@ -556,24 +556,25 @@ html.print-pdf .reveal .slide-number {
 
 .reveal .slides section.slide.title ,
 .reveal .slides .pdf-page section.slide.title {
-  margin-top:   calc(0.412 * var(--ysize))                !important;
-  margin-left:  calc(0.291 * var(--xsize))                !important;
-  margin-right: 0                                         !important;
-  max-width:    calc(var(--xsize) - 0.291 * var(--xsize)) !important;
+  margin-top:   calc(0.66 * var(--ysize))                !important;
+  margin-left:  calc(0.12 * var(--xsize))                !important;
+  margin-right: 0                                        !important;
+  max-width:    calc(0.64 * var(--xsize))                !important;
 }
 .reveal section.slide.title * {
   color:       var(--csc-dark-blue);
   text-align:  left;
 }
 .reveal section.slide.title h1 {
-  font-size:   1.4em;
+  transform: translateY(-100%);
+  font-size: 1.4em;
   font-weight: bold;
   line-height: 1.2;
 }
-.reveal section.slide.title h1:first-child {
-  padding-bottom: 1ex;
-}
 .reveal section.slide.title p {
+  position: absolute;
+  left: 0.0em;
+  top: -3.0em;
   font-size: 0.6em;
 }
 
