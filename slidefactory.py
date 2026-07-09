@@ -313,10 +313,17 @@ def create_pdf(html_fpath, pdf_fpath, *,
             run(run_args)
 
 
-def create_index_page(fpath, title, info_content, html_content, pdf_content):
+def create_index_page(fpath, title, info_content, html_content, pdf_content,
+                      merged_pdf_content=''):
     info(f'Create {fpath}')
     with fpath.open("w") as fd:
         csc_ui_version = '2.1.11'
+        pdf_title_extra = ''
+        if merged_pdf_content:
+            pdf_title_extra = (
+                '<span style="float: right; font-size: 0.8rem; '
+                f'font-weight: normal;">{merged_pdf_content}</span>'
+            )
         fd.write(f"""
 <!DOCTYPE html>
 <html>
@@ -355,7 +362,7 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
     <br>
 
     <c-card>
-      <c-card-title>Slides (PDF)</c-card-title>
+      <c-card-title>Slides (PDF){pdf_title_extra}</c-card-title>
       <c-card-content>
 {pdf_content}
       </c-card-content>
@@ -1000,15 +1007,15 @@ def main_pages(args):
                             args.output / 'pdf')
         pdf_content += f'<c-link href="{zip_fpath.name}">Download a zip file containing all slides.</c-link>\n'  # noqa: E501
 
+        merged_pdf_content = ''
         if args.merge_pdf:
             merged_fpath = args.output / 'slides-merged.pdf'
             info(f'Create {merged_fpath}')
             merge_pdfs(chapters, merged_fpath, args, dry_run=args.dry_run)
-            pdf_content += '</c-card-content>\n'
-            pdf_content += '<c-card-content>\n'
-            pdf_content += f'<c-link href="{merged_fpath.name}">Download a single merged PDF with a table of contents.</c-link>\n'  # noqa: E501
+            merged_pdf_content = f'<c-link href="{merged_fpath.name}">Download a single merged PDF with a table of contents.</c-link>'  # noqa: E501
     else:
         pdf_content = "Not generated."
+        merged_pdf_content = ''
 
     # Convert links to html
     info_content = re.sub(r'\[(.*?)\]\((.*?)\)',
@@ -1017,7 +1024,8 @@ def main_pages(args):
 
     index_fpath = args.output / 'index.html'
     create_index_page(index_fpath, title,
-                      info_content, html_content, pdf_content)
+                      info_content, html_content, pdf_content,
+                      merged_pdf_content)
 
 
 def main_install(args):
