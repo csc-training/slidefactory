@@ -6,6 +6,7 @@ ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
 ADD theme/ /slidefactory/theme/
 ADD slidefactory.py /slidefactory/
+ADD global_title.md /slidefactory/
 
 # Remove possible temporary files
 RUN find /slidefactory -name '*~' -delete
@@ -40,17 +41,6 @@ RUN apt-get update -qy && \
       tar \
       wget \
       zip unzip \
-      && \
-    apt-get clean
-
-# Dependencies of chromium
-RUN apt-get update -qy && \
-    apt-get install -qy --no-install-recommends \
-      chromium \
-      && \
-    apt-get remove -qy \
-      chromium \
-      chromium-common \
       && \
     apt-get clean
 
@@ -90,11 +80,17 @@ RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-
     dpkg -i tmp.deb && \
     rm -f tmp.deb
 
-# Chromium
-RUN apt-get update -qy && \
-    apt-get install -qy --no-install-recommends \
-      chromium \
-      && \
+# Chromium, pinned to a known-good Debian package version.
+# Debian's chromium package is normally installed unpinned (whatever is
+# current in the bookworm archive at build time), but that has caused
+# regressions between builds (a startup crash on one snapshot, a rendering
+# hang on another); pin to a version confirmed to work correctly, fetched
+# from snapshot.debian.org since the current archive has since moved on.
+RUN wget -q https://snapshot.debian.org/file/38a604389acefd9c54715123543cd1303dd8238d -O chromium.deb && \
+    wget -q https://snapshot.debian.org/file/a5cb35b95b69ba24ed5539243b6c45ed50f72bb8 -O chromium-common.deb && \
+    apt-get update -qy && \
+    apt-get install -qy --no-install-recommends ./chromium-common.deb ./chromium.deb && \
+    rm -f chromium.deb chromium-common.deb && \
     apt-get clean
 
 # Fix pandoc filters calling python;
@@ -125,6 +121,19 @@ RUN apt-get update -qy && \
       fonts-noto-mono \
       && \
     apt-get clean
+
+# Install pypdf for `pages --merge-pdf` (pinned via pip, not apt: Debian's
+# python3-pypdf version isn't pinned to the base image and has been observed
+# to drift/regress between builds of the same Dockerfile, e.g. lacking the
+# pypdf.annotations module we rely on);
+# Move this higher up when updating earlier blobs
+RUN apt-get update -qy && \
+    apt-get install -qy --no-install-recommends \
+      python3-pip \
+      && \
+    apt-get clean && \
+    pip install --no-cache-dir --break-system-packages \
+      pypdf==4.0.2
 
 COPY --from=slidefactory-files /slidefactory/ /slidefactory/
 
