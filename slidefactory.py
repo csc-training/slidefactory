@@ -9,15 +9,19 @@ import argparse
 import copy
 import functools
 import hashlib
+import html
 import html.parser
 import inspect
 import os
 import re
 import shlex
 import shutil
+import signal
 import sys
 import subprocess
 import tempfile
+import pypdf
+import pypdf.annotations
 import yaml
 from collections import namedtuple
 from contextlib import contextmanager
@@ -28,6 +32,10 @@ from pathlib import Path
 VERSION = "3.4.3"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
+
+# Chromium can occasionally deadlock during startup/rendering; bound how
+# long we wait so that failure mode is a clear error, not an indefinite hang.
+CHROMIUM_TIMEOUT = 120
 
 # Modify version string if this file has been edited
 with open(__file__, 'rb') as f:
@@ -111,7 +119,7 @@ class HTMLParser(html.parser.HTMLParser):
                         self.sources.add(value)
 
 
-def run_template(run_args, *, dry_run):
+def run_template(run_args, *, dry_run, timeout=None):
     run_args = [str(a) for a in run_args]
 
     if dry_run:
@@ -119,16 +127,32 @@ def run_template(run_args, *, dry_run):
         return
 
     verbose_info(shlex.join(run_args))
-    p = subprocess.run(run_args,
-                       check=False, shell=False,
-                       capture_output=True)
+    p = subprocess.Popen(run_args,
+                        shell=False,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        start_new_session=True)
+    try:
+        stdout, stderr = p.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        except ProcessLookupError:
+            pass  # process already exited on its own
+        p.communicate()
+        error(f'error: {repr(run_args[0])} timed out after {timeout}s '
+              f'and was killed.\n\n'
+              f'This has been observed as an intermittent Chromium '
+              f'startup/rendering issue, independent of slide content. '
+              f'It can also happen when a slide references a '
+              f'slow-loading or unresponsive external resource.')
 
-    verbose_info(p.stdout.decode())
+    verbose_info(stdout.decode())
 
     if p.returncode != 0:
         error(f'error: {repr(run_args[0])} failed '
               f'with exit code {p.returncode}:\n'
-              f'{p.stderr.decode()}')
+              f'{stderr.decode()}')
 
 
 def info_template(msg, *, quiet):
@@ -245,7 +269,7 @@ def create_pdf(html_fpath, pdf_fpath, *,
             f'--print-to-pdf={tmp_pdf_fpath}',
             f'file://{html_fpath.absolute()}?print-pdf'
             ]
-        run(run_args)
+        run(run_args, timeout=CHROMIUM_TIMEOUT)
 
         with tempfile.NamedTemporaryFile(
                  dir=pdf_fpath.parent,
@@ -292,10 +316,17 @@ def create_pdf(html_fpath, pdf_fpath, *,
             run(run_args)
 
 
-def create_index_page(fpath, title, info_content, html_content, pdf_content):
+def create_index_page(fpath, title, info_content, html_content, pdf_content,
+                      merged_pdf_content=''):
     info(f'Create {fpath}')
     with fpath.open("w") as fd:
         csc_ui_version = '2.1.11'
+        pdf_title_extra = ''
+        if merged_pdf_content:
+            pdf_title_extra = (
+                '<span style="float: right; font-size: 0.8rem; '
+                f'font-weight: normal;">{merged_pdf_content}</span>'
+            )
         fd.write(f"""
 <!DOCTYPE html>
 <html>
@@ -334,7 +365,7 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
     <br>
 
     <c-card>
-      <c-card-title>Slides (PDF)</c-card-title>
+      <c-card-title>Slides (PDF){pdf_title_extra}</c-card-title>
       <c-card-content>
 {pdf_content}
       </c-card-content>
@@ -357,6 +388,376 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
 """.strip("\n"))  # noqa: E501
 
 
+# TOC layout, in the theme's own CSS pixel coordinate system (see
+# _theme_slide_size), so the generated TOC slide(s) go through the same
+# pandoc+Chromium rendering as real content and pick up the theme's
+# background/logo/colors/font automatically. Rows use normal document flow
+# (not absolute positioning) so they start right after the heading exactly
+# like any other slide's content -- we don't need to predict positions here
+# since click-through link rectangles are measured from the rendered PDF
+# afterwards (see _measure_toc_links), not calculated analytically.
+# HEADING_ALLOWANCE and LINE_HEIGHT are a capacity estimate for pagination
+# (how many entries fit per TOC page) -- unlike a positioning value, this
+# still needs to be reasonably accurate: overestimating it under-fills each
+# page (rows stop well before the slide's bottom margin, since rows flow
+# normally and simply stop once the chunk's entry count is reached), rather
+# than just wasting margin. Calibrated against csc-plain by measuring actual
+# rendered row spacing.
+TOC_HEADING_ALLOWANCE = 150
+TOC_BOTTOM_MARGIN = 140
+TOC_ROW_GAP = 10
+TOC_LINE_HEIGHT = 44
+TOC_INDENT_PER_LEVEL = 40
+# Continuation pages have no heading (see _render_toc_markdown), so unlike
+# the first page their rows aren't pushed down by the heading's own
+# padding-bottom -- without this they start right at the slide's top
+# margin and collide with the logo in the top-right corner. One line
+# height of clearance is enough and comes out of the same slack that
+# TOC_HEADING_ALLOWANCE already reserves for pagination on every page
+# (continuation pages need less than a full heading's worth of allowance,
+# so this doesn't risk overflowing the per-page capacity estimate).
+TOC_CONTINUATION_TOP_MARGIN = TOC_LINE_HEIGHT
+TOC_ENTRY_FONT_SIZE = 28
+TOC_SUBENTRY_FONT_SIZE = 24
+
+# Name of the optional file used as the merged PDF's title slide, looked up
+# next to the top-level about.yml given to `pages`. Falls back to the
+# placeholder of the same name shipped with slidefactory (see
+# SLIDEFACTORY_ROOT / GLOBAL_TITLE_FILENAME), which explains on-slide how to
+# provide a real one.
+GLOBAL_TITLE_FILENAME = 'global_title.md'
+
+# Hides the theme's reveal.js slide-number badge (visible in print-pdf
+# output, see csc.css) on the title/TOC pages generated by merge_pdfs --
+# it's meaningless there (not a real numbered slide in a real deck), and
+# on the TOC specifically its extracted text is an extra, unaccounted-for
+# run that breaks _measure_toc_links' chapter/run pairing. Injected via
+# 'header-includes' rather than reveal.js's own `slideNumber` config
+# variable, since the CSS approach can't be defeated by reveal.js's own
+# number-formatting fallbacks.
+HIDE_SLIDE_NUMBER_CSS = (
+    '<style>.reveal .slide-number { display: none !important; }</style>')
+
+
+def _md_has_body(fpath):
+    """Whether a markdown file has any content beyond its YAML front
+    matter, used to tell a body-less global title file (see merge_pdfs)
+    apart from one a user has extended with real slide content. Scans
+    for the front matter's `---` delimiters the same lenient way
+    read_slides_metadata does (skipping any leading comment/blank lines
+    rather than requiring the first delimiter on line 1), since project
+    files commonly start with a license header comment."""
+    lines = fpath.read_text().splitlines(keepends=True)
+    i = 0
+    while i < len(lines) and lines[i].strip() != '---':
+        i += 1
+    if i >= len(lines):
+        return bool(''.join(lines).strip())  # no front matter found at all
+    start = i + 1
+    i = start
+    while i < len(lines) and lines[i].strip() != '---':
+        i += 1
+    if i >= len(lines):
+        return bool(''.join(lines[start:]).strip())  # front matter never closes
+    return bool(''.join(lines[i + 1:]).strip())
+
+
+def _theme_slide_size(defaults_fpath):
+    """Return the theme's configured (width, height) in CSS pixels, from its
+    defaults.yaml, falling back to reveal.js's own default of 960x700."""
+    try:
+        with open(defaults_fpath) as fd:
+            defaults = next(iter(yaml.safe_load_all(fd.read())))
+        variables = defaults['variables']
+        return float(variables['width']), float(variables['height'])
+    except (OSError, KeyError, TypeError, ValueError, StopIteration,
+            yaml.YAMLError):
+        return 960.0, 700.0
+
+
+def _toc_lines_per_page(theme_height):
+    return max(1, int((theme_height - TOC_HEADING_ALLOWANCE - TOC_BOTTOM_MARGIN)
+                       // TOC_LINE_HEIGHT))
+
+
+def _toc_page_count(n_entries, theme_height):
+    lines_per_page = _toc_lines_per_page(theme_height)
+    return max(1, -(-n_entries // lines_per_page))
+
+
+def _flatten_chapters(chapters, level=0):
+    for chapter in chapters:
+        yield level, chapter
+        yield from _flatten_chapters(chapter['children'], level + 1)
+
+
+def _assign_start_pages(chapters, offset):
+    # Depth-first, matching the order pages are appended in _add_content_pages
+    for chapter in chapters:
+        if chapter['pdf_fpath'] is not None:
+            chapter['start_page'] = offset + 1
+            offset += len(chapter['reader'].pages)
+        else:
+            offset = _assign_start_pages(chapter['children'], offset)
+            chapter['start_page'] = (chapter['children'][0]['start_page']
+                                     if chapter['children'] else None)
+    return offset
+
+
+def _render_toc_markdown(entries, theme_width, theme_height,
+                        title='Table of Contents'):
+    """Build reveal.js slide markdown for the TOC. Rows use normal document
+    flow (not absolute positioning), so they start right after the heading
+    and stack with predictable spacing exactly like any other slide's
+    content -- no need to predict where things land, since click-through
+    link rectangles are measured from the rendered PDF afterwards (see
+    _measure_toc_links). Returns (markdown_text, chunks), where chunks is
+    the entries grouped by which generated TOC page they end up on."""
+    lines_per_page = _toc_lines_per_page(theme_height)
+    chunks = [entries[i:i + lines_per_page]
+             for i in range(0, len(entries), lines_per_page)] or [[]]
+
+    slides = []
+    for chunk_index, chunk in enumerate(chunks):
+        rows = []
+        for level, chapter in chunk:
+            indent = level * TOC_INDENT_PER_LEVEL
+            bold = level == 0
+            size = TOC_ENTRY_FONT_SIZE if bold else TOC_SUBENTRY_FONT_SIZE
+            start_page = chapter['start_page']
+            page_str = str(start_page) if start_page else ''
+            leader = (
+                f'<span style="flex: 1 1 auto; margin: 0 0.5em 0.2em 0.5em; '
+                f'border-bottom: 2px dotted currentColor;"></span>'
+                f'<span>{html.escape(page_str)}</span>'
+                ) if page_str else ''
+            rows.append(
+                f'<div style="margin-left: {indent}px; '
+                f'margin-bottom: {TOC_ROW_GAP}px; font-size: {size}px; '
+                f'font-weight: {"bold" if bold else "normal"}; '
+                f'display: flex; align-items: flex-end; '
+                f'white-space: nowrap; overflow: hidden;">'
+                f'<span>{html.escape(chapter["title"])}</span>'
+                f'{leader}'
+                f'</div>')
+        # Only the first TOC slide shows the heading; continuation slides
+        # start with a horizontal rule instead, which pandoc's reveal.js
+        # writer treats as a slide break even without a heading. Give
+        # those a spacer so the first row doesn't collide with the logo
+        # (see TOC_CONTINUATION_TOP_MARGIN).
+        if chunk_index == 0:
+            header = f'# {title}\n\n'
+        else:
+            header = '-----\n\n'
+            rows.insert(0, '<div style="height: '
+                          f'{TOC_CONTINUATION_TOP_MARGIN}px;"></div>')
+        slides.append(header + '\n'.join(rows))
+
+    markdown = '---\nlang: en\n---\n\n' + '\n\n'.join(slides) + '\n'
+    return markdown, chunks
+
+
+def _measure_toc_links(toc_reader, chunks, page_width, right_margin_pt):
+    """Find each chapter entry's actual rendered position by reading text
+    positions back out of the generated TOC PDF, rather than computing them
+    analytically -- the theme's CSS shifts absolutely-positioned content by
+    an amount that isn't reliably predictable from the CSS alone (confirmed
+    empirically: a fixed additive offset beyond the expected px-to-pt
+    scale, presumably from the theme's own slide-container margins).
+    Returns a list of (chapter, toc_page_index, rect) in PDF points."""
+    link_boxes = []
+    for toc_page_index, chunk in enumerate(chunks):
+        page = toc_reader.pages[toc_page_index]
+        runs = []
+
+        def visitor(text, cm, tm, fontdict, fontsize, runs=runs):
+            if text.strip():
+                x = tm[4] * cm[0] + tm[5] * cm[2] + cm[4]
+                y = tm[4] * cm[1] + tm[5] * cm[3] + cm[5]
+                runs.append((x, y, text.strip()))
+
+        page.extract_text(visitor_text=visitor)
+        if toc_page_index == 0:
+            runs = runs[1:]  # first run is the title heading (page 1 only)
+
+        # Each chapter contributes exactly one run for its title, plus one
+        # more for its page number (if any). If the rendered page doesn't
+        # have exactly that many measurable runs -- e.g. a title got split
+        # into multiple text-showing operations by the PDF renderer -- we
+        # can no longer trust which run belongs to which chapter, so fail
+        # loudly rather than silently emit mispositioned/mismatched links.
+        expected = sum(2 if chapter['start_page'] else 1
+                       for _, chapter in chunk)
+        if len(runs) != expected:
+            run_lines = '\n'.join(
+                f'  [{i}] x={x:.1f} y={y:.1f} text={text!r}'
+                for i, (x, y, text) in enumerate(runs))
+            error(f'TOC page {toc_page_index + 1} has {len(runs)} '
+                  f'measurable text run(s), expected {expected}. Cannot '
+                  f'reliably place chapter links/bookmarks on this page.\n\n'
+                  f'Measured runs:\n{run_lines}')
+
+        i = 0
+        for level, chapter in chunk:
+            x, y, _ = runs[i]
+            i += 1
+            if chapter['start_page']:
+                # Generous fixed padding (in PDF points, the unit x/y are
+                # already measured in) around the measured text baseline,
+                # rather than deriving it from the CSS font-size in theme
+                # px -- we don't have a reliable px-to-pt scale for that
+                # (see the module docstring note in _measure_toc_links).
+                rect = (x - 4, y - 6, page_width - right_margin_pt, y + 22)
+                link_boxes.append((chapter, toc_page_index, rect))
+                i += 1  # skip the page-number run
+    return link_boxes
+
+
+def _add_content_pages(writer, chapters):
+    for _, chapter in _flatten_chapters(chapters):
+        if chapter['pdf_fpath'] is not None:
+            for page in chapter['reader'].pages:
+                writer.add_page(page)
+
+
+def _add_bookmarks(writer, chapters, parent=None):
+    for chapter in chapters:
+        if chapter['start_page'] is None:
+            continue  # empty chapter (e.g. a module with no slides); no page to link to
+        item = writer.add_outline_item(chapter['title'],
+                                       chapter['start_page'] - 1,
+                                       parent=parent)
+        if chapter['children']:
+            _add_bookmarks(writer, chapter['children'], parent=item)
+
+
+def _add_toc_links(writer, link_boxes, page_offset=0):
+    for chapter, toc_page_index, rect in link_boxes:
+        link = pypdf.annotations.Link(
+            rect=rect,
+            target_page_index=chapter['start_page'] - 1,
+            fit=pypdf.generic.Fit(fit_type='/FitH'),
+            border=[0, 0, 0],
+            )
+        writer.add_annotation(toc_page_index + page_offset, link)
+
+
+def merge_pdfs(chapters, output_fpath, args, *, dry_run=False):
+    if dry_run:
+        info(f'[dry-run] would create {output_fpath}')
+        return
+
+    flat = list(_flatten_chapters(chapters))
+    if not flat:
+        error('No chapters found to merge into a PDF')
+
+    # Each chapter PDF is read once here and reused everywhere else
+    # (start-page assignment, page copying, the page-size probe below)
+    # instead of being re-parsed by pypdf on every pass.
+    for _, chapter in flat:
+        if chapter['pdf_fpath'] is not None:
+            chapter['reader'] = pypdf.PdfReader(str(chapter['pdf_fpath']))
+
+    page_size = None
+    for _, chapter in flat:
+        if chapter['pdf_fpath'] is not None:
+            box = chapter['reader'].pages[0].mediabox
+            page_size = (float(box.width), float(box.height))
+            break
+    if page_size is None:
+        error('No slide PDFs found to merge')
+
+    theme_width, theme_height = _theme_slide_size(
+        args.theme.dpath / 'defaults.yaml')
+    toc_page_count = _toc_page_count(len(flat), theme_height)
+
+    title_md_fpath = args.input.parent / GLOBAL_TITLE_FILENAME
+    if not title_md_fpath.exists():
+        title_md_fpath = SLIDEFACTORY_ROOT / GLOBAL_TITLE_FILENAME
+
+    writer = pypdf.PdfWriter()
+    with tempfile.TemporaryDirectory() as tmp_dpath:
+        tmp_dpath = Path(tmp_dpath)
+
+        # Render the title slide in place if it's a project file (so any
+        # relative asset paths, e.g. a logo image, keep resolving normally);
+        # copy the bundled placeholder into the tmp dir instead, since
+        # SLIDEFACTORY_ROOT isn't guaranteed to be writable at runtime.
+        if title_md_fpath.parent == SLIDEFACTORY_ROOT:
+            local_title_fpath = tmp_dpath / GLOBAL_TITLE_FILENAME
+            local_title_fpath.write_text(title_md_fpath.read_text())
+            title_md_fpath = local_title_fpath
+
+        args_title = copy.copy(args)
+        args_title.input = [title_md_fpath]
+        args_title.output = tmp_dpath
+        args_title.format = 'pdf'
+        # This is slidefactory-authored content, not a user slide deck --
+        # the user's own --filters/--pandoc-args may assume real slide
+        # structure/front matter and shouldn't run against it.
+        args_title.filters = []
+        args_title.pandoc_args = ''
+        args_title.extra_pandoc_vars = {'header-includes': HIDE_SLIDE_NUMBER_CSS}
+        main_slides(args_title)
+        title_reader = pypdf.PdfReader(
+            str(tmp_dpath / title_md_fpath.with_suffix('.pdf').name))
+        if not title_reader.pages:
+            error(f'Generated title slide from {title_md_fpath} has no pages')
+
+        if _md_has_body(title_md_fpath):
+            # Real slide content beyond the front matter: headings split it
+            # into their own real slides, so every rendered page is kept.
+            title_page_count = len(title_reader.pages)
+        else:
+            # The title file is just YAML front matter with no body headings,
+            # which makes pandoc's reveal.js writer append a second, empty
+            # slide for the (nonexistent) headingless body -- confirmed against
+            # pandoc directly, independent of our template. The title is always
+            # exactly one slide in that case, so drop that trailing page rather
+            # than trusting the renderer's page count.
+            title_page_count = 1
+
+        # Chapter start pages (used both for the TOC's own page numbers and
+        # for bookmarks/links) depend on how many pages precede the content,
+        # so they can only be assigned once the title slide has been
+        # rendered and its page count is known.
+        _assign_start_pages(chapters, title_page_count + toc_page_count)
+        entries = [(level, chapter) for level, chapter in flat]
+        markdown, chunks = _render_toc_markdown(
+            entries, theme_width, theme_height)
+
+        toc_md_fpath = tmp_dpath / 'toc.md'
+        toc_md_fpath.write_text(markdown)
+
+        args_toc = copy.copy(args)
+        args_toc.input = [toc_md_fpath]
+        args_toc.output = tmp_dpath
+        args_toc.format = 'pdf'
+        args_toc.filters = []
+        args_toc.pandoc_args = ''
+        args_toc.extra_pandoc_vars = {'header-includes': HIDE_SLIDE_NUMBER_CSS}
+        main_slides(args_toc)
+
+        toc_reader = pypdf.PdfReader(str(tmp_dpath / 'toc.pdf'))
+        if len(toc_reader.pages) != toc_page_count:
+            error(f'Generated TOC has {len(toc_reader.pages)} page(s), '
+                  f'expected {toc_page_count}')
+        link_boxes = _measure_toc_links(toc_reader, chunks, page_size[0],
+                                        right_margin_pt=30)
+
+        for page in title_reader.pages[:title_page_count]:
+            writer.add_page(page)
+        for page in toc_reader.pages:
+            writer.add_page(page)
+
+    _add_content_pages(writer, chapters)
+    _add_bookmarks(writer, chapters)
+    _add_toc_links(writer, link_boxes, page_offset=title_page_count)
+
+    with output_fpath.open('wb') as f:
+        writer.write(f)
+
+
 def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
     info(f'Process {fpath}')
     with fpath.open() as fd:
@@ -364,17 +765,20 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
 
     title = metadata["title"]
     content = ""
+    chapters = []
 
     if "modules" in metadata:
         content += '<c-accordion>\n'
         for module in metadata["modules"]:
             mod_fpath = fpath.parent / module / fpath.name
-            mod_title, mod_content = \
+            mod_title, mod_content, mod_chapters = \
                 build_content(mod_fpath, page_theme_fpath, args,
                               line_fmt='<p>{}</p>')
             content += f'<c-accordion-item heading="{mod_title}" value="{module}">\n'  # noqa: E501
             content += mod_content
             content += '</c-accordion-item>\n'
+            chapters.append({'title': mod_title, 'pdf_fpath': None,
+                            'children': mod_chapters})
         content += '</c-accordion>\n'
     else:
         assert "slidesdir" in metadata
@@ -386,6 +790,7 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
             slides_title = meta["title"]
             m = re.search(r'^\d+', html_name)
             prefix = '' if m is None else f'{int(m.group())}.'
+            chapter_title = f'{prefix} {slides_title}'.strip()
             content += line_fmt.format(f'<c-link href="{html_fpath}" target="_blank">{prefix} {slides_title}</c-link>')  # noqa: E501
             content += '\n'
 
@@ -393,6 +798,7 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
             formats = ['html']
             if args.with_pdf:
                 formats += ['pdf']
+            pdf_fpath = None
             for fmt in formats:
                 args_slides = copy.copy(args)
                 args_slides.input = [md_fpath]
@@ -403,8 +809,14 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
                                                 html_fpath.parent)
                     args_slides.theme_url = theme_url
                 main_slides(args_slides)
+                if fmt == 'pdf':
+                    pdf_fpath = (args_slides.output
+                                / md_fpath.with_suffix('.pdf').name)
 
-    return title, content
+            chapters.append({'title': chapter_title, 'pdf_fpath': pdf_fpath,
+                            'children': []})
+
+    return title, content, chapters
 
 
 def read_slides_metadata(fpath):
@@ -513,6 +925,11 @@ def main():
     parser_pages.add_argument(
         '--with-pdf', action='store_true',
         help='include pdf')
+    parser_pages.add_argument(
+        '--merge-pdf', action='store_true',
+        help=('also build a single merged PDF with a table of contents '
+              'and chapter bookmarks (requires --with-pdf); '
+              'slide pages are left untouched'))
 
     # Main argparser - install sub-command
     parser_install = subparsers.add_parser(
@@ -572,6 +989,7 @@ def main_slides(args):
         'mathjaxurl': args.mathjax_url,
         'css': args.fonts_url,
         }
+    pandoc_vars.update(getattr(args, 'extra_pandoc_vars', {}))
 
     if args.format in ['html-embedded'] and include_math:
         url = args.mathjax_url
@@ -640,12 +1058,16 @@ def main_pages(args):
     if args.output.exists():
         error(f'Output path {args.output} exists. Exiting.')
 
+    if args.merge_pdf and not args.with_pdf:
+        error('--merge-pdf requires --with-pdf')
+
     page_theme_fpath = Path('html') / 'theme' / args.theme.name / 'csc.css'
     output_theme_dpath = args.output / page_theme_fpath.parent
     info(f'Copy theme to {output_theme_dpath}')
     shutil.copytree(args.theme.dpath, output_theme_dpath)
 
-    title, html_content = build_content(args.input, page_theme_fpath, args)
+    title, html_content, chapters = \
+        build_content(args.input, page_theme_fpath, args)
 
     if args.with_pdf:
         pdf_content = re.sub(r'href="html/(.*?).html"',
@@ -660,8 +1082,16 @@ def main_pages(args):
                             'zip',
                             args.output / 'pdf')
         pdf_content += f'<c-link href="{zip_fpath.name}">Download a zip file containing all slides.</c-link>\n'  # noqa: E501
+
+        merged_pdf_content = ''
+        if args.merge_pdf:
+            merged_fpath = args.output / 'slides-merged.pdf'
+            info(f'Create {merged_fpath}')
+            merge_pdfs(chapters, merged_fpath, args, dry_run=args.dry_run)
+            merged_pdf_content = f'<c-link href="{merged_fpath.name}">Download a single merged PDF with a table of contents.</c-link>'  # noqa: E501
     else:
         pdf_content = "Not generated."
+        merged_pdf_content = ''
 
     # Convert links to html
     info_content = re.sub(r'\[(.*?)\]\((.*?)\)',
@@ -670,7 +1100,8 @@ def main_pages(args):
 
     index_fpath = args.output / 'index.html'
     create_index_page(index_fpath, title,
-                      info_content, html_content, pdf_content)
+                      info_content, html_content, pdf_content,
+                      merged_pdf_content)
 
 
 def main_install(args):
