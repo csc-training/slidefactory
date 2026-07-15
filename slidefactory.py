@@ -11,6 +11,7 @@ import functools
 import hashlib
 import html.parser
 import inspect
+import json
 import os
 import re
 import shlex
@@ -28,6 +29,11 @@ from pathlib import Path
 VERSION = "3.4.3"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
+
+# Only used for the `pages` html output, so its search index can anchor
+# directly to the matching slide (see filters/duplicate_heading_ids.py).
+DUPLICATE_HEADING_IDS_FILTER = (SLIDEFACTORY_ROOT / 'filters'
+                                / 'duplicate_heading_ids.py')
 
 # Modify version string if this file has been edited
 with open(__file__, 'rb') as f:
@@ -292,6 +298,17 @@ def create_pdf(html_fpath, pdf_fpath, *,
             run(run_args)
 
 
+def build_search_index(output_dpath):
+    info(f'Index slides for search in {output_dpath}/pagefind')
+    run([
+        'pagefind',
+        '--site', output_dpath,
+        '--output-subdir', 'pagefind',
+        '--glob', 'html/**/*.html',
+        '--exclude-selectors', 'aside.notes',
+        ])
+
+
 def create_index_page(fpath, title, info_content, html_content, pdf_content):
     info(f'Create {fpath}')
     with fpath.open("w") as fd:
@@ -303,6 +320,38 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
   <meta charset="utf-8" />
   <title>{title}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@cscfi/csc-ui@{csc_ui_version}/dist/styles/css/theme.css" />
+  <style>
+    #search-input {{
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.5em;
+      font-size: 1em;
+    }}
+    .search-status {{
+      color: #666;
+      font-style: italic;
+    }}
+    .search-module {{
+      margin-top: 0.5em;
+    }}
+    .search-module > summary {{
+      font-weight: bold;
+      cursor: pointer;
+    }}
+    .search-deck {{
+      margin: 0.25em 0 0.25em 1em;
+    }}
+    .search-deck > summary {{
+      font-style: italic;
+      cursor: pointer;
+    }}
+    .search-hit {{
+      margin: 0.25em 0 0.5em 1em;
+    }}
+    .search-hit mark {{
+      background: #ffe08a;
+    }}
+  </style>
 </head>
 <body>
 <c-main>
@@ -319,6 +368,16 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
         <div>
 {info_content}
         </div>
+      </c-card-content>
+    </c-card>
+
+    <br>
+
+    <c-card>
+      <c-card-title>Search in slides</c-card-title>
+      <c-card-content>
+        <input type="search" id="search-input" placeholder="Search all slides..." />
+        <div id="search-results"></div>
       </c-card-content>
     </c-card>
 
@@ -352,29 +411,186 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content):
     accordion.multiple = true;
   });
 </script>
+<script type="module">
+  // Custom search UI on top of Pagefind's low-level API (instead of the
+  // prebuilt PagefindUI widget): each slide heading gets its own id (via
+  // filters/duplicate_heading_ids.py, a pandoc filter applied to the
+  // `pages` html output), so Pagefind's per-slide sub_results resolve
+  // correctly, and here we
+  // render each sub_result's own title/excerpt/url together (PagefindUI's
+  // default widget instead shows a whole-deck excerpt next to a
+  // best-matching-slide link, which don't necessarily agree). Hits are
+  // grouped/sorted by module then slide deck, using search-order.json,
+  // to match the accordion below instead of by raw relevance score.
+  const pagefind = await import("./pagefind/pagefind.js");
+  await pagefind.options({ excerptLength: 20 });
+  await pagefind.init();
+
+  const search_order = await fetch("search-order.json").then(r => r.json());
+  const order_index = new Map();
+  search_order.forEach((entry, i) => {
+    order_index.set(entry.url, { index: i, module: entry.module, deck: entry.deck });
+  });
+
+  const strip_hash = (url) => url.replace(/#.*$/, "");
+  const to_relative_href = (url) => url.replace(/^(?:https?:)?\\/\\/[^/]+/, "").replace(/^\\//, "");
+
+  const input = document.getElementById("search-input");
+  const results_el = document.getElementById("search-results");
+
+  // `debouncedSearch` only guards its own promise (it resolves to null if a
+  // newer keystroke supersedes it before or during the search itself) - any
+  // further async work done afterwards (the exact/fuzzy fallback searches
+  // below, and fetching each result's fragment data) is not covered by that
+  // guard, so a slower older keystroke could otherwise overwrite a faster
+  // newer keystroke's already-rendered results. `latest_request` guards
+  // those later steps too: each invocation checks it still holds the most
+  // recent id before doing more work or touching the DOM.
+  let latest_request = 0;
+
+  input.addEventListener("input", async () => {
+    const request_id = ++latest_request;
+    const stale = () => request_id !== latest_request;
+
+    const term = input.value.trim();
+    if (!term) {
+      results_el.innerHTML = "";
+      return;
+    }
+    results_el.innerHTML = '<p class="search-status">Searching...</p>';
+
+    // Pagefind is typo-tolerant, but for single-word queries that tolerance
+    // can fuzzy-match short/unrelated tokens (e.g. code snippets) when the
+    // word isn't found otherwise. Wrapping the whole query in quotes asks
+    // Pagefind for an exact (non-fuzzy) match; for a single word that's
+    // just "no fuzziness", so try that first and only fall back to a fuzzy
+    // search - clearly labeled - if the exact search finds nothing. (Quotes
+    // switch multi-word queries to strict adjacent-phrase matching instead,
+    // so this is only applied to single words.)
+    const is_single_word = !/\s/.test(term);
+    let search = await pagefind.debouncedSearch(
+      is_single_word ? `"${term}"` : term, {}, 300);
+    if (!search) return; // superseded by a newer keystroke
+    if (stale()) return;
+
+    let approximate = false;
+    if (is_single_word && search.results.length === 0) {
+      approximate = true;
+      search = await pagefind.search(term);
+      if (stale()) return;
+    } else if (is_single_word) {
+      // Pagefind's exact (quoted) search only returns the FIRST matching
+      // slide anchor per deck as a sub_result, unlike its fuzzy search,
+      // which returns every matching anchor on the page (confirmed by
+      // testing: e.g. a deck with "sauna" on one slide and "Sauna" on
+      // another only ever surfaced the first one). Re-run unquoted (same
+      // term, so still an exact - just not anchor-limited - substring
+      // match) and use its richer sub_results for the decks the exact
+      // search already confirmed as genuine matches, by matching each
+      // result's stable `id`. This keeps the noise-free exact-match
+      // filtering (still only those decks, not fuzzy-matched extras) while
+      // recovering every matching anchor within them.
+      const fuzzy = await pagefind.search(term);
+      if (stale()) return;
+      const fuzzy_by_id = new Map((fuzzy?.results ?? []).map((r) => [r.id, r]));
+      search = { ...search,
+        results: search.results.map((r) => fuzzy_by_id.get(r.id) ?? r) };
+    }
+
+    const datas = await Promise.all(search.results.map((r) => r.data()));
+    if (stale()) return;
+
+    const hits = [];
+    for (const data of datas) {
+      const sub_results = (data.sub_results && data.sub_results.length)
+        ? data.sub_results
+        : [{ title: data.meta?.title, url: data.url, excerpt: data.excerpt }];
+      for (const sub of sub_results) {
+        const key = strip_hash(to_relative_href(sub.url));
+        const info = order_index.get(key)
+          ?? { index: Number.MAX_SAFE_INTEGER, module: "", deck: data.meta?.title ?? "" };
+        hits.push({
+          href: to_relative_href(sub.url),
+          title: sub.title,
+          excerpt: sub.excerpt,
+          order: info.index,
+          module: info.module,
+          deck: info.deck,
+        });
+      }
+    }
+    hits.sort((a, b) => a.order - b.order);
+
+    if (!hits.length) {
+      results_el.innerHTML = '<p class="search-status">No results.</p>';
+      return;
+    }
+
+    let html = approximate
+      ? `<p class="search-status">No exact match for "${term}" - showing similar terms:</p>`
+      : "";
+
+    // Group into Map<module, Map<deck, hit[]>>; Maps preserve insertion
+    // order, so this keeps the accordion order already applied by the sort.
+    const grouped = new Map();
+    for (const hit of hits) {
+      if (!grouped.has(hit.module)) grouped.set(hit.module, new Map());
+      const decks = grouped.get(hit.module);
+      if (!decks.has(hit.deck)) decks.set(hit.deck, []);
+      decks.get(hit.deck).push(hit);
+    }
+
+    for (const [module, decks] of grouped) {
+      const module_count = [...decks.values()]
+        .reduce((n, deck_hits) => n + deck_hits.length, 0);
+      html += `<details class="search-module"><summary>${module} (${module_count})</summary>`;
+      for (const [deck, deck_hits] of decks) {
+        html += `<details class="search-deck"><summary>${deck} (${deck_hits.length})</summary>`;
+        for (const hit of deck_hits) {
+          html += `<p class="search-hit"><a href="${hit.href}">${hit.title}</a><br>${hit.excerpt}</p>`;
+        }
+        html += `</details>`;
+      }
+      html += `</details>`;
+    }
+    results_el.innerHTML = html;
+  });
+</script>
 </body>
 </html>
 """.strip("\n"))  # noqa: E501
 
 
-def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
+def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}',
+                  parent_titles=(), top_level=True):
     info(f'Process {fpath}')
     with fpath.open() as fd:
         metadata = yaml.safe_load(fd.read())
 
-    title = metadata["title"]
+    title = clean_metadata_value(metadata["title"])
     content = ""
+    search_order = []
 
     if "modules" in metadata:
         content += '<c-accordion>\n'
+        # The page's own top-level title is never included: it's constant
+        # for every module on the page, so it would only add noise, not
+        # disambiguation. Every level below that does get included, so
+        # search grouping stays unique no matter how deeply `modules:` is
+        # nested (unrelated to how many levels summerschool itself uses).
+        child_parent_titles = parent_titles if top_level \
+            else parent_titles + (title,)
         for module in metadata["modules"]:
             mod_fpath = fpath.parent / module / fpath.name
-            mod_title, mod_content = \
+            mod_title, mod_content, mod_search_order = \
                 build_content(mod_fpath, page_theme_fpath, args,
-                              line_fmt='<p>{}</p>')
+                              line_fmt='<p>{}</p>',
+                              parent_titles=child_parent_titles,
+                              top_level=False)
             content += f'<c-accordion-item heading="{mod_title}" value="{module}">\n'  # noqa: E501
             content += mod_content
             content += '</c-accordion-item>\n'
+            search_order += mod_search_order
         content += '</c-accordion>\n'
     else:
         assert "slidesdir" in metadata
@@ -389,6 +605,12 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
             content += line_fmt.format(f'<c-link href="{html_fpath}" target="_blank">{prefix} {slides_title}</c-link>')  # noqa: E501
             content += '\n'
 
+            search_order.append({
+                'url': str(html_fpath),
+                'module': ' / '.join(parent_titles + (title,)),
+                'deck': slides_title,
+                })
+
             # Convert slides
             formats = ['html']
             if args.with_pdf:
@@ -402,9 +624,19 @@ def build_content(fpath, page_theme_fpath, args, *, line_fmt='{}'):
                     theme_url = os.path.relpath(page_theme_fpath,
                                                 html_fpath.parent)
                     args_slides.theme_url = theme_url
+                    # Only the `pages` html output is indexed for search.
+                    args_slides.filters = (args.filters
+                                           + [DUPLICATE_HEADING_IDS_FILTER])
                 main_slides(args_slides)
 
-    return title, content
+    return title, content, search_order
+
+
+def clean_metadata_value(val):
+    val = re.sub(r'<.*?>', ' ', val)
+    while '  ' in val:
+        val = val.replace('  ', ' ')
+    return val
 
 
 def read_slides_metadata(fpath):
@@ -422,12 +654,8 @@ def read_slides_metadata(fpath):
         try:
             data = yaml.safe_load(data)
             for key, val in data.items():
-                # Clean value
                 if isinstance(val, str):
-                    val = re.sub(r'<.*?>', ' ', val)
-                    while '  ' in val:
-                        val = val.replace('  ', ' ')
-                    data[key] = val
+                    data[key] = clean_metadata_value(val)
             return data
         except yaml.parser.ParserError as exc:
             raise RuntimeError(f"{fpath} yaml parsing failed") from exc
@@ -643,9 +871,24 @@ def main_pages(args):
     page_theme_fpath = Path('html') / 'theme' / args.theme.name / 'csc.css'
     output_theme_dpath = args.output / page_theme_fpath.parent
     info(f'Copy theme to {output_theme_dpath}')
-    shutil.copytree(args.theme.dpath, output_theme_dpath)
+    if not args.dry_run:
+        shutil.copytree(args.theme.dpath, output_theme_dpath)
+        # Not served/searched, only csc.css and img/ are used at runtime
+        (output_theme_dpath / 'template.html').unlink(missing_ok=True)
+        (output_theme_dpath / 'defaults.yaml').unlink(missing_ok=True)
 
-    title, html_content = build_content(args.input, page_theme_fpath, args)
+    title, html_content, search_order = build_content(args.input,
+                                                      page_theme_fpath, args)
+
+    build_search_index(args.output)
+
+    # Used by the search widget to group/sort hits like the accordion
+    # (module, then slide deck) instead of by raw relevance score.
+    search_order_fpath = args.output / 'search-order.json'
+    info(f'Create {search_order_fpath}')
+    if not args.dry_run:
+        with search_order_fpath.open('w') as f:
+            json.dump(search_order, f)
 
     if args.with_pdf:
         pdf_content = re.sub(r'href="html/(.*?).html"',

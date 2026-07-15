@@ -5,6 +5,7 @@ ARG VERSION
 ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
 ADD theme/ /slidefactory/theme/
+ADD filters/ /slidefactory/filters/
 ADD slidefactory.py /slidefactory/
 
 # Remove possible temporary files
@@ -89,6 +90,12 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
 RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O tmp.deb && \
     dpkg -i tmp.deb && \
     rm -f tmp.deb
+
+# Pagefind (static search index builder, used by the `pages` sub-command)
+RUN wget https://github.com/Pagefind/pagefind/releases/download/v1.5.2/pagefind-v1.5.2-x86_64-unknown-linux-musl.tar.gz -O tmp.tar.gz && \
+    tar xzf tmp.tar.gz -C /usr/bin pagefind && \
+    chmod 755 /usr/bin/pagefind && \
+    rm -f tmp.tar.gz
 
 # Chromium
 RUN apt-get update -qy && \
