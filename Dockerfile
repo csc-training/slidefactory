@@ -55,11 +55,11 @@ RUN apt-get update -qy && \
     apt-get clean
 
 # Fonts
-RUN FONT_DIR=NotoSans && \
+RUN FONT_DIR=NunitoSans && \
     mkdir -p /slidefactory/fonts/$FONT_DIR && \
-    wget https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.013/NotoSans-v2.013.zip -O tmp.zip && \
-    unzip -j tmp.zip 'NotoSans/googlefonts/ttf/*' -d /slidefactory/fonts/$FONT_DIR && \
-    unzip -j tmp.zip 'OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
+    wget https://github.com/googlefonts/NunitoSans/archive/refs/heads/main.zip -O tmp.zip && \
+    unzip -j tmp.zip 'NunitoSans-main/fonts/ttf/*' -d /slidefactory/fonts/$FONT_DIR && \
+    unzip -j tmp.zip 'NunitoSans-main/OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
     rm tmp.zip
 
 RUN FONT_DIR=Inconsolata && \

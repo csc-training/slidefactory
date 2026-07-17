@@ -1,33 +1,33 @@
 @font-face {
-  font-family: 'Noto Sans';
+  font-family: 'Nunito Sans';
   font-style: normal;
   font-weight: 400;
   font-stretch: 100%;
-  src: url(NotoSans/NotoSans-Regular.ttf) format(truetype);
+  src: url(NunitoSans/NunitoSans-Regular.ttf) format(truetype);
 }
 
 @font-face {
-  font-family: 'Noto Sans';
+  font-family: 'Nunito Sans';
   font-style: normal;
   font-weight: 700;
   font-stretch: 100%;
-  src: url(NotoSans/NotoSans-Bold.ttf) format(truetype);
+  src: url(NunitoSans/NunitoSans-Bold.ttf) format(truetype);
 }
 
 @font-face {
-  font-family: 'Noto Sans';
+  font-family: 'Nunito Sans';
   font-style: italic;
   font-weight: 400;
   font-stretch: 100%;
-  src: url(NotoSans/NotoSans-Italic.ttf) format(truetype);
+  src: url(NunitoSans/NunitoSans-Italic.ttf) format(truetype);
 }
 
 @font-face {
-  font-family: 'Noto Sans';
+  font-family: 'Nunito Sans';
   font-style: italic;
   font-weight: 700;
   font-stretch: 100%;
-  src: url(NotoSans/NotoSans-BoldItalic.ttf) format(truetype);
+  src: url(NunitoSans/NunitoSans-BoldItalic.ttf) format(truetype);
 }
 
 @font-face {
