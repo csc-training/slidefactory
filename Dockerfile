@@ -4,7 +4,6 @@ ARG VERSION
 
 ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
-ADD img/ /slidefactory/img/
 ADD theme/ /slidefactory/theme/
 ADD slidefactory.py /slidefactory/
 
@@ -25,6 +24,8 @@ RUN cd /slidefactory && \
 
 
 FROM docker.io/debian:bookworm
+
+ARG INCLUDE_ILLUSTRATIONS=true
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -69,6 +70,16 @@ RUN FONT_DIR=Inconsolata && \
     unzip -j tmp.zip 'Inconsolata-3.000/fonts/ttf/Inconsolata-*' -x '*Condensed*' '*Expanded*' -d /slidefactory/fonts/$FONT_DIR && \
     unzip -j tmp.zip 'Inconsolata-3.000/OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
     rm tmp.zip
+
+# CSC brand illustrations (optional, set INCLUDE_ILLUSTRATIONS=false to skip)
+RUN if [ "$INCLUDE_ILLUSTRATIONS" = "true" ]; then \
+        mkdir -p /slidefactory/img/csc_illustrations && \
+        wget https://a3s.fi/swift/v1/slides/csc_illustrations.zip -O tmp.zip && \
+        unzip -j tmp.zip -d /slidefactory/img/csc_illustrations && \
+        rm tmp.zip; \
+    else \
+        echo "Skipping CSC illustrations (INCLUDE_ILLUSTRATIONS=$INCLUDE_ILLUSTRATIONS)"; \
+    fi
 
 # Reveal.js
 RUN wget https://github.com/hakimel/reveal.js/archive/refs/tags/4.4.0.zip -O tmp.zip && \

@@ -51,6 +51,52 @@ Use help for all other options:
     ./slidefactory_VERSION.sif slides --help
 
 
+#### Themes
+
+Two themes are bundled:
+
+* `csc-2026` (default) - the current CSC brand: new color palette, the
+  `Nunito Sans` font, and support for the [CC license badge](#license) on
+  the title slide.
+* `csc-old` - the previous CSC look (formerly named `csc-plain`), kept for
+  continuity with older material.
+
+Select a bundled theme by name by adding `--theme csc-old` with the run command. 
+
+
+#### Illustrations
+
+21 CSC brand illustrations (`CSC_Characters_01.png` - `CSC_Characters_21.png`)
+are available for use in slides. They are not stored in this repository -
+instead they are downloaded from an external source and bundled into the
+container image at build time (see `Dockerfile`), the same way fonts and
+reveal.js are handled. Reference them in `slides.md` by filename, without
+needing to know where slidefactory is installed:
+
+    ![](img/csc_illustrations/CSC_Characters_01.png)
+
+Including the illustrations in the image is optional. They are included by
+default; skip them with:
+
+    make build INCLUDE_ILLUSTRATIONS=false
+
+
+#### License
+
+Add a `license` key to the YAML metadata block at the top of `slides.md`
+to display a Creative Commons badge and link on the title slide (theme
+`csc-2026` only):
+
+    ---
+    title:  My Slides
+    license: by
+    ---
+
+Valid values are the standard CC 4.0 license slugs: `by`, `by-sa`, `by-nd`,
+`by-nc`, `by-nc-sa`, `by-nc-nd`. If `license` is left out, no license
+information is shown.
+
+
 #### Build pages for a project
 
 Use pages sub-command to create an index page and convert all slides:
@@ -69,16 +115,19 @@ and follow the instructions.
 
 ### Docker / podman
 
+The commands below work identically with `docker` or `podman` - just swap
+the binary name. 
+
 Fetch the slidefactory container image:
 
-    docker pull ghcr.io/csc-training/slidefactory:VERSION
+    docker/podman pull ghcr.io/csc-training/slidefactory:VERSION
 
 Convert the markdown slides to a PDF (default):
 
-    docker run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" ghcr.io/csc-training/slidefactory:VERSION slides --format pdf slides.md
+    docker/podman run -it --rm -v "$PWD:$PWD:Z" -w "$PWD" ghcr.io/csc-training/slidefactory:VERSION slides --format pdf slides.md
 
 All the options work the same way as for singularity
-but using the above docker command instead.
+but using the above docker/podman command instead.
 
 
 ## Known issues
