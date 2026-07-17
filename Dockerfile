@@ -25,6 +25,8 @@ RUN cd /slidefactory && \
 
 FROM docker.io/debian:bookworm
 
+ARG INCLUDE_ILLUSTRATIONS=true
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 # General packages
@@ -55,11 +57,11 @@ RUN apt-get update -qy && \
     apt-get clean
 
 # Fonts
-RUN FONT_DIR=NotoSans && \
+RUN FONT_DIR=NunitoSans && \
     mkdir -p /slidefactory/fonts/$FONT_DIR && \
-    wget https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.013/NotoSans-v2.013.zip -O tmp.zip && \
-    unzip -j tmp.zip 'NotoSans/googlefonts/ttf/*' -d /slidefactory/fonts/$FONT_DIR && \
-    unzip -j tmp.zip 'OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
+    wget https://github.com/googlefonts/NunitoSans/archive/refs/heads/main.zip -O tmp.zip && \
+    unzip -j tmp.zip 'NunitoSans-main/fonts/ttf/*' -d /slidefactory/fonts/$FONT_DIR && \
+    unzip -j tmp.zip 'NunitoSans-main/OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
     rm tmp.zip
 
 RUN FONT_DIR=Inconsolata && \
@@ -68,6 +70,16 @@ RUN FONT_DIR=Inconsolata && \
     unzip -j tmp.zip 'Inconsolata-3.000/fonts/ttf/Inconsolata-*' -x '*Condensed*' '*Expanded*' -d /slidefactory/fonts/$FONT_DIR && \
     unzip -j tmp.zip 'Inconsolata-3.000/OFL.txt' -d /slidefactory/fonts/$FONT_DIR && \
     rm tmp.zip
+
+# CSC brand illustrations (optional, set INCLUDE_ILLUSTRATIONS=false to skip)
+RUN if [ "$INCLUDE_ILLUSTRATIONS" = "true" ]; then \
+        mkdir -p /slidefactory/img/csc_illustrations && \
+        wget https://a3s.fi/swift/v1/slides/csc_illustrations.zip -O tmp.zip && \
+        unzip -j tmp.zip -d /slidefactory/img/csc_illustrations && \
+        rm tmp.zip; \
+    else \
+        echo "Skipping CSC illustrations (INCLUDE_ILLUSTRATIONS=$INCLUDE_ILLUSTRATIONS)"; \
+    fi
 
 # Reveal.js
 RUN wget https://github.com/hakimel/reveal.js/archive/refs/tags/4.4.0.zip -O tmp.zip && \
@@ -86,7 +98,14 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     rm -f tmp.zip
 
 # Pandoc
-RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O tmp.deb && \
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then \
+        wget https://github.com/jgm/pandoc/releases/download/3.8.2/pandoc-3.8.2-1-amd64.deb -O tmp.deb; \
+    elif [ "$ARCH" = "arm64" ]; then \
+        wget https://github.com/jgm/pandoc/releases/download/3.8.2/pandoc-3.8.2-1-arm64.deb -O tmp.deb; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
     dpkg -i tmp.deb && \
     rm -f tmp.deb
 
