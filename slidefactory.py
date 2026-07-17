@@ -28,6 +28,7 @@ from pathlib import Path
 VERSION = "3.4.3"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
+SHARED_IMG_DPATH = SLIDEFACTORY_ROOT / 'img'
 
 # Modify version string if this file has been edited
 with open(__file__, 'rb') as f:
@@ -451,7 +452,7 @@ def main():
     pparser_conversion = argparse.ArgumentParser(add_help=False)
     pparser_conversion.add_argument(
         '-t', '--theme', metavar='THEME', type=find_theme,
-        default='csc-plain',
+        default='csc-2026',
         help='presentation theme name or path (default: %(default)s)')
     pparser_conversion.add_argument(
         '--filters', action='append', default=[],
@@ -596,6 +597,10 @@ def main_slides(args):
         pandoc_args += ['--mathjax']
     if args.format in ['html-embedded']:
         pandoc_args += ['--embed-resources']
+    if SHARED_IMG_DPATH.is_dir():
+        # Let authors reference images from the shared img/ folder by
+        # filename only, without knowing where slidefactory is installed
+        pandoc_args += [f'--resource-path=.:{SHARED_IMG_DPATH}']
 
     # Convert files
     for in_fpath in args.input:
@@ -611,20 +616,26 @@ def main_slides(args):
             defaults_fpath=args.defaults_fpath,
             template_fpath=args.template_fpath,
             pandoc_vars=pandoc_vars,
-            pandoc_args=pandoc_args,
             filters=args.filters,
             dry_run=args.dry_run,
         )
 
         if args.format == 'pdf':
-            # Use temporary html output for pdf
+            # Use temporary html output for pdf, and a temporary dir to
+            # resolve/copy any resource-path images used in the input
             with tempfile.NamedTemporaryFile(
                      dir=in_fpath.parent,
                      prefix=f'{in_fpath.stem}-',
                      suffix='.html',
-                 ) as tmpfile:
+                 ) as tmpfile, \
+                 tempfile.TemporaryDirectory(
+                     dir=in_fpath.parent,
+                     prefix=f'{in_fpath.stem}-media-',
+                 ) as media_dpath:
                 html_fpath = Path(tmpfile.name)
-                create_html(in_fpath, html_fpath, **html_kwargs)
+                create_html(in_fpath, html_fpath,
+                            pandoc_args=pandoc_args + [f'--extract-media={media_dpath}'],  # noqa: E501
+                            **html_kwargs)
                 meta = read_slides_metadata(in_fpath)
 
                 # Use event name as subject if no separate subject defined
@@ -632,8 +643,16 @@ def main_slides(args):
                     meta['subject'] = meta['event']
 
                 create_pdf(html_fpath, out_fpath, meta=meta, dry_run=args.dry_run)
+        elif args.format == 'html-embedded':
+            # --embed-resources already inlines resolved images; no
+            # separate media directory needed
+            create_html(in_fpath, out_fpath, pandoc_args=pandoc_args,
+                        **html_kwargs)
         else:
-            create_html(in_fpath, out_fpath, **html_kwargs)
+            media_dpath = out_fpath.parent / f'{out_fpath.stem}_media'
+            create_html(in_fpath, out_fpath,
+                        pandoc_args=pandoc_args + [f'--extract-media={media_dpath}'],  # noqa: E501
+                        **html_kwargs)
 
 
 def main_pages(args):

@@ -4,6 +4,7 @@ ARG VERSION
 
 ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
+ADD img/ /slidefactory/img/
 ADD theme/ /slidefactory/theme/
 ADD slidefactory.py /slidefactory/
 
