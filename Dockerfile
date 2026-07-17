@@ -86,7 +86,14 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     rm -f tmp.zip
 
 # Pandoc
-RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O tmp.deb && \
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ "$ARCH" = "amd64" ]; then \
+        wget https://github.com/jgm/pandoc/releases/download/3.8.2/pandoc-3.8.2-1-amd64.deb -O tmp.deb; \
+    elif [ "$ARCH" = "arm64" ]; then \
+        wget https://github.com/jgm/pandoc/releases/download/3.8.2/pandoc-3.8.2-1-arm64.deb -O tmp.deb; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
     dpkg -i tmp.deb && \
     rm -f tmp.deb
 
