@@ -73,7 +73,7 @@ container image at build time (see `Dockerfile`), the same way fonts and
 reveal.js are handled. Reference them in `slides.md` by filename, without
 needing to know where slidefactory is installed:
 
-    ![](img/csc_illustrations/CSC_Characters_01.png)
+    ![](csc_illustrations/CSC_Characters_01.png)
 
 Including the illustrations in the image is optional. They are included by
 default; skip them with:
