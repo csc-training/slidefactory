@@ -1,2 +1,4 @@
 *.sif
 *.tar
+*.DS_Store
+slides.*
