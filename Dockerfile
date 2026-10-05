@@ -1,6 +1,6 @@
 FROM docker.io/debian:bookworm AS slidefactory-files
 
-ARG VERSION
+ARG VERSION=git
 
 ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
@@ -17,10 +17,8 @@ RUN chmod 755 /slidefactory && \
     find /slidefactory -type f -exec chmod 644 {} \; && \
     chmod 755 /slidefactory/slidefactory.py
 
-# Add checksums
-RUN cd /slidefactory && \
-    find . -type f -print0 | xargs -0 sha256sum > /tmp/sha256sums_$VERSION && \
-    mv /tmp/sha256sums_$VERSION /slidefactory/
+# Stamp the version (branch or tag) into the script
+RUN sed -i "s/^VERSION = .*/VERSION = \"$VERSION\"/" /slidefactory/slidefactory.py
 
 
 FROM docker.io/debian:bookworm
