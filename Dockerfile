@@ -86,7 +86,9 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     rm -f tmp.zip
 
 # Pandoc
-RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O tmp.deb && \
+# TARGETARCH is provided automatically by buildx (amd64, arm64, ...)
+ARG TARGETARCH
+RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-${TARGETARCH}.deb -O tmp.deb && \
     dpkg -i tmp.deb && \
     rm -f tmp.deb
 
