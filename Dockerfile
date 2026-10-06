@@ -1,6 +1,6 @@
 FROM docker.io/debian:bookworm AS slidefactory-files
 
-ARG VERSION
+ARG VERSION=git
 
 ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
@@ -17,10 +17,8 @@ RUN chmod 755 /slidefactory && \
     find /slidefactory -type f -exec chmod 644 {} \; && \
     chmod 755 /slidefactory/slidefactory.py
 
-# Add checksums
-RUN cd /slidefactory && \
-    find . -type f -print0 | xargs -0 sha256sum > /tmp/sha256sums_$VERSION && \
-    mv /tmp/sha256sums_$VERSION /slidefactory/
+# Stamp the version (branch or tag) into the script
+RUN sed -i "s/^VERSION = .*/VERSION = \"$VERSION\"/" /slidefactory/slidefactory.py
 
 
 FROM docker.io/debian:bookworm
@@ -86,14 +84,9 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     rm -f tmp.zip
 
 # Pandoc
-RUN ARCH=$(dpkg --print-architecture) && \
-    if [ "$ARCH" = "amd64" ]; then \
-        wget https://github.com/jgm/pandoc/releases/download/3.8.2/pandoc-3.8.2-1-amd64.deb -O tmp.deb; \
-    elif [ "$ARCH" = "arm64" ]; then \
-        wget https://github.com/jgm/pandoc/releases/download/3.8.2/pandoc-3.8.2-1-arm64.deb -O tmp.deb; \
-    else \
-        echo "Unsupported architecture: $ARCH" && exit 1; \
-    fi && \
+# TARGETARCH is provided automatically by buildx (amd64, arm64, ...)
+ARG TARGETARCH
+RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-${TARGETARCH}.deb -O tmp.deb && \
     dpkg -i tmp.deb && \
     rm -f tmp.deb
 
