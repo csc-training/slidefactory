@@ -2,10 +2,10 @@ IMAGE_ROOT?=ghcr.io/csc-training
 IMAGE=slidefactory
 IMAGE_TAG?=$(shell git rev-parse --abbrev-ref HEAD | tr '/' '-')
 BUILD_VERSION?=$(shell git describe --tags --always --dirty | sed 's/^v//')
-
+CONTAINER_CMD=$(shell command -v podman >/dev/null 2>&1 && echo podman || echo docker)
 
 build: Dockerfile slidefactory.py
-	docker build \
+	${CONTAINER_CMD} build \
 		--label "org.opencontainers.image.source=https://github.com/csc-training/slidefactory" \
 		--label "org.opencontainers.image.description=slidefactory" \
 		--build-arg VERSION=${BUILD_VERSION} \
@@ -13,11 +13,11 @@ build: Dockerfile slidefactory.py
 		.
 
 push:
-	docker push ${IMAGE_ROOT}/${IMAGE}:${IMAGE_TAG}
+	${CONTAINER_CMD} push ${IMAGE_ROOT}/${IMAGE}:${IMAGE_TAG}
 
 singularity:
 	rm -f $(IMAGE).sif $(IMAGE).tar
-	docker save $(IMAGE_ROOT)/$(IMAGE):$(IMAGE_TAG) -o $(IMAGE).tar
+	${CONTAINER_CMD} save $(IMAGE_ROOT)/$(IMAGE):$(IMAGE_TAG) -o $(IMAGE).tar
 	singularity build $(IMAGE).sif docker-archive://$(IMAGE).tar
 	rm -f $(IMAGE).tar
 
