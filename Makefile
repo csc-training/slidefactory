@@ -6,7 +6,6 @@ CONTAINER_CMD=$(shell command -v podman >/dev/null 2>&1 && echo podman || echo d
 
 build: Dockerfile slidefactory.py
 	${CONTAINER_CMD} build \
-		--platform "linux/amd64,linux/arm64" \
 		--label "org.opencontainers.image.source=https://github.com/csc-training/slidefactory" \
 		--label "org.opencontainers.image.description=slidefactory" \
 		--build-arg VERSION=${BUILD_VERSION} \
