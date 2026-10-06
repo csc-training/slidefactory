@@ -1,0 +1,135 @@
+name: Build and push container image
+
+# Build and push a multi-arch image on every push to any branch and on tags.
+#
+# Each architecture is built natively on its own runner (no QEMU).
+# The per-arch images are pushed by digest and then combined into a single
+# multi-arch manifest in the `merge` job.
+#
+# Image tags:
+# - branch pushes -> :<branch>
+# - semver tag vX.Y.Z -> :X.Y.Z and :latest (skips pre-releases)
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/slidefactory
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.runner }}
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.version }}
+      json: ${{ steps.meta.outputs.json }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { name: linux/amd64, runner: ubuntu-24.04,     pair: linux-amd64 }
+          - { name: linux/arm64, runner: ubuntu-24.04-arm, pair: linux-arm64 }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # full history + tags, needed for git describe
+
+      - name: Extract image metadata (tags, version)
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=ref,event=branch
+          flavor: |
+            latest=auto
+
+      - name: Determine build version
+        id: ver
+        run: |
+          version="$(git describe --tags --always)"  # <tag> or <tag>-<commits>-g<sha>
+          echo "version=${version#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: ${{ matrix.platform.name }}
+          provenance: false
+          build-args: |
+            VERSION=${{ steps.ver.outputs.version }}
+          labels: |
+            org.opencontainers.image.description=slidefactory
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.platform.pair }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform.pair }}
+
+      - name: Export digest
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v7
+        with:
+          name: digests-${{ matrix.platform.pair }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: Merge and push multi-arch image
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create multi-arch manifest
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< '${{ needs.build.outputs.json }}') \
+            $(printf '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.build.outputs.tag }}"
