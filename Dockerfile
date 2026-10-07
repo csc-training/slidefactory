@@ -80,37 +80,11 @@ RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-
     dpkg -i tmp.deb && \
     rm -f tmp.deb
 
-# Chromium, pinned to a known-good Debian package version -- including its
-# full dependency closure, not just chromium/chromium-common themselves.
-# Debian's chromium package is normally installed unpinned (whatever is
-# current in the bookworm archive at build time), but that has caused
-# regressions between builds (a startup crash on one snapshot, a rendering
-# hang on another). Installing two pinned .deb files directly still lets
-# apt resolve their shared-library dependencies (e.g. libnss3) from
-# whatever's current in the live archive, which could reintroduce the same
-# class of regression via a dependency instead of chromium itself. Instead,
-# point apt at snapshot.debian.org for this one step, so every package
-# chromium pulls in resolves from the same known-good moment in time.
-# Overriding Dir::Etc::sourcelist/sourceparts (rather than replacing the
-# image's real sources file) means this doesn't care whether the base
-# image uses the classic /etc/apt/sources.list or the newer
-# /etc/apt/sources.list.d/*.sources format -- it never touches either.
-RUN mkdir -p /etc/apt/chromium-snapshot.sources.d && \
-    { \
-      echo 'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20250530T205506Z/ bookworm main'; \
-      echo 'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20250530T205506Z/ bookworm-updates main'; \
-      echo 'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/20250529T170704Z/ bookworm-security main'; \
-    } > /etc/apt/chromium-snapshot.sources.d/chromium.list && \
-    apt-get -o Dir::Etc::sourcelist=/dev/null \
-            -o Dir::Etc::sourceparts=/etc/apt/chromium-snapshot.sources.d \
-            update -qy && \
-    apt-get -o Dir::Etc::sourcelist=/dev/null \
-            -o Dir::Etc::sourceparts=/etc/apt/chromium-snapshot.sources.d \
-            install -qy --no-install-recommends \
-      chromium=137.0.7151.55-3~deb12u1 \
-      chromium-common=137.0.7151.55-3~deb12u1 \
+# Chromium
+RUN apt-get update -qy && \
+    apt-get install -qy --no-install-recommends \
+      chromium \
       && \
-    rm -rf /etc/apt/chromium-snapshot.sources.d && \
     apt-get clean
 
 # Fix pandoc filters calling python;
