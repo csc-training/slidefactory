@@ -8,7 +8,6 @@
 import argparse
 import copy
 import functools
-import hashlib
 import html
 import html.parser
 import inspect
@@ -29,35 +28,14 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.4.3"
+# Replaced at container build time; stays "git" for direct clones
+VERSION = "git"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
 # Chromium can occasionally deadlock during startup/rendering; bound how
 # long we wait so that failure mode is a clear error, not an indefinite hang.
 CHROMIUM_TIMEOUT = 120
-
-# Modify version string if this file has been edited
-with open(__file__, 'rb') as f:
-    CHECKSUM = hashlib.sha256(f.read()).hexdigest()
-
-
-def __read_checksum_reference():
-    checksum_fpath = SLIDEFACTORY_ROOT / f'sha256sums_{VERSION}'
-    if not checksum_fpath.exists():
-        return None
-    with open(checksum_fpath, 'r') as f:
-        for line in f:
-            chk, fpath = line.strip().split('  ', 1)
-            if fpath == f'./{Path(__file__).name}':
-                return chk
-    return None
-
-
-REF_CHECKSUM = __read_checksum_reference()
-if CHECKSUM != REF_CHECKSUM:
-    VERSION += '-edited'
-
 
 URL_KEYS = (
     'defaults_fpath',
@@ -953,8 +931,6 @@ def main():
     run = functools.partial(run_template, dry_run=args.dry_run)
 
     info(f'Slidefactory {VERSION}')
-    verbose_info(f'  checksum:  {CHECKSUM}')
-    verbose_info(f'  reference: {REF_CHECKSUM}')
     args.main(args)
 
     if args.dry_run:
