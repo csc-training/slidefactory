@@ -81,8 +81,11 @@ jobs:
           labels: |
             org.opencontainers.image.description=slidefactory
           outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=${{ matrix.platform.pair }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.platform.pair }}
+          # Inline cache carried by the published images themselves
+          cache-from: |
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:master
+            type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+          cache-to: type=inline
 
       - name: Export digest
         run: |
