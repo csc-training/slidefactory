@@ -1,4 +1,8 @@
-FROM docker.io/debian:bookworm AS slidefactory-files
+# Base image pinned by digest for stable layer reuse.
+# Bump this digest to pull in base updates.
+ARG BASE_IMAGE=docker.io/debian:bookworm@sha256:2c037a04925515fdd6ea85ea14a682d0e79931f5e9f5d07b6dbfc6ba12f9e858
+
+FROM ${BASE_IMAGE} AS slidefactory-files
 
 ARG VERSION=git
 
@@ -21,7 +25,7 @@ RUN chmod 755 /slidefactory && \
 RUN sed -i "s/^VERSION = .*/VERSION = \"$VERSION\"/" /slidefactory/slidefactory.py
 
 
-FROM docker.io/debian:bookworm
+FROM ${BASE_IMAGE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
