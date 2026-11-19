@@ -416,6 +416,8 @@ TOC_INDENT_PER_LEVEL = 40
 TOC_CONTINUATION_TOP_MARGIN = TOC_LINE_HEIGHT
 TOC_ENTRY_FONT_SIZE = 28
 TOC_SUBENTRY_FONT_SIZE = 24
+# Heading of the TOC slide(s), also used as the TOC slide's bookmark.
+TOC_TITLE = 'Table of Contents'
 
 # Name of the optional file used as the merged PDF's title slide, looked up
 # next to the top-level about.yml given to `pages`. Without it, a title slide
@@ -512,7 +514,7 @@ def _assign_start_pages(chapters, offset):
 
 
 def _render_toc_markdown(entries, theme_width, theme_height,
-                        title='Table of Contents'):
+                        title=TOC_TITLE):
     """Build reveal.js slide markdown for the TOC. Rows use normal document
     flow (not absolute positioning), so they start right after the heading
     and stack with predictable spacing exactly like any other slide's
@@ -638,6 +640,28 @@ def _add_bookmarks(writer, chapters, parent=None):
             _add_bookmarks(writer, chapter['children'], parent=item)
 
 
+def _merged_pdf_metadata(title_md_fpath):
+    """Document info for the merged PDF, taken from its title slide's front
+    matter the same way create_pdf does for each slide deck (title, author,
+    subject falling back to event, and the slidefactory creator), with the
+    subtitle as a last fallback for the subject (e.g. for the generated
+    title slide, which has no event)."""
+    try:
+        meta = read_slides_metadata(title_md_fpath) or {}
+    except RuntimeError:
+        meta = {}  # title file without front matter; creator only
+    if 'subject' not in meta:
+        meta['subject'] = meta.get('event', meta.get('subtitle'))
+    docinfo = {'/Creator': f'Slidefactory {VERSION}'}
+    for key in ['Title', 'Author', 'Subject']:
+        value = meta.get(key.lower())
+        if isinstance(value, list):
+            value = ', '.join(str(v) for v in value)
+        if value is not None:
+            docinfo[f'/{key}'] = str(value).strip()
+    return docinfo
+
+
 def _import_pypdf():
     """Import pypdf on demand: it is only needed for the merged PDF
     (`pages --with-pdf`), so the rest of slidefactory works without it."""
@@ -708,6 +732,8 @@ def merge_pdfs(chapters, output_fpath, args, *, title, dry_run=False):
             title_md_fpath = tmp_dpath / GLOBAL_TITLE_FILENAME
             title_md_fpath.write_text(_default_title_markdown(title))
 
+        metadata = _merged_pdf_metadata(title_md_fpath)
+
         args_title = copy.copy(args)
         args_title.input = [title_md_fpath]
         args_title.output = tmp_dpath
@@ -771,8 +797,12 @@ def merge_pdfs(chapters, output_fpath, args, *, title, dry_run=False):
             writer.add_page(page)
 
     _add_content_pages(writer, chapters)
+    # Bookmarks for the title and TOC slides first, then one per chapter.
+    writer.add_outline_item(metadata.get('/Title', 'Title'), 0)
+    writer.add_outline_item(TOC_TITLE, title_page_count)
     _add_bookmarks(writer, chapters)
     _add_toc_links(writer, link_boxes, page_offset=title_page_count)
+    writer.add_metadata(metadata)
 
     with output_fpath.open('wb') as f:
         writer.write(f)
