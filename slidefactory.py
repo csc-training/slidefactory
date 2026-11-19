@@ -26,7 +26,8 @@ from urllib.parse import quote as urlquote, urlparse
 from pathlib import Path
 
 
-VERSION = "3.4.3"
+# Replaced at container build time; stays "git" for direct clones
+VERSION = "git"
 SLIDEFACTORY_ROOT = Path(__file__).absolute().parent
 IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
@@ -1004,8 +1005,6 @@ def main():
     run = functools.partial(run_template, dry_run=args.dry_run)
 
     info(f'Slidefactory {VERSION}')
-    verbose_info(f'  checksum:  {CHECKSUM}')
-    verbose_info(f'  reference: {REF_CHECKSUM}')
     args.main(args)
 
     if args.dry_run:

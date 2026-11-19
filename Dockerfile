@@ -1,6 +1,10 @@
-FROM docker.io/debian:bookworm AS slidefactory-files
+# Base image pinned by digest for stable layer reuse.
+# Bump this digest to pull in base updates.
+ARG BASE_IMAGE=docker.io/debian:bookworm@sha256:2c037a04925515fdd6ea85ea14a682d0e79931f5e9f5d07b6dbfc6ba12f9e858
 
-ARG VERSION
+FROM ${BASE_IMAGE} AS slidefactory-files
+
+ARG VERSION=git
 
 ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
@@ -17,13 +21,11 @@ RUN chmod 755 /slidefactory && \
     find /slidefactory -type f -exec chmod 644 {} \; && \
     chmod 755 /slidefactory/slidefactory.py
 
-# Add checksums
-RUN cd /slidefactory && \
-    find . -type f -print0 | xargs -0 sha256sum > /tmp/sha256sums_$VERSION && \
-    mv /tmp/sha256sums_$VERSION /slidefactory/
+# Stamp the version (branch or tag) into the script
+RUN sed -i "s/^VERSION = .*/VERSION = \"$VERSION\"/" /slidefactory/slidefactory.py
 
 
-FROM docker.io/debian:bookworm
+FROM ${BASE_IMAGE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -75,7 +77,9 @@ RUN wget https://github.com/mathjax/MathJax/archive/refs/tags/3.2.2.zip -O tmp.z
     rm -f tmp.zip
 
 # Pandoc
-RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb -O tmp.deb && \
+# TARGETARCH is provided automatically by buildx (amd64, arm64, ...)
+ARG TARGETARCH
+RUN wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-${TARGETARCH}.deb -O tmp.deb && \
     dpkg -i tmp.deb && \
     rm -f tmp.deb
 
