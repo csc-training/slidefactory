@@ -7,10 +7,12 @@ variables:
     height: 1080
     history: true
     center: false
-    controls: false
+    controls: true
     transition: none
     backgroundTransition: none
     slideNumber: true
+    showSlideNumber: all
+    progress: true
 highlight-style: pygments
 ...
 ---

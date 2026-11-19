@@ -81,6 +81,14 @@ $endfor$
 $for(institute)$
   <p class="institute">$institute$</p>
 $endfor$
+$if(license)$
+  <p class="license">
+    <a href="https://creativecommons.org/licenses/$license$/4.0/" target="_blank" rel="license noopener">
+      <img src="https://licensebuttons.net/l/$license$/4.0/88x31.png" alt="CC $license$ 4.0">
+    </a>
+    <span class="license-note">This material is licensed under the license above, unless otherwise stated.</span>
+  </p>
+$endif$
 </section>
 $endif$
 $if(toc)$
