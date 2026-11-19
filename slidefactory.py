@@ -74,7 +74,7 @@ def get_default_url(key: str, format: str, theme: Theme):
         if use_local_resources:
             return f'{root_url}/fonts/fonts.css'
         else:
-            return 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,100,400;0,100,700;1,100,400;1,100,700&family=Inconsolata:wght@400;700'  # noqa: E501
+            return 'https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Inconsolata:wght@400;700'  # noqa: E501
 
 
 class HTMLParser(html.parser.HTMLParser):
