@@ -19,8 +19,6 @@ import shutil
 import sys
 import subprocess
 import tempfile
-import pypdf
-import pypdf.annotations
 import yaml
 from collections import namedtuple
 from contextlib import contextmanager
@@ -616,7 +614,20 @@ def _add_bookmarks(writer, chapters, parent=None):
             _add_bookmarks(writer, chapter['children'], parent=item)
 
 
+def _import_pypdf():
+    """Import pypdf on demand: it is only needed for the merged PDF
+    (`pages --with-pdf`), so the rest of slidefactory works without it."""
+    try:
+        import pypdf
+        import pypdf.annotations  # noqa: F401
+    except ImportError:
+        error('error: the merged PDF built by `pages --with-pdf` requires '
+              'the pypdf Python package, which is not installed.')
+    return pypdf
+
+
 def _add_toc_links(writer, link_boxes, page_offset=0):
+    pypdf = _import_pypdf()
     for chapter, toc_page_index, rect in link_boxes:
         link = pypdf.annotations.Link(
             rect=rect,
@@ -632,7 +643,9 @@ def merge_pdfs(chapters, output_fpath, args, *, dry_run=False):
         info(f'[dry-run] would create {output_fpath}')
         return
 
-    flat = list(_flatten_chapters(chapters))
+    pypdf = _import_pypdf()
+
+    flat =list(_flatten_chapters(chapters))
     if not flat:
         error('No chapters found to merge into a PDF')
 
@@ -1038,6 +1051,11 @@ def main_slides(args):
 def main_pages(args):
     if args.output.exists():
         error(f'Output path {args.output} exists. Exiting.')
+
+    # Fail fast, before the slow per-chapter PDF conversions, rather than
+    # only when the merged PDF is built at the very end.
+    if args.with_pdf and not args.dry_run:
+        _import_pypdf()
 
     page_theme_fpath = Path('html') / 'theme' / args.theme.name / 'csc.css'
     output_theme_dpath = args.output / page_theme_fpath.parent
