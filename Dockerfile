@@ -6,7 +6,6 @@ ADD LICENSE /slidefactory/
 ADD fonts/ /slidefactory/fonts/
 ADD theme/ /slidefactory/theme/
 ADD slidefactory.py /slidefactory/
-ADD global_title.md /slidefactory/
 
 # Remove possible temporary files
 RUN find /slidefactory -name '*~' -delete
