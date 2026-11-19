@@ -32,6 +32,7 @@ IN_CONTAINER = SLIDEFACTORY_ROOT == Path('/slidefactory')
 
 # Chromium can occasionally deadlock during startup/rendering; bound how
 # long we wait so that failure mode is a clear error, not an indefinite hang.
+# Default for --chromium-timeout, in seconds.
 CHROMIUM_TIMEOUT = 120
 
 # Modify version string if this file has been edited
@@ -237,9 +238,22 @@ def copy_html_externals(input_fpath, html_fpath):
             shutil.copy2(ext_fpath, tgt_fpath)
 
 
+def _non_negative_int(value):
+    """argparse type for a whole number >= 0."""
+    try:
+        number = int(value)
+    except ValueError:
+        number = -1
+    if number < 0:
+        raise argparse.ArgumentTypeError(
+            f'expected a whole number >= 0, got {value!r}')
+    return number
+
+
 def create_pdf(html_fpath, pdf_fpath, *,
                meta={},
                dry_run=False,
+               timeout=CHROMIUM_TIMEOUT,
                ):
     with tempfile.NamedTemporaryFile(
              dir=pdf_fpath.parent,
@@ -259,7 +273,7 @@ def create_pdf(html_fpath, pdf_fpath, *,
             f'--print-to-pdf={tmp_pdf_fpath}',
             f'file://{html_fpath.absolute()}?print-pdf'
             ]
-        run(run_args, timeout=CHROMIUM_TIMEOUT)
+        run(run_args, timeout=timeout)
 
         with tempfile.NamedTemporaryFile(
                  dir=pdf_fpath.parent,
@@ -882,6 +896,11 @@ def main():
         '--pandoc-args', nargs='?',
         default='', const='',
         help='additional arguments passed to pandoc')
+    pparser_conversion.add_argument(
+        '--chromium-timeout', metavar='SECONDS', type=_non_negative_int,
+        default=CHROMIUM_TIMEOUT,
+        help=('abort a PDF conversion if Chromium takes longer than this; '
+              '0 disables the timeout (default: %(default)s)'))
 
     # Main argparser
     parser = argparse.ArgumentParser(
@@ -1051,7 +1070,9 @@ def main_slides(args):
                 if 'subject' not in meta and 'event' in meta:
                     meta['subject'] = meta['event']
 
-                create_pdf(html_fpath, out_fpath, meta=meta, dry_run=args.dry_run)
+                create_pdf(html_fpath, out_fpath, meta=meta,
+                           dry_run=args.dry_run,
+                           timeout=args.chromium_timeout or None)
         else:
             create_html(in_fpath, out_fpath, **html_kwargs)
 
