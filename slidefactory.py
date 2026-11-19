@@ -16,7 +16,6 @@ import os
 import re
 import shlex
 import shutil
-import signal
 import sys
 import subprocess
 import tempfile
@@ -127,19 +126,12 @@ def run_template(run_args, *, dry_run, timeout=None):
         return
 
     verbose_info(shlex.join(run_args))
-    p = subprocess.Popen(run_args,
-                        shell=False,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        start_new_session=True)
     try:
-        stdout, stderr = p.communicate(timeout=timeout)
+        p = subprocess.run(run_args,
+                           check=False, shell=False,
+                           capture_output=True,
+                           timeout=timeout)
     except subprocess.TimeoutExpired:
-        try:
-            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
-        except ProcessLookupError:
-            pass  # process already exited on its own
-        p.communicate()
         error(f'error: {repr(run_args[0])} timed out after {timeout}s '
               f'and was killed.\n\n'
               f'This has been observed as an intermittent Chromium '
@@ -147,12 +139,12 @@ def run_template(run_args, *, dry_run, timeout=None):
               f'It can also happen when a slide references a '
               f'slow-loading or unresponsive external resource.')
 
-    verbose_info(stdout.decode())
+    verbose_info(p.stdout.decode())
 
     if p.returncode != 0:
         error(f'error: {repr(run_args[0])} failed '
               f'with exit code {p.returncode}:\n'
-              f'{stderr.decode()}')
+              f'{p.stderr.decode()}')
 
 
 def info_template(msg, *, quiet):
