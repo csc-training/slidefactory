@@ -316,17 +316,10 @@ def create_pdf(html_fpath, pdf_fpath, *,
             run(run_args)
 
 
-def create_index_page(fpath, title, info_content, html_content, pdf_content,
-                      merged_pdf_content=''):
+def create_index_page(fpath, title, info_content, html_content, pdf_content):
     info(f'Create {fpath}')
     with fpath.open("w") as fd:
         csc_ui_version = '2.1.11'
-        pdf_title_extra = ''
-        if merged_pdf_content:
-            pdf_title_extra = (
-                '<span style="float: right; font-size: 0.8rem; '
-                f'font-weight: normal;">{merged_pdf_content}</span>'
-            )
         fd.write(f"""
 <!DOCTYPE html>
 <html>
@@ -365,7 +358,7 @@ def create_index_page(fpath, title, info_content, html_content, pdf_content,
     <br>
 
     <c-card>
-      <c-card-title>Slides (PDF){pdf_title_extra}</c-card-title>
+      <c-card-title>Slides (PDF)</c-card-title>
       <c-card-content>
 {pdf_content}
       </c-card-content>
@@ -924,12 +917,8 @@ def main():
         help='information shown on the page')
     parser_pages.add_argument(
         '--with-pdf', action='store_true',
-        help='include pdf')
-    parser_pages.add_argument(
-        '--merge-pdf', action='store_true',
-        help=('also build a single merged PDF with a table of contents '
-              'and chapter bookmarks (requires --with-pdf); '
-              'slide pages are left untouched'))
+        help=('include pdf, plus a single merged PDF with a table of '
+              'contents and chapter bookmarks'))
 
     # Main argparser - install sub-command
     parser_install = subparsers.add_parser(
@@ -1058,9 +1047,6 @@ def main_pages(args):
     if args.output.exists():
         error(f'Output path {args.output} exists. Exiting.')
 
-    if args.merge_pdf and not args.with_pdf:
-        error('--merge-pdf requires --with-pdf')
-
     page_theme_fpath = Path('html') / 'theme' / args.theme.name / 'csc.css'
     output_theme_dpath = args.output / page_theme_fpath.parent
     info(f'Copy theme to {output_theme_dpath}')
@@ -1076,22 +1062,12 @@ def main_pages(args):
         pdf_content += '</c-card-content>\n'
         pdf_content += '<c-card-content>\n'
 
-        zip_fpath = args.output / 'slides.zip'
-        info(f'Create {zip_fpath}')
-        shutil.make_archive(zip_fpath.with_suffix(''),
-                            'zip',
-                            args.output / 'pdf')
-        pdf_content += f'<c-link href="{zip_fpath.name}">Download a zip file containing all slides.</c-link>\n'  # noqa: E501
-
-        merged_pdf_content = ''
-        if args.merge_pdf:
-            merged_fpath = args.output / 'slides-merged.pdf'
-            info(f'Create {merged_fpath}')
-            merge_pdfs(chapters, merged_fpath, args, dry_run=args.dry_run)
-            merged_pdf_content = f'<c-link href="{merged_fpath.name}">Download a single merged PDF with a table of contents.</c-link>'  # noqa: E501
+        merged_fpath = args.output / 'slides-merged.pdf'
+        info(f'Create {merged_fpath}')
+        merge_pdfs(chapters, merged_fpath, args, dry_run=args.dry_run)
+        pdf_content += f'<c-link href="{merged_fpath.name}">Download a single merged PDF with a table of contents.</c-link>\n'  # noqa: E501
     else:
         pdf_content = "Not generated."
-        merged_pdf_content = ''
 
     # Convert links to html
     info_content = re.sub(r'\[(.*?)\]\((.*?)\)',
@@ -1100,8 +1076,7 @@ def main_pages(args):
 
     index_fpath = args.output / 'index.html'
     create_index_page(index_fpath, title,
-                      info_content, html_content, pdf_content,
-                      merged_pdf_content)
+                      info_content, html_content, pdf_content)
 
 
 def main_install(args):

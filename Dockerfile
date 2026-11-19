@@ -142,7 +142,7 @@ RUN apt-get update -qy && \
       && \
     apt-get clean
 
-# Install pypdf for `pages --merge-pdf` (pinned via pip, not apt: Debian's
+# Install pypdf for the merged PDF of `pages --with-pdf` (pinned via pip, not apt: Debian's
 # python3-pypdf version isn't pinned to the base image and has been observed
 # to drift/regress between builds of the same Dockerfile, e.g. lacking the
 # pypdf.annotations module we rely on);
