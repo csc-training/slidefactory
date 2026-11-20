@@ -48,9 +48,9 @@ def get_default_url(key: str, format: str, theme: Theme):
     root_url = f'file://{urlquote(str(SLIDEFACTORY_ROOT))}'
     if key == 'theme_url':
         if theme.is_custom or not IN_CONTAINER or use_local_resources:
-            return f'file://{urlquote(str(theme.dpath.absolute()))}/csc.css'  # noqa: E501
+            return f'file://{urlquote(str(theme.dpath.absolute()))}/theme.css'  # noqa: E501
         else:
-            return f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.4.0/theme/{theme.name}/csc.css'  # noqa: E501
+            return f'https://cdn.jsdelivr.net/gh/csc-training/slidefactory@3.6.0/theme/{theme.name}/theme.css'  # noqa: E501
 
     elif key == 'defaults_fpath':
         return theme.dpath / "defaults.yaml"
@@ -74,7 +74,7 @@ def get_default_url(key: str, format: str, theme: Theme):
         if use_local_resources:
             return f'{root_url}/fonts/fonts.css'
         else:
-            return 'https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wdth,wght@0,100,400;0,100,700;1,100,400;1,100,700&family=Inconsolata:wght@400;700'  # noqa: E501
+            return 'https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Inconsolata:wght@400;700'  # noqa: E501
 
 
 class HTMLParser(html.parser.HTMLParser):
@@ -145,7 +145,7 @@ def find_theme(name):
             available_themes = get_available_themes(theme_root)
             error(f'Invalid theme {name}.'
                   f' Available themes: {", ".join(available_themes)}.')
-    for fname in ['defaults.yaml', 'template.html', 'csc.css']:
+    for fname in ['defaults.yaml', 'template.html', 'theme.css']:
         if not (p / fname).is_file():
             error(f'File {fname} missing from the theme directory'
                   f' {p.absolute()}')
@@ -430,7 +430,7 @@ def main():
     pparser_conversion = argparse.ArgumentParser(add_help=False)
     pparser_conversion.add_argument(
         '-t', '--theme', metavar='THEME', type=find_theme,
-        default='csc-plain',
+        default='csc',
         help='presentation theme name or path (default: %(default)s)')
     pparser_conversion.add_argument(
         '--filters', action='append', default=[],
@@ -617,7 +617,7 @@ def main_pages(args):
     if args.output.exists():
         error(f'Output path {args.output} exists. Exiting.')
 
-    page_theme_fpath = Path('html') / 'theme' / args.theme.name / 'csc.css'
+    page_theme_fpath = Path('html') / 'theme' / args.theme.name / 'theme.css'
     output_theme_dpath = args.output / page_theme_fpath.parent
     info(f'Copy theme to {output_theme_dpath}')
     shutil.copytree(args.theme.dpath, output_theme_dpath)
